@@ -1,0 +1,32 @@
+# Template from https://rtldesignlabs.com/blog/005-setting-up-a-gitignore-file-for-vivado-projects
+
+# Ignore everything
+*
+# Whitelist all subdirectories
+!*/
+# Don't ignore the block design and block design hdl wrapper files
+!/bd/**/*.*
+# Don't ignore the constraint files
+!/constraints/**/*.*
+# Don't ignore the synthesis files 
+!/hdl/**/*.*
+# Don't ignore the IP defintion files
+!/ip/**/*.*
+# Don't ignore the output files
+!/output/**/*.*
+# Don't ignore the vivado project files
+!/vivado/*.xpr
+# Don't ignore the simulation files 
+!/sim/**/*.*
+# Don't ingore Scripts
+!/scripts/**/*.*
+# Don't ignore Doc
+!/doc/**/*.*
+# Don't ignore .vscode settings
+!/.vscode/**/*.*
+# Don't ignore this file
+!.gitignore
+# Don't ignore license
+!LICENSE
+# Don't ingnore markdown or text files
+!*.md
