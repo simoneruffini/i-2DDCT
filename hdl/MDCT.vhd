@@ -3,9 +3,9 @@
 --            Simone Ruffini [simone.ruffini@tutanota.com]
 --
 -- Create Date:     Sat Feb 25 16:12 2006
--- Design Name:     MDCT
+-- Design Name:     MDCT core
 -- Module Name:     MDCT.vhd - RTL
--- Project Name:    MDCT
+-- Project Name:    iMDCT
 -- Description:     Multidimensional Discrite Cosine Transform module
 --                  top level with memories
 --
@@ -34,7 +34,7 @@ entity MDCT is
   port (
     CLK           : in    std_logic;                             -- Input clock
     RST           : in    std_logic;                             -- Positive reset
-    MDCTI         : in    std_logic_vector(IP_W - 1 downto 0); -- MDCT data input
+    MDCTI         : in    std_logic_vector(IP_W - 1 downto 0);   -- MDCT data input
     IDV           : in    std_logic;                             -- Input data valid
 
     MDCTO         : out   std_logic_vector(COE_W - 1 downto 0);  -- MDCT data output
@@ -59,48 +59,48 @@ architecture RTL of MDCT is
 
   --########################### SIGNALS ########################################
 
-  signal ramdatao_s            : std_logic_vector(RAMDATA_W - 1 downto 0);
-  signal ramraddro_s           : std_logic_vector(RAMADRR_W - 1 downto 0);
-  signal ramwaddro_s           : std_logic_vector(RAMADRR_W - 1 downto 0);
-  signal ramdatai_s            : std_logic_vector(RAMDATA_W - 1 downto 0);
-  signal ramwe_s               : std_logic;
+  signal ram_dout_s             : std_logic_vector(RAMDATA_W - 1 downto 0);
+  signal ram_raddr_s            : std_logic_vector(RAMADRR_W - 1 downto 0);
+  signal ram_waddr_s            : std_logic_vector(RAMADRR_W - 1 downto 0);
+  signal ram_din_s              : std_logic_vector(RAMDATA_W - 1 downto 0);
+  signal ram_we_s                : std_logic;
 
-  signal romedatao_s           : t_rom1datao;
-  signal romodatao_s           : t_rom1datao;
-  signal romeaddro_s           : t_rom1addro;
-  signal romoaddro_s           : t_rom1addro;
+  signal rome_dout_s            : t_rom1datao;
+  signal romo_dout_s            : t_rom1datao;
+  signal rome_addr_s            : t_rom1addro;
+  signal romo_addr_s            : t_rom1addro;
 
-  signal rome2datao_s          : t_rom2datao;
-  signal romo2datao_s          : t_rom2datao;
-  signal rome2addro_s          : t_rom2addro;
-  signal romo2addro_s          : t_rom2addro;
+  signal rome2_dout_s           : t_rom2datao;
+  signal romo2_dout_s           : t_rom2datao;
+  signal rome2_addr_s           : t_rom2addro;
+  signal romo2_addr_s           : t_rom2addro;
 
-  signal trigger2_s            : std_logic;
-  signal trigger1_s            : std_logic;
-  signal ramdatao1_s           : std_logic_vector(RAMDATA_W - 1 downto 0);
-  signal ramdatao2_s           : std_logic_vector(RAMDATA_W - 1 downto 0);
-  signal ramwe1_s              : std_logic;
-  signal ramwe2_s              : std_logic;
-  signal memswitchrd_s         : std_logic;
-  signal memswitchwr_s         : std_logic;
-  signal wmemsel_s             : std_logic;
-  signal rmemsel_s             : std_logic;
-  signal dataready_s           : std_logic;
-  signal datareadyack_s        : std_logic;
+  signal trigger2_s             : std_logic;
+  signal trigger1_s             : std_logic;
+  signal ram1_dout_s            : std_logic_vector(RAMDATA_W - 1 downto 0);
+  signal ram2_dout_s            : std_logic_vector(RAMDATA_W - 1 downto 0);
+  signal ram1_we_s              : std_logic;
+  signal ram2_we_s              : std_logic;
+  signal memswitchrd_s          : std_logic;
+  signal memswitchwr_s          : std_logic;
+  signal wmemsel_s              : std_logic;
+  signal rmemsel_s              : std_logic;
+  signal dataready_s            : std_logic;
+  signal datareadyack_s         : std_logic;
 
   --########################### ARCHITECTURE BEGIN #############################
 
   --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  --                             ramdatai_s
-  --      +-------------------+  ramwaddro_s +------+  ramraddro_s +-------------------+
+  --                             ram_din_s
+  --      +-------------------+  ram_waddr_s +------+  ram_raddr_s +-------------------+
   --      |      U_DCT1D      |-----------+->|U1_RAM|<-+-----------|      U_DCT2D      |
   --      |                   |            \ +------+ /            |                   |
   --      |                   | <--------+  >+------+<             |                   |
   --      |                   |          |   |U2_RAM|              |                   |
   --      +-------------------+ <-----+  |   +------+       +----> +-------------------+
-  --                |                 |  |  ramdatao1_s     |                |
-  --     romeaddro_s|romoaddro_s      |  |  ramdatao2_s     |    rome2addro_s|romo2addro_s
-  --     romedatao_s|romodatao_s      |  |     |  |         |    rome2datao_s|romo2datao_s
+  --                |                 |  |  ram1_dout_s     |                |
+  --     rome_addr_s|romo_addr_s      |  |  ram2_dout_s     |    rome2_addr_s|romo2_addr_s
+  --     rome_dout_s|romo_dout_s      |  |     |  |         |    rome2_dout_s|romo2_dout_s
   --                |                 |  |     v  v         |                |
   --                |                 |  |   --------       |                |
   --    +-----------v-----------+     |  |   \      /<-+    |    +-----------v-----------+
@@ -129,16 +129,16 @@ begin
       RST       => RST,
       DCTI      => MDCTI,
       IDV       => IDV,
-      ROMEDATAO => romedatao_s,
-      ROMODATAO => romodatao_s,
+      ROMEDATAO => rome_dout_s,
+      ROMODATAO => romo_dout_s,
 
       ODV       => ODV1,
       DCTO      => DCTO1,
-      ROMEADDRO => romeaddro_s,
-      ROMOADDRO => romoaddro_s,
-      RAMWADDRO => ramwaddro_s,
-      RAMDATAI  => ramdatai_s,
-      RAMWE     => ramwe_s,
+      ROMEADDRO => rome_addr_s,
+      ROMOADDRO => romo_addr_s,
+      RAMWADDRO => ram_waddr_s,
+      RAMDATAI  => ram_din_s,
+      RAMWE     => ram_we_s,
       WMEMSEL   => wmemsel_s
     );
 
@@ -149,16 +149,16 @@ begin
     port map (
       CLK       => CLK,
       RST       => RST,
-      ROMEDATAO => rome2datao_s,
-      ROMODATAO => romo2datao_s,
-      RAMDATAO  => ramdatao_s,
+      ROMEDATAO => rome2_dout_s,
+      ROMODATAO => romo2_dout_s,
+      RAMDATAO  => ram_dout_s,
       DATAREADY => dataready_s,
 
       ODV          => ODV,
       DCTO         => MDCTO,
-      ROMEADDRO    => rome2addro_s,
-      ROMOADDRO    => romo2addro_s,
-      RAMRADDRO    => ramraddro_s,
+      ROMEADDRO    => rome2_addr_s,
+      ROMOADDRO    => romo2_addr_s,
+      RAMRADDRO    => ram_raddr_s,
       RMEMSEL      => rmemsel_s,
       DATAREADYACK => datareadyack_s
     );
@@ -168,13 +168,13 @@ begin
   --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   U1_RAM : entity work.ram
     port map (
-      D     => ramdatai_s,
-      WADDR => ramwaddro_s,
-      RADDR => ramraddro_s,
-      WE    => ramwe1_s,
+      D     => ram_din_s,
+      WADDR => ram_waddr_s,
+      RADDR => ram_raddr_s,
+      WE    => ram1_we_s,
       CLK   => CLK,
 
-      Q => ramdatao1_s
+      Q => ram1_dout_s
     );
 
   --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -182,22 +182,22 @@ begin
   --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   U2_RAM : entity work.ram
     port map (
-      D     => ramdatai_s,
-      WADDR => ramwaddro_s,
-      RADDR => ramraddro_s,
-      WE    => ramwe2_s,
+      D     => ram_din_s,
+      WADDR => ram_waddr_s,
+      RADDR => ram_raddr_s,
+      WE    => ram2_we_s,
       CLK   => CLK,
 
-      Q => ramdatao2_s
+      Q => ram2_dout_s
     );
 
   -- double buffer switch
-  ramwe1_s   <= ramwe_s when memswitchwr_s = '0' else
+  ram1_we_s  <= ram_we_s when memswitchwr_s = '0' else
                 '0';
-  ramwe2_s   <= ramwe_s when memswitchwr_s = '1' else
+  ram2_we_s  <= ram_we_s when memswitchwr_s = '1' else
                 '0';
-  ramdatao_s <= ramdatao1_s when memswitchrd_s = '0' else
-                ramdatao2_s;
+  ram_dout_s <= ram1_dout_s when memswitchrd_s = '0' else
+                ram2_dout_s;
 
   --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   -- |DBUFCTL|
@@ -226,10 +226,10 @@ begin
     --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     U1_ROME : entity work.rome
       port map (
-        ADDR => romeaddro_s(i),
+        ADDR => rome_addr_s(i),
         CLK  => CLK,
 
-        DATAO => romedatao_s(i)
+        DATAO => rome_dout_s(i)
       );
 
     --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -237,10 +237,10 @@ begin
     --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     U1_ROMO : entity work.romo
       port map (
-        ADDR => romoaddro_s(i),
+        ADDR => romo_addr_s(i),
         CLK  => CLK,
 
-        DATAO => romodatao_s(i)
+        DATAO => romo_dout_s(i)
       );
 
   end generate G_ROM_ST1;
@@ -256,10 +256,10 @@ begin
     --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     U2_ROME : entity work.rome
       port map (
-        ADDR => rome2addro_s(i),
+        ADDR => rome2_addr_s(i),
         CLK  => CLK,
 
-        DATAO => rome2datao_s(i)
+        DOUT => rome2_dout_s(i)
       );
 
     --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -267,10 +267,10 @@ begin
     --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     U2_ROMO : entity work.romo
       port map (
-        ADDR => romo2addro_s(i),
+        ADDR => romo2_addr_s(i),
         CLK  => CLK,
 
-        DATAO => romo2datao_s(i)
+        DOUT => romo2_dout_s(i)
       );
 
   end generate G_ROM_ST2;
