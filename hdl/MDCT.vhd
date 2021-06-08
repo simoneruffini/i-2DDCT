@@ -59,34 +59,34 @@ architecture RTL of MDCT is
 
   --########################### SIGNALS ########################################
 
-  signal ram_dout_s             : std_logic_vector(RAMDATA_W - 1 downto 0);
-  signal ram_raddr_s            : std_logic_vector(RAMADRR_W - 1 downto 0);
-  signal ram_waddr_s            : std_logic_vector(RAMADRR_W - 1 downto 0);
-  signal ram_din_s              : std_logic_vector(RAMDATA_W - 1 downto 0);
+  signal ram_dout_s              : std_logic_vector(RAMDATA_W - 1 downto 0);
+  signal ram_raddr_s             : std_logic_vector(RAMADRR_W - 1 downto 0);
+  signal ram_waddr_s             : std_logic_vector(RAMADRR_W - 1 downto 0);
+  signal ram_din_s               : std_logic_vector(RAMDATA_W - 1 downto 0);
   signal ram_we_s                : std_logic;
 
-  signal rome_dout_s            : t_rom1datao;
-  signal romo_dout_s            : t_rom1datao;
-  signal rome_addr_s            : t_rom1addro;
-  signal romo_addr_s            : t_rom1addro;
+  signal rome_dout_s             : t_rom1datao;
+  signal romo_dout_s             : t_rom1datao;
+  signal rome_addr_s             : t_rom1addro;
+  signal romo_addr_s             : t_rom1addro;
 
-  signal rome2_dout_s           : t_rom2datao;
-  signal romo2_dout_s           : t_rom2datao;
-  signal rome2_addr_s           : t_rom2addro;
-  signal romo2_addr_s           : t_rom2addro;
+  signal rome2_dout_s            : t_rom2datao;
+  signal romo2_dout_s            : t_rom2datao;
+  signal rome2_addr_s            : t_rom2addro;
+  signal romo2_addr_s            : t_rom2addro;
 
-  signal trigger2_s             : std_logic;
-  signal trigger1_s             : std_logic;
-  signal ram1_dout_s            : std_logic_vector(RAMDATA_W - 1 downto 0);
-  signal ram2_dout_s            : std_logic_vector(RAMDATA_W - 1 downto 0);
-  signal ram1_we_s              : std_logic;
-  signal ram2_we_s              : std_logic;
-  signal memswitchrd_s          : std_logic;
-  signal memswitchwr_s          : std_logic;
-  signal wmemsel_s              : std_logic;
-  signal rmemsel_s              : std_logic;
-  signal dataready_s            : std_logic;
-  signal datareadyack_s         : std_logic;
+  signal trigger2_s              : std_logic;
+  signal trigger1_s              : std_logic;
+  signal ram1_dout_s             : std_logic_vector(RAMDATA_W - 1 downto 0);
+  signal ram2_dout_s             : std_logic_vector(RAMDATA_W - 1 downto 0);
+  signal ram1_we_s               : std_logic;
+  signal ram2_we_s               : std_logic;
+  signal memswitchrd_s           : std_logic;
+  signal memswitchwr_s           : std_logic;
+  signal wmemsel_s               : std_logic;
+  signal rmemsel_s               : std_logic;
+  signal dataready_s             : std_logic;
+  signal datareadyack_s          : std_logic;
 
   --########################### ARCHITECTURE BEGIN #############################
 
@@ -129,16 +129,16 @@ begin
       RST       => RST,
       DCTI      => MDCTI,
       IDV       => IDV,
-      ROMEDATAO => rome_dout_s,
-      ROMODATAO => romo_dout_s,
+      ROME_DOUT => rome_dout_s,
+      ROMO_DOUT => romo_dout_s,
 
       ODV       => ODV1,
       DCTO      => DCTO1,
-      ROMEADDRO => rome_addr_s,
-      ROMOADDRO => romo_addr_s,
-      RAMWADDRO => ram_waddr_s,
-      RAMDATAI  => ram_din_s,
-      RAMWE     => ram_we_s,
+      ROME_ADDR => rome_addr_s,
+      ROMO_ADDR => romo_addr_s,
+      RAM_WADDR => ram_waddr_s,
+      RAM_DIN   => ram_din_s,
+      RAM_WE    => ram_we_s,
       WMEMSEL   => wmemsel_s
     );
 
@@ -149,8 +149,8 @@ begin
     port map (
       CLK       => CLK,
       RST       => RST,
-      ROMEDATAO => rome2_dout_s,
-      ROMODATAO => romo2_dout_s,
+      ROME_DOUT => rome2_dout_s,
+      ROMO_DOUT => romo2_dout_s,
       RAMDATAO  => ram_dout_s,
       DATAREADY => dataready_s,
 
