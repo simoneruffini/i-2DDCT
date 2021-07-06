@@ -192,16 +192,7 @@ begin
       --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
       -- 2nd stage
       --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-      if (stage2_start = '1') then
-        stage2_cnt <= (others => '0');
-
-        -- row_cnt++ happens when col_cnt overloeads to 0 (see finished processing input row).
-        -- So this needs to be triggered by logic and not by intialization, hence col_cnt starts from 1
-        col_cnt <= (0=>'1', others => '0');
-
-        col_cnt2 <= (others => '0');
-      end if;
-
+      
       if (stage2_cnt < N) then
         stage2_cnt <= stage2_cnt + 1;              -- theoretical 0->63, real 0->8
 
@@ -223,7 +214,16 @@ begin
           end if;
         end if;
       end if;
+			
+			if (stage2_start = '1') then
+        stage2_cnt <= (others => '0');
 
+        -- row_cnt++ happens when col_cnt overloeads to 0 (see finished processing input row).
+        -- So this needs to be triggered by logic and not by intialization, hence col_cnt starts from 1
+        col_cnt <= (0=>'1', others => '0');
+
+        col_cnt2 <= (others => '0');
+      end if;
       --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     end if;
 

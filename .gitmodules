@@ -1,0 +1,3 @@
+[submodule "hdl/NORM"]
+	path = hdl/NORM
+	url = git@github.com:simoneruffini/NORM.git
