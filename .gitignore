@@ -30,3 +30,8 @@
 !LICENSE
 # Don't ingnore markdown or text files
 !*.md
+
+# Miscellaneus
+
+**/hdl/xilinx/**
+**/mdct_jpeg/**

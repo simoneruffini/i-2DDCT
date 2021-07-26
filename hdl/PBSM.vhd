@@ -6,7 +6,7 @@
 -- Create Date:     Wed Jun 30 23:43:08 CEST 2021
 -- Design Name:     PBSM
 -- Module Name:     PBSM.vhd - RTL
--- Project Name:    iMDCT
+-- Project Name:    i-MDCT
 -- Description:     Process Block State Machine used to control consecutive processes
 --
 -- Revision:
@@ -25,17 +25,17 @@ library IEEE;
 
 entity PBSM is
   port (
-    CLK                : in    std_logic;
-    RST                : in    std_logic;
+    CLK                : in    std_logic; -- System Clock
+    RST                : in    std_logic; -- System Reset (active high)
     -- from/to PBSM(m-1)
-    START_I            : in    std_logic;
+    START_I            : in    std_logic; -- Start this process block state machine
     -- from/to PBSM(m+1)
-    START_O            : out   std_logic;
+    START_O            : out   std_logic; -- Start next process block state machine
     -- from/to processing block
-    PB_RDY_I           : in    std_logic;
-    PB_START_O         : out   std_logic
+    PB_RDY_I           : in    std_logic; -- Redy signal from process block: '0' when PB is computing '1' otherwise
+    PB_START_O         : out   std_logic -- Start process block tied to this State Machine
   );
-end entity PBSM ;
+end entity PBSM;
 
 ----------------------------- ARCHITECTURE -------------------------------------
 
@@ -45,7 +45,7 @@ architecture RTL of PBSM is
 
   --########################### TYPES ##########################################
 
-  type state_t is (S_INIT, S_WAIT_START, S_WAIT_BLK_RDY);
+  type pbsm_state_t is (S_PBSM_INIT, S_PBSM_WAIT_START, S_PBSM_WAIT_BLK_RDY);
 
   --########################### FUNCTIONS ######################################
 
@@ -53,8 +53,8 @@ architecture RTL of PBSM is
 
   --########################### SIGNALS ##########################################
 
-  signal pres_state : state_t;
-  signal fut_state  : state_t;
+  signal pbsm_pstate : pbsm_state_t;
+  signal pbsm_fstate  : pbsm_state_t;
 
   --########################### ARCHITECTURE BEGIN ###############################
 
@@ -65,15 +65,15 @@ begin
   --########################### PROCESSES ########################################
 
   --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  -- sequential process for fsm (synthesized FFs)
+  -- sequential process for fsm (synthesizes FFs)
 
   P_FSM_SEQ : process (CLK, RST) is
   begin
 
     if (RST = '1') then
-      pres_state <= S_INIT;
+      pbsm_pstate <= S_PBSM_INIT;
     elsif (CLK'event and CLK = '1') then
-      pres_state <= fut_state;
+      pbsm_pstate <= pbsm_fstate;
     end if;
 
   end process P_FSM_SEQ;
@@ -81,23 +81,23 @@ begin
   --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   -- Future state computation for fsm (combinatorial process)
 
-  P_FSM_FUT_S : process (pres_state, START_I, PB_RDY_I) is
+  P_FSM_FUT_S : process (pbsm_pstate, START_I, PB_RDY_I) is
   begin
 
-    case pres_state is
+    case pbsm_pstate is
 
-      when S_INIT =>
-        fut_state <= S_WAIT_START;
-      when S_WAIT_START =>
+      when S_PBSM_INIT =>
+        pbsm_fstate <= S_PBSM_WAIT_START;
+      when S_PBSM_WAIT_START =>
 
         if (START_I = '1') then
-          fut_state <= S_WAIT_BLK_RDY;
+          pbsm_fstate <= S_PBSM_WAIT_BLK_RDY;
         end if;
 
-      when S_WAIT_BLK_RDY =>
+      when S_PBSM_WAIT_BLK_RDY =>
 
         if (PB_RDY_I = '1') then
-          fut_state <= S_INIT;
+          pbsm_fstate <= S_PBSM_INIT;
         end if;
 
     end case;
@@ -107,7 +107,7 @@ begin
   --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   -- Output generator for a mealy fsm (output depends on input)
 
-  P_FSM_OUTPS : process (pres_state, START_I, PB_RDY_I) is
+  P_FSM_OUTPS : process (pbsm_pstate, START_I, PB_RDY_I) is
   begin
 
     -- defaults
@@ -115,16 +115,16 @@ begin
     PB_START_O <= '0';
     START_O    <= '0';
 
-    case pres_state is
+    case pbsm_pstate is
 
-      when S_INIT =>
-      when S_WAIT_START =>
+      when S_PBSM_INIT =>
+      when S_PBSM_WAIT_START =>
 
         if (START_I = '1') then
-          PB_START_O <= '0';
+          PB_START_O <= '1';
         end if;
 
-      when S_WAIT_BLK_RDY =>
+      when S_PBSM_WAIT_BLK_RDY =>
 
         if (PB_RDY_I = '1') then
           START_O <= '1';

@@ -44,7 +44,7 @@ package MDCTTB_PKG is
     type MATRIX_TYPE   is array (0 to N-1,0 TO N-1) of REAL;
     type I_MATRIX_TYPE is array (0 to N-1,0 TO N-1) of INTEGER;
     type COEM_TYPE     is array (0 to N/2-1, 0 to N/2-1) 
-          of SIGNED(ROMDATA_W-1 downto 0);
+          of SIGNED(C_ROMDATA_W-1 downto 0);
     type VECTOR4       is array (0 to N/2-1) of REAL;
     type N_LINES_TYPE  is array (0 to N-1)
           of STD_LOGIC_VECTOR(0 to MAX_IMAGE_SIZE_X*IP_W-1);
@@ -188,18 +188,18 @@ package MDCTTB_PKG is
                           
     constant Ce : COEM_TYPE :=
                             (
-                            (to_signed(AP,ROMDATA_W),to_signed(AP,ROMDATA_W),to_signed(AP,ROMDATA_W),to_signed(AP,ROMDATA_W)),
-                            (to_signed(BP,ROMDATA_W),to_signed(CP,ROMDATA_W),to_signed(CM,ROMDATA_W),to_signed(BM,ROMDATA_W)),
-                            (to_signed(AP,ROMDATA_W),to_signed(AM,ROMDATA_W),to_signed(AM,ROMDATA_W),to_signed(AP,ROMDATA_W)),
-                            (to_signed(CP,ROMDATA_W),to_signed(BM,ROMDATA_W),to_signed(BP,ROMDATA_W),to_signed(CM,ROMDATA_W))
+                            (to_signed(AP,C_ROMDATA_W),to_signed(AP,C_ROMDATA_W),to_signed(AP,C_ROMDATA_W),to_signed(AP,C_ROMDATA_W)),
+                            (to_signed(BP,C_ROMDATA_W),to_signed(CP,C_ROMDATA_W),to_signed(CM,C_ROMDATA_W),to_signed(BM,C_ROMDATA_W)),
+                            (to_signed(AP,C_ROMDATA_W),to_signed(AM,C_ROMDATA_W),to_signed(AM,C_ROMDATA_W),to_signed(AP,C_ROMDATA_W)),
+                            (to_signed(CP,C_ROMDATA_W),to_signed(BM,C_ROMDATA_W),to_signed(BP,C_ROMDATA_W),to_signed(CM,C_ROMDATA_W))
                             );
                             
     constant Co : COEM_TYPE :=
                             (
-                            (to_signed(DP,ROMDATA_W),to_signed(EP,ROMDATA_W),to_signed(FP,ROMDATA_W),to_signed(GP,ROMDATA_W)),
-                            (to_signed(EP,ROMDATA_W),to_signed(GM,ROMDATA_W),to_signed(DM,ROMDATA_W),to_signed(FM,ROMDATA_W)),
-                            (to_signed(FP,ROMDATA_W),to_signed(DM,ROMDATA_W),to_signed(GP,ROMDATA_W),to_signed(EP,ROMDATA_W)),
-                            (to_signed(GP,ROMDATA_W),to_signed(FM,ROMDATA_W),to_signed(EP,ROMDATA_W),to_signed(DM,ROMDATA_W))
+                            (to_signed(DP,C_ROMDATA_W),to_signed(EP,C_ROMDATA_W),to_signed(FP,C_ROMDATA_W),to_signed(GP,C_ROMDATA_W)),
+                            (to_signed(EP,C_ROMDATA_W),to_signed(GM,C_ROMDATA_W),to_signed(DM,C_ROMDATA_W),to_signed(FM,C_ROMDATA_W)),
+                            (to_signed(FP,C_ROMDATA_W),to_signed(DM,C_ROMDATA_W),to_signed(GP,C_ROMDATA_W),to_signed(EP,C_ROMDATA_W)),
+                            (to_signed(GP,C_ROMDATA_W),to_signed(FM,C_ROMDATA_W),to_signed(EP,C_ROMDATA_W),to_signed(DM,C_ROMDATA_W))
                             );
 end MDCTTB_PKG;
 

@@ -27,93 +27,93 @@
 library IEEE; 
   use IEEE.STD_LOGIC_1164.all;
   use IEEE.STD_LOGIC_arith.all;
-  use WORK.MDCT_PKG.all;
+  use WORK.I_MDCT_PKG.all;
 
 entity ROME is 
   port( 
-       addr         : in  STD_LOGIC_VECTOR(ROMADDR_W-1 downto 0); 
+       addr         : in  STD_LOGIC_VECTOR(C_ROMADDR_W-1 downto 0); 
        clk          : in  STD_LOGIC; 
        
-       dout        : out STD_LOGIC_VECTOR(ROMDATA_W-1 downto 0) 
+       dout        : out STD_LOGIC_VECTOR(C_ROMDATA_W-1 downto 0) 
   );         
   
 end ROME; 
 
 architecture RTL of ROME is  
   
-  type ROM_TYPE is array (0 to (2**ROMADDR_W)-1) 
-            of STD_LOGIC_VECTOR(ROMDATA_W-1 downto 0);
+  type ROM_TYPE is array (0 to (2**C_ROMADDR_W)-1) 
+            of STD_LOGIC_VECTOR(C_ROMDATA_W-1 downto 0);
   constant rom : ROM_TYPE := 
     (
     (others => '0'),                
-     conv_std_logic_vector( AP,ROMDATA_W ),         
-     conv_std_logic_vector( AP,ROMDATA_W ),         
-     conv_std_logic_vector( AP+AP,ROMDATA_W ),      
-     conv_std_logic_vector( AP,ROMDATA_W ),         
-     conv_std_logic_vector( AP+AP,ROMDATA_W ),      
-     conv_std_logic_vector( AP+AP,ROMDATA_W ),      
-     conv_std_logic_vector( AP+AP+AP,ROMDATA_W ),   
-     conv_std_logic_vector( AP,ROMDATA_W ),         
-     conv_std_logic_vector( AP+AP,ROMDATA_W ),      
-     conv_std_logic_vector( AP+AP,ROMDATA_W ),      
-     conv_std_logic_vector( AP+AP+AP,ROMDATA_W ),   
-     conv_std_logic_vector( AP+AP,ROMDATA_W ),      
-     conv_std_logic_vector( AP+AP+AP,ROMDATA_W ),   
-     conv_std_logic_vector( AP+AP+AP,ROMDATA_W ),   
-     conv_std_logic_vector( AP+AP+AP+AP,ROMDATA_W ),
+     conv_std_logic_vector( AP,C_ROMDATA_W ),         
+     conv_std_logic_vector( AP,C_ROMDATA_W ),         
+     conv_std_logic_vector( AP+AP,C_ROMDATA_W ),      
+     conv_std_logic_vector( AP,C_ROMDATA_W ),         
+     conv_std_logic_vector( AP+AP,C_ROMDATA_W ),      
+     conv_std_logic_vector( AP+AP,C_ROMDATA_W ),      
+     conv_std_logic_vector( AP+AP+AP,C_ROMDATA_W ),   
+     conv_std_logic_vector( AP,C_ROMDATA_W ),         
+     conv_std_logic_vector( AP+AP,C_ROMDATA_W ),      
+     conv_std_logic_vector( AP+AP,C_ROMDATA_W ),      
+     conv_std_logic_vector( AP+AP+AP,C_ROMDATA_W ),   
+     conv_std_logic_vector( AP+AP,C_ROMDATA_W ),      
+     conv_std_logic_vector( AP+AP+AP,C_ROMDATA_W ),   
+     conv_std_logic_vector( AP+AP+AP,C_ROMDATA_W ),   
+     conv_std_logic_vector( AP+AP+AP+AP,C_ROMDATA_W ),
                                      
                                      
      (others => '0'),                
-     conv_std_logic_vector( BM,ROMDATA_W ),         
-     conv_std_logic_vector( CM,ROMDATA_W ),         
-     conv_std_logic_vector( CM+BM,ROMDATA_W ),      
-     conv_std_logic_vector( CP,ROMDATA_W ),         
-     conv_std_logic_vector( CP+BM,ROMDATA_W ),      
+     conv_std_logic_vector( BM,C_ROMDATA_W ),         
+     conv_std_logic_vector( CM,C_ROMDATA_W ),         
+     conv_std_logic_vector( CM+BM,C_ROMDATA_W ),      
+     conv_std_logic_vector( CP,C_ROMDATA_W ),         
+     conv_std_logic_vector( CP+BM,C_ROMDATA_W ),      
      (others => '0'),                
-     conv_std_logic_vector( BM,ROMDATA_W ),         
-     conv_std_logic_vector( BP,ROMDATA_W ),         
+     conv_std_logic_vector( BM,C_ROMDATA_W ),         
+     conv_std_logic_vector( BP,C_ROMDATA_W ),         
      (others => '0'),                
-     conv_std_logic_vector( BP+CM,ROMDATA_W ),      
-     conv_std_logic_vector( CM,ROMDATA_W ),         
-     conv_std_logic_vector( BP+CP,ROMDATA_W ),      
-     conv_std_logic_vector( CP,ROMDATA_W ),         
-     conv_std_logic_vector( BP,ROMDATA_W ),         
-     (others => '0'),                
-                                     
-                                     
-     (others => '0'),                
-     conv_std_logic_vector( AP,ROMDATA_W ),         
-     conv_std_logic_vector( AM,ROMDATA_W ),         
-     (others => '0'),                
-     conv_std_logic_vector( AM,ROMDATA_W ),         
-     (others => '0'),                
-     conv_std_logic_vector( AM+AM,ROMDATA_W ),      
-     conv_std_logic_vector( AM,ROMDATA_W ),         
-     conv_std_logic_vector( AP,ROMDATA_W ),         
-     conv_std_logic_vector( AP+AP,ROMDATA_W ),      
-     (others => '0'),                
-     conv_std_logic_vector( AP,ROMDATA_W ),         
-     (others => '0'),                
-     conv_std_logic_vector( AP,ROMDATA_W ),         
-     conv_std_logic_vector( AM,ROMDATA_W ),         
+     conv_std_logic_vector( BP+CM,C_ROMDATA_W ),      
+     conv_std_logic_vector( CM,C_ROMDATA_W ),         
+     conv_std_logic_vector( BP+CP,C_ROMDATA_W ),      
+     conv_std_logic_vector( CP,C_ROMDATA_W ),         
+     conv_std_logic_vector( BP,C_ROMDATA_W ),         
      (others => '0'),                
                                      
                                      
      (others => '0'),                
-     conv_std_logic_vector( CM,ROMDATA_W ),         
-     conv_std_logic_vector( BP,ROMDATA_W ),         
-     conv_std_logic_vector( BP+CM,ROMDATA_W ),      
-     conv_std_logic_vector( BM,ROMDATA_W ),         
-     conv_std_logic_vector( BM+CM,ROMDATA_W ),      
+     conv_std_logic_vector( AP,C_ROMDATA_W ),         
+     conv_std_logic_vector( AM,C_ROMDATA_W ),         
      (others => '0'),                
-     conv_std_logic_vector( CM,ROMDATA_W ),         
-     conv_std_logic_vector( CP,ROMDATA_W ),         
+     conv_std_logic_vector( AM,C_ROMDATA_W ),         
      (others => '0'),                
-     conv_std_logic_vector( CP+BP,ROMDATA_W ),      
-     conv_std_logic_vector( BP,ROMDATA_W ),         
-     conv_std_logic_vector( CP+BM,ROMDATA_W ),      
-     conv_std_logic_vector( BM,ROMDATA_W ),         
-     conv_std_logic_vector( CP,ROMDATA_W ),         
+     conv_std_logic_vector( AM+AM,C_ROMDATA_W ),      
+     conv_std_logic_vector( AM,C_ROMDATA_W ),         
+     conv_std_logic_vector( AP,C_ROMDATA_W ),         
+     conv_std_logic_vector( AP+AP,C_ROMDATA_W ),      
+     (others => '0'),                
+     conv_std_logic_vector( AP,C_ROMDATA_W ),         
+     (others => '0'),                
+     conv_std_logic_vector( AP,C_ROMDATA_W ),         
+     conv_std_logic_vector( AM,C_ROMDATA_W ),         
+     (others => '0'),                
+                                     
+                                     
+     (others => '0'),                
+     conv_std_logic_vector( CM,C_ROMDATA_W ),         
+     conv_std_logic_vector( BP,C_ROMDATA_W ),         
+     conv_std_logic_vector( BP+CM,C_ROMDATA_W ),      
+     conv_std_logic_vector( BM,C_ROMDATA_W ),         
+     conv_std_logic_vector( BM+CM,C_ROMDATA_W ),      
+     (others => '0'),                
+     conv_std_logic_vector( CM,C_ROMDATA_W ),         
+     conv_std_logic_vector( CP,C_ROMDATA_W ),         
+     (others => '0'),                
+     conv_std_logic_vector( CP+BP,C_ROMDATA_W ),      
+     conv_std_logic_vector( BP,C_ROMDATA_W ),         
+     conv_std_logic_vector( CP+BM,C_ROMDATA_W ),      
+     conv_std_logic_vector( BM,C_ROMDATA_W ),         
+     conv_std_logic_vector( CP,C_ROMDATA_W ),         
      (others => '0')
      );                
   

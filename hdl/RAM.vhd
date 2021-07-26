@@ -1,79 +1,105 @@
 --------------------------------------------------------------------------------
---                                                                            --
---                          V H D L    F I L E                                --
---                          COPYRIGHT (C) 2006                                --
---                                                                            --
---------------------------------------------------------------------------------
---                                                                            --
--- Title       : RAM                                                          --
--- Design      : MDCT                                                         --
--- Author      : Michal Krepa                                                 --                                                             --                                                           --
---                                                                            --
---------------------------------------------------------------------------------
+-- Engineer: Michal Krepa 
+--           Simone Ruffini [simone.ruffini@tutanota.com]
 --
--- File        : RAM.VHD
--- Created     : Sat Mar 5 7:37 2006
 --
---------------------------------------------------------------------------------
+-- Create Date:     Sat Mar 5 7:37 2006
+-- Design Name:     RAM
+-- Module Name:     RAM.vhd - RTL
+-- Project Name:    iMDCT
+-- Description:     RAM 
 --
---  Description : RAM memory simulation model
+-- Revision:
+-- Revision 00 - Michal Krepa
+--  * File Creation
+-- Revision 01 - Simone Ruffini
+--  * Refactoring and generics
+-- Additional Comments:
 --
 --------------------------------------------------------------------------------
 
+----------------------------- PACKAGES/LIBRARIES -------------------------------
 -- 5:3 row select
 -- 2:0 col select
 
 library IEEE;
   use IEEE.STD_LOGIC_1164.all;
   use IEEE.NUMERIC_STD.all;
-  
-library WORK;
-  use WORK.MDCT_PKG.all;
-  
-entity RAM is   
-  port (      
-        d                 : in  STD_LOGIC_VECTOR(RAMDATA_W-1 downto 0);
-        waddr             : in  STD_LOGIC_VECTOR(RAMADRR_W-1 downto 0);
-        raddr             : in  STD_LOGIC_VECTOR(RAMADRR_W-1 downto 0);
-        we                : in  STD_LOGIC;
-        clk               : in  STD_LOGIC;
-        
-        q                 : out STD_LOGIC_VECTOR(RAMDATA_W-1 downto 0)
+
+-- User libraries
+
+----------------------------- ENTITY -------------------------------------------
+entity RAM is
+  generic (
+    DATA_W : natural;
+    ADDR_W : natural
   );
-end RAM;   
+  port (
+    D                 : in    std_logic_vector(DATA_W - 1 downto 0);
+    WADDR             : in    std_logic_vector(ADDR_W - 1 downto 0);
+    RADDR             : in    std_logic_vector(ADDR_W - 1 downto 0);
+    WE                : in    std_logic;
+    CLK               : in    std_logic;
+    Q                 : out   std_logic_vector(DATA_W - 1 downto 0)
+  );
+end entity RAM;
+
+----------------------------- ARCHITECTURE -------------------------------------
+
 
 architecture RTL of RAM is
-  type mem_type is array ((2**RAMADRR_W)-1 downto 0) of 
-                              STD_LOGIC_VECTOR(RAMDATA_W-1 downto 0);
+
+  --########################### CONSTANTS 1 ####################################
+
+  --########################### TYPES ##########################################
+
+  type mem_type is array ((2 ** ADDR_W) - 1 downto 0) of std_logic_vector(DATA_W - 1 downto 0);
+
+  --########################### FUNCTIONS ######################################
+
+  --########################### CONSTANTS 2 ####################################
+
+  --########################### SIGNALS ########################################
+
   signal mem                    : mem_type;
-  signal read_addr              : STD_LOGIC_VECTOR(RAMADRR_W-1 downto 0);
-  
-begin       
-  
-  -------------------------------------------------------------------------------
-  q_sg:
-  -------------------------------------------------------------------------------
-  q <= mem(TO_INTEGER(UNSIGNED(read_addr)));    
-  
-  -------------------------------------------------------------------------------
-  read_proc: -- register read address
-  -------------------------------------------------------------------------------
-  process (clk)
-  begin 
-    if clk = '1' and clk'event then        
-      read_addr <= raddr;
-    end if;  
-  end process;
-  
-  -------------------------------------------------------------------------------
-  write_proc: --write access
-  -------------------------------------------------------------------------------
-  process (clk) begin
-    if clk = '1' and clk'event then
-      if we = '1'  then
-        mem(TO_INTEGER(UNSIGNED(waddr))) <= d;
+  signal read_addr              : std_logic_vector(ADDR_W - 1 downto 0);
+
+  --########################### ARCHITECTURE BEGIN #############################
+
+begin
+
+  --########################### ENTITY DEFINITION ##############################
+
+  --########################## OUTPUT PORTS WIRING #############################
+  Q <= mem(to_integer(unsigned(read_addr)));
+
+  --########################## COBINATORIAL FUNCTIONS ##########################
+
+  --########################## PROCESSES #######################################
+
+  --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  -- register read address
+  P_READ : process (CLK) is
+  begin
+
+    if (CLK = '1' and CLK'event) then
+      read_addr <= RADDR;
+    end if;
+
+  end process P_READ;
+
+  --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  -- write access
+  P_WRITE : process (CLK) is
+  begin
+
+    if (CLK = '1' and CLK'event) then
+      if (WE = '1') then
+        mem(to_integer(unsigned(WADDR))) <= D;
       end if;
     end if;
-  end process;
-    
-end RTL;
+
+  end process P_WRITE;
+
+end architecture RTL;
+--------------------------------------------------------------------------------

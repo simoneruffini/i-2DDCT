@@ -12,13 +12,13 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="81133333fs"></ZoomStartTime>
-      <ZoomEndTime time="104973334fs"></ZoomEndTime>
-      <Cursor1Time time="88953333fs"></Cursor1Time>
+      <ZoomStartTime time="67163660fs"></ZoomStartTime>
+      <ZoomEndTime time="85283661fs"></ZoomEndTime>
+      <Cursor1Time time="71603660fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="323"></NameColumnWidth>
-      <ValueColumnWidth column_width="124"></ValueColumnWidth>
+      <ValueColumnWidth column_width="120"></ValueColumnWidth>
    </column_width_setting>
    <WVObjectSize size="4" />
    <wave_markers>
@@ -105,109 +105,12 @@
       <wvobject type="array" fp_name="/DCT1D_TB/U_DCT1D/databuf_reg">
          <obj_property name="ElementShortName">databuf_reg[7:0][8:0]</obj_property>
          <obj_property name="ObjectShortName">databuf_reg[7:0][8:0]</obj_property>
-         <obj_property name="CustomSignalColor">#00FFFF</obj_property>
-         <obj_property name="UseCustomSignalColor">true</obj_property>
-         <wvobject type="array" fp_name="/DCT1D_TB/U_DCT1D/databuf_reg[7]">
-            <obj_property name="ElementShortName">[7][8:0]</obj_property>
-            <obj_property name="ObjectShortName">[7][8:0]</obj_property>
-            <obj_property name="Radix">BINARYRADIX</obj_property>
-            <obj_property name="CustomSignalColor">#00FFFF</obj_property>
-            <obj_property name="UseCustomSignalColor">true</obj_property>
-         </wvobject>
-         <wvobject type="array" fp_name="/DCT1D_TB/U_DCT1D/databuf_reg[6]">
-            <obj_property name="ElementShortName">[6][8:0]</obj_property>
-            <obj_property name="ObjectShortName">[6][8:0]</obj_property>
-            <obj_property name="Radix">BINARYRADIX</obj_property>
-            <obj_property name="CustomSignalColor">#00FFFF</obj_property>
-            <obj_property name="UseCustomSignalColor">true</obj_property>
-         </wvobject>
-         <wvobject type="array" fp_name="/DCT1D_TB/U_DCT1D/databuf_reg[5]">
-            <obj_property name="ElementShortName">[5][8:0]</obj_property>
-            <obj_property name="ObjectShortName">[5][8:0]</obj_property>
-            <obj_property name="Radix">BINARYRADIX</obj_property>
-            <obj_property name="CustomSignalColor">#00FFFF</obj_property>
-            <obj_property name="UseCustomSignalColor">true</obj_property>
-         </wvobject>
-         <wvobject type="array" fp_name="/DCT1D_TB/U_DCT1D/databuf_reg[4]">
-            <obj_property name="ElementShortName">[4][8:0]</obj_property>
-            <obj_property name="ObjectShortName">[4][8:0]</obj_property>
-            <obj_property name="Radix">BINARYRADIX</obj_property>
-            <obj_property name="CustomSignalColor">#00FFFF</obj_property>
-            <obj_property name="UseCustomSignalColor">true</obj_property>
-         </wvobject>
-         <wvobject type="array" fp_name="/DCT1D_TB/U_DCT1D/databuf_reg[3]">
-            <obj_property name="ElementShortName">[3][8:0]</obj_property>
-            <obj_property name="ObjectShortName">[3][8:0]</obj_property>
-            <obj_property name="Radix">BINARYRADIX</obj_property>
-            <obj_property name="CustomSignalColor">#00FFFF</obj_property>
-            <obj_property name="UseCustomSignalColor">true</obj_property>
-         </wvobject>
-         <wvobject type="array" fp_name="/DCT1D_TB/U_DCT1D/databuf_reg[2]">
-            <obj_property name="ElementShortName">[2][8:0]</obj_property>
-            <obj_property name="ObjectShortName">[2][8:0]</obj_property>
-            <obj_property name="Radix">BINARYRADIX</obj_property>
-            <obj_property name="CustomSignalColor">#00FFFF</obj_property>
-            <obj_property name="UseCustomSignalColor">true</obj_property>
-         </wvobject>
-         <wvobject type="array" fp_name="/DCT1D_TB/U_DCT1D/databuf_reg[1]">
-            <obj_property name="ElementShortName">[1][8:0]</obj_property>
-            <obj_property name="ObjectShortName">[1][8:0]</obj_property>
-            <obj_property name="Radix">BINARYRADIX</obj_property>
-            <obj_property name="CustomSignalColor">#00FFFF</obj_property>
-            <obj_property name="UseCustomSignalColor">true</obj_property>
-         </wvobject>
-         <wvobject type="array" fp_name="/DCT1D_TB/U_DCT1D/databuf_reg[0]">
-            <obj_property name="ElementShortName">[0][8:0]</obj_property>
-            <obj_property name="ObjectShortName">[0][8:0]</obj_property>
-            <obj_property name="Radix">BINARYRADIX</obj_property>
-            <obj_property name="CustomSignalColor">#00FFFF</obj_property>
-            <obj_property name="UseCustomSignalColor">true</obj_property>
-         </wvobject>
+         <obj_property name="isExpanded"></obj_property>
       </wvobject>
       <wvobject type="array" fp_name="/DCT1D_TB/U_DCT1D/latchbuf_reg">
          <obj_property name="ElementShortName">latchbuf_reg[7:0][8:0]</obj_property>
          <obj_property name="ObjectShortName">latchbuf_reg[7:0][8:0]</obj_property>
-         <obj_property name="Radix">HEXRADIX</obj_property>
-         <wvobject type="array" fp_name="/DCT1D_TB/U_DCT1D/latchbuf_reg[7]">
-            <obj_property name="ElementShortName">[7][8:0]</obj_property>
-            <obj_property name="ObjectShortName">[7][8:0]</obj_property>
-            <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
-         </wvobject>
-         <wvobject type="array" fp_name="/DCT1D_TB/U_DCT1D/latchbuf_reg[6]">
-            <obj_property name="ElementShortName">[6][8:0]</obj_property>
-            <obj_property name="ObjectShortName">[6][8:0]</obj_property>
-            <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
-         </wvobject>
-         <wvobject type="array" fp_name="/DCT1D_TB/U_DCT1D/latchbuf_reg[5]">
-            <obj_property name="ElementShortName">[5][8:0]</obj_property>
-            <obj_property name="ObjectShortName">[5][8:0]</obj_property>
-            <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
-         </wvobject>
-         <wvobject type="array" fp_name="/DCT1D_TB/U_DCT1D/latchbuf_reg[4]">
-            <obj_property name="ElementShortName">[4][8:0]</obj_property>
-            <obj_property name="ObjectShortName">[4][8:0]</obj_property>
-            <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
-         </wvobject>
-         <wvobject type="array" fp_name="/DCT1D_TB/U_DCT1D/latchbuf_reg[3]">
-            <obj_property name="ElementShortName">[3][8:0]</obj_property>
-            <obj_property name="ObjectShortName">[3][8:0]</obj_property>
-            <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
-         </wvobject>
-         <wvobject type="array" fp_name="/DCT1D_TB/U_DCT1D/latchbuf_reg[2]">
-            <obj_property name="ElementShortName">[2][8:0]</obj_property>
-            <obj_property name="ObjectShortName">[2][8:0]</obj_property>
-            <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
-         </wvobject>
-         <wvobject type="array" fp_name="/DCT1D_TB/U_DCT1D/latchbuf_reg[1]">
-            <obj_property name="ElementShortName">[1][8:0]</obj_property>
-            <obj_property name="ObjectShortName">[1][8:0]</obj_property>
-            <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
-         </wvobject>
-         <wvobject type="array" fp_name="/DCT1D_TB/U_DCT1D/latchbuf_reg[0]">
-            <obj_property name="ElementShortName">[0][8:0]</obj_property>
-            <obj_property name="ObjectShortName">[0][8:0]</obj_property>
-            <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
-         </wvobject>
+         <obj_property name="isExpanded"></obj_property>
       </wvobject>
       <wvobject type="array" fp_name="/DCT1D_TB/U_DCT1D/stage2_cnt">
          <obj_property name="ElementShortName">stage2_cnt[5:0]</obj_property>
@@ -235,22 +138,6 @@
          <obj_property name="ObjectShortName">ram_waddr_d[3:0][5:0]</obj_property>
          <obj_property name="isExpanded"></obj_property>
       </wvobject>
-      <wvobject type="array" fp_name="/DCT1D_TB/U_DCT1D/ram_waddr_d1">
-         <obj_property name="ElementShortName">ram_waddr_d1[5:0]</obj_property>
-         <obj_property name="ObjectShortName">ram_waddr_d1[5:0]</obj_property>
-      </wvobject>
-      <wvobject type="array" fp_name="/DCT1D_TB/U_DCT1D/ram_waddr_d2">
-         <obj_property name="ElementShortName">ram_waddr_d2[5:0]</obj_property>
-         <obj_property name="ObjectShortName">ram_waddr_d2[5:0]</obj_property>
-      </wvobject>
-      <wvobject type="array" fp_name="/DCT1D_TB/U_DCT1D/ram_waddr_d3">
-         <obj_property name="ElementShortName">ram_waddr_d3[5:0]</obj_property>
-         <obj_property name="ObjectShortName">ram_waddr_d3[5:0]</obj_property>
-      </wvobject>
-      <wvobject type="array" fp_name="/DCT1D_TB/U_DCT1D/ram_waddr_d4">
-         <obj_property name="ElementShortName">ram_waddr_d4[5:0]</obj_property>
-         <obj_property name="ObjectShortName">ram_waddr_d4[5:0]</obj_property>
-      </wvobject>
       <wvobject fp_name="divider90" type="divider">
       </wvobject>
       <wvobject type="logic" fp_name="/DCT1D_TB/U_DCT1D/ram_we_s">
@@ -261,22 +148,6 @@
          <obj_property name="ElementShortName">ram_we_d[3:0]</obj_property>
          <obj_property name="ObjectShortName">ram_we_d[3:0]</obj_property>
       </wvobject>
-      <wvobject type="logic" fp_name="/DCT1D_TB/U_DCT1D/ram_we_d1">
-         <obj_property name="ElementShortName">ram_we_d1</obj_property>
-         <obj_property name="ObjectShortName">ram_we_d1</obj_property>
-      </wvobject>
-      <wvobject type="logic" fp_name="/DCT1D_TB/U_DCT1D/ram_we_d2">
-         <obj_property name="ElementShortName">ram_we_d2</obj_property>
-         <obj_property name="ObjectShortName">ram_we_d2</obj_property>
-      </wvobject>
-      <wvobject type="logic" fp_name="/DCT1D_TB/U_DCT1D/ram_we_d3">
-         <obj_property name="ElementShortName">ram_we_d3</obj_property>
-         <obj_property name="ObjectShortName">ram_we_d3</obj_property>
-      </wvobject>
-      <wvobject type="logic" fp_name="/DCT1D_TB/U_DCT1D/ram_we_d4">
-         <obj_property name="ElementShortName">ram_we_d4</obj_property>
-         <obj_property name="ObjectShortName">ram_we_d4</obj_property>
-      </wvobject>
       <wvobject fp_name="divider99" type="divider">
       </wvobject>
       <wvobject type="logic" fp_name="/DCT1D_TB/U_DCT1D/wmemsel_reg">
@@ -286,22 +157,6 @@
       <wvobject type="array" fp_name="/DCT1D_TB/U_DCT1D/wmemsel_d">
          <obj_property name="ElementShortName">wmemsel_d[3:0]</obj_property>
          <obj_property name="ObjectShortName">wmemsel_d[3:0]</obj_property>
-      </wvobject>
-      <wvobject type="logic" fp_name="/DCT1D_TB/U_DCT1D/wmemsel_d1">
-         <obj_property name="ElementShortName">wmemsel_d1</obj_property>
-         <obj_property name="ObjectShortName">wmemsel_d1</obj_property>
-      </wvobject>
-      <wvobject type="logic" fp_name="/DCT1D_TB/U_DCT1D/wmemsel_d2">
-         <obj_property name="ElementShortName">wmemsel_d2</obj_property>
-         <obj_property name="ObjectShortName">wmemsel_d2</obj_property>
-      </wvobject>
-      <wvobject type="logic" fp_name="/DCT1D_TB/U_DCT1D/wmemsel_d3">
-         <obj_property name="ElementShortName">wmemsel_d3</obj_property>
-         <obj_property name="ObjectShortName">wmemsel_d3</obj_property>
-      </wvobject>
-      <wvobject type="logic" fp_name="/DCT1D_TB/U_DCT1D/wmemsel_d4">
-         <obj_property name="ElementShortName">wmemsel_d4</obj_property>
-         <obj_property name="ObjectShortName">wmemsel_d4</obj_property>
       </wvobject>
    </wvobject>
 </wave_config>
