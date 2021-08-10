@@ -1,0 +1,16 @@
+{signal: [
+  {name: 'clk', wave: 'p.............|........'},
+  {name: 'pb_start', wave: 'lhl...........|.hl.....'},
+  {name: 'transfer_on',wave: 'l.h.........l.|..h...l.'},
+  {name: 'nvm_en',wave:'l.h......l....|..h..l..'},
+  {name: 'busy', wave: 'l..h.lh.lh.l..|........'},
+  {name: 'nvm_addr', wave: 'x.==..=.....x.|..===.x.', data: ['NA0', 'NA1', 'NA2','NA0', 'NA1', 'NA2']},
+  {name: 'nvm_data', wave:'x....=x.=x.=x.|...===.x',data: ['D0','D1','D2','D0','D1','D2']},
+  {name: 'sync',wave: 'l....hl.hl.hl.|...h..l.'},
+  {},
+  {name: 'raddr', wave: 'x.=...=..=...x|..=.==.x',data: ['RA0','RA1','RA2','RA0','RA1','RA2']},
+  {name: 'ram_we',wave: 'l....hl.hl.hl.|...h..l.'}
+],
+ head: {text: ['tspan','NV -> V']}
+}
+

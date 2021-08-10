@@ -31,27 +31,45 @@ package i_mdct_pkg is
   constant C_OUTDATA_W    : natural := 12; -- Output data width
   constant N              : natural := 8;  -- Input frame base size
 
-  constant C_ROM_SIZE : natural := 64; -- Number of data (words) in each rom
+  -- Number of data (words) in each rom
+  constant C_ROM_SIZE : natural := 64;
 
-  constant C_FRAME_SIZE        : natural := N * N; -- Size of a full frame of data
-  constant C_DCT1D_CHKPNT_SIZE : natural := N + 1; -- Size of DCT1D checkpoint in RAM: DBUF + ROW_COL
-
-  constant C_RAM_SIZE       : natural := C_FRAME_SIZE + C_DCT1D_CHKPNT_SIZE; -- Size of RAM (number of words)
-  constant C_SYS_CHKPT_SIZE : natural := (C_RAM_SIZE * 2) + 1;               -- Size of a system checkpoint (number of words): 2 RAM sizes and data in DBUFCTL
+  -- Size of a full frame of data
+  constant C_FRAME_SIZE : natural := N * N;                                                                --(64)
+  -- Size of DCT1D checkpoint in RAM: DBUF + ROW_COL
+  constant C_DCT1D_CHKPNT_RAM_SIZE : natural := N + 1;                                                     --(8)
+  -- Amount of content inside RAM (number of words)
+  constant C_RAM_CONTENT_AMOUNT : natural := C_FRAME_SIZE + C_DCT1D_CHKPNT_RAM_SIZE;                       --(73)
+  -- Amount of data to store inside NVM w.r.t RAM
+  constant C_CHKPNT_NVM_RAM_AMOUNT : natural := C_RAM_CONTENT_AMOUNT;                                      --(73)
+  -- Amount of data to store inside NVM w.r.t DBUFCTL
+  constant C_CHKPNT_NVM_DBUFCTL_AMOUNT : natural := 2;                                                     --(2)
+  -- Size of a system checkpoint (number of words): 1 RAM size ,1 data in DBUFCTL and FIRST run.
+  constant C_CHKPNT_NVM_SYS_AMOUNT : natural := C_CHKPNT_NVM_RAM_AMOUNT + C_CHKPNT_NVM_DBUFCTL_AMOUNT + 1; --(76)
 
   constant C_ROMDATA_W : natural := C_OUTDATA_W + 2;   -- ROM data width
   constant C_ROMADDR_W : natural := ilog2(C_ROM_SIZE); -- ROM address width
 
-  constant C_RAMDATA_W : natural := C_1D_OUTDATA_W;    -- RAM data width
-  constant C_RAMADDR_W : natural := ilog2(C_RAM_SIZE); -- RAM address width
+  constant C_RAMDATA_W : natural := C_1D_OUTDATA_W;              -- RAM data width
+  constant C_RAMADDR_W : natural := ilog2(C_RAM_CONTENT_AMOUNT); -- RAM address width
 
   constant LEVEL_SHIFT  : natural := 128;                      -- probably (2^8)/2
   constant C_PL1_DATA_W : natural := C_ROMDATA_W + C_INDATA_W; -- Pipeline 1D data width
   constant C_PL2_DATA_W : natural := C_PL1_DATA_W + 2;         -- Pipeline 2D data width
-  ------------------------------------------------------------------------------
-  constant NVM_DATA_W : natural := max(C_RAMDATA_W, C_INDATA_W);
-  constant NVM_ADDR_W : natural := (C_RAMADDR_W  * 2) + 1;     --
 
+  ------------------------------------------------------------------------------
+  -- NVM constants
+  ------------------------------------------------------------------------------
+  constant C_NVM_DATA_W : natural := max(C_RAMDATA_W * 2, C_INDATA_W);
+  constant C_NVM_ADDR_W : natural := ilog2(C_CHKPNT_NVM_SYS_AMOUNT);
+
+  -- WARNING: keep this constant equal to the system speed
+  constant C_CLK_FREQ_HZ : natural := 100000000; -- 100MHz master clk speed.
+
+  -- NVM access time
+  -- See https://www.cypress.com/file/46186/download FRAM-Technology brief
+  -- and https://www.cypress.com/file/136446/download page 9 tRC ~ 130ns
+  constant C_ACCESS_TIME_NS : positive := 50; --130;
 
   -- 2's complement numbers
 
@@ -108,9 +126,8 @@ package body i_mdct_pkg is
 
   end max;
 
-
   function ilog2 (x:natural) return natural is
-  -- Integer log2 (returs always the ceiling of the log2)
+    -- Integer log2 (returs always the ceiling of the log2)
   begin
     return natural(ceil(log2(real(x))));
   end function;

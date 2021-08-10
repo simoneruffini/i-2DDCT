@@ -89,7 +89,7 @@ architecture RTL of I_DCT1D is
 
   --########################### CONSTANTS 2 ####################################
   constant C_DCT1D_CHKP_IN_RAM_STRT_ADDR            : natural := (C_FRAME_SIZE - 1) + 1;                                  -- start address in ram where DCT1D state/checkpoint is saved
-  constant C_DCT1D_CHKP_IN_RAM_OFST                 : natural := C_DCT1D_CHKPNT_SIZE - 1;                                 -- length of data saved in ram for DCT1D state/checkpoint: DBUF(N) + ROW_COL
+  constant C_DCT1D_CHKP_IN_RAM_OFST                 : natural := C_DCT1D_CHKPNT_RAM_SIZE - 1;                                 -- length of data saved in ram for DCT1D state/checkpoint: DBUF(N) + ROW_COL
 
   constant C_RAM_DBUF_STRT_ADDR                     : natural := C_DCT1D_CHKP_IN_RAM_STRT_ADDR;
   constant C_RAM_DBUF_OFST                          : natural := N - 1;

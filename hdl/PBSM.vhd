@@ -27,13 +27,14 @@ entity PBSM is
   port (
     CLK                : in    std_logic; -- System Clock
     RST                : in    std_logic; -- System Reset (active high)
+    NVM_BUSY_SIG       : in    std_logic; -- NVM busy signal (for async processes)
     -- from/to PBSM(m-1)
     START_I            : in    std_logic; -- Start this process block state machine
     -- from/to PBSM(m+1)
     START_O            : out   std_logic; -- Start next process block state machine
     -- from/to processing block
     PB_RDY_I           : in    std_logic; -- Redy signal from process block: '0' when PB is computing '1' otherwise
-    PB_START_O         : out   std_logic -- Start process block tied to this State Machine
+    PB_START_O         : out   std_logic  -- Start process block tied to this State Machine
   );
 end entity PBSM;
 
@@ -45,7 +46,7 @@ architecture RTL of PBSM is
 
   --########################### TYPES ##########################################
 
-  type pbsm_state_t is (S_PBSM_INIT, S_PBSM_WAIT_START, S_PBSM_WAIT_BLK_RDY);
+  type pbsm_state_t is (S_PBSM_WAIT_START, S_PBSM_WAIT_NVM_BUSY, S_PBSM_START_O, S_PBSM_RUN, S_PBSM_WAIT_BLK_RDY);
 
   --########################### FUNCTIONS ######################################
 
@@ -53,7 +54,7 @@ architecture RTL of PBSM is
 
   --########################### SIGNALS ##########################################
 
-  signal pbsm_pstate : pbsm_state_t;
+  signal pbsm_pstate  : pbsm_state_t;
   signal pbsm_fstate  : pbsm_state_t;
 
   --########################### ARCHITECTURE BEGIN ###############################
@@ -71,7 +72,7 @@ begin
   begin
 
     if (RST = '1') then
-      pbsm_pstate <= S_PBSM_INIT;
+      pbsm_pstate <= S_PBSM_WAIT_START;
     elsif (CLK'event and CLK = '1') then
       pbsm_pstate <= pbsm_fstate;
     end if;
@@ -81,23 +82,49 @@ begin
   --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   -- Future state computation for fsm (combinatorial process)
 
-  P_FSM_FUT_S : process (pbsm_pstate, START_I, PB_RDY_I) is
+  P_FSM_FUT_S : process (pbsm_pstate, START_I, PB_RDY_I, NVM_BUSY_SIG) is
   begin
+
+    -- Default
+    pbsm_fstate <= pbsm_pstate;
 
     case pbsm_pstate is
 
-      when S_PBSM_INIT =>
-        pbsm_fstate <= S_PBSM_WAIT_START;
       when S_PBSM_WAIT_START =>
 
         if (START_I = '1') then
+          if (NVM_BUSY_SIG = '1') then
+            pbsm_fstate <= S_PBSM_WAIT_NVM_BUSY;
+          elsif (PB_RDY_I = '1') then
+            pbsm_fstate <= S_PBSM_START_O;
+          else
+            pbsm_fstate <= S_PBSM_WAIT_BLK_RDY;
+          end if;
+        end if;
+
+      when S_PBSM_WAIT_NVM_BUSY =>
+
+        if (NVM_BUSY_SIG = '1') then
+          pbsm_fstate <= S_PBSM_WAIT_NVM_BUSY;
+        elsif (PB_RDY_I = '1') then
+          pbsm_fstate <= S_PBSM_START_O;
+        else
           pbsm_fstate <= S_PBSM_WAIT_BLK_RDY;
         end if;
 
       when S_PBSM_WAIT_BLK_RDY =>
 
         if (PB_RDY_I = '1') then
-          pbsm_fstate <= S_PBSM_INIT;
+          pbsm_fstate <= S_PBSM_RUN;
+        end if;
+
+      when S_PBSM_START_O =>
+        pbsm_fstate <= S_PBSM_RUN;
+
+      when S_PBSM_RUN =>
+
+        if (PB_RDY_I = '1') then
+          pbsm_fstate <= S_PBSM_WAIT_START;
         end if;
 
     end case;
@@ -107,7 +134,7 @@ begin
   --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   -- Output generator for a mealy fsm (output depends on input)
 
-  P_FSM_OUTPS : process (pbsm_pstate, START_I, PB_RDY_I) is
+  P_FSM_OUTPS : process (pbsm_pstate,  PB_RDY_I) is
   begin
 
     -- defaults
@@ -117,14 +144,13 @@ begin
 
     case pbsm_pstate is
 
-      when S_PBSM_INIT =>
       when S_PBSM_WAIT_START =>
-
-        if (START_I = '1') then
-          PB_START_O <= '1';
-        end if;
-
+      when S_PBSM_WAIT_NVM_BUSY =>
       when S_PBSM_WAIT_BLK_RDY =>
+      when S_PBSM_START_O =>
+        PB_START_O <= '1';
+
+      when S_PBSM_RUN =>
 
         if (PB_RDY_I = '1') then
           START_O <= '1';

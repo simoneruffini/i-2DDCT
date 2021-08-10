@@ -30,34 +30,33 @@ library WORK;
 
 entity NVM_CTRL is
   port (
-    CLK               : in    std_logic;                                              -- Input clock
-    RST               : in    std_logic;                                              -- Positive reset
+    CLK                  : in    std_logic;                                                   -- Input clock
+    RST                  : in    std_logic;                                                   -- Positive reset
     ----------------------------------------------------------------------------
-    NVM_BUSY          : in    std_logic;                                              -- Busy signal for Async processes
-    NVM_BUSY_SIG      : in    std_logic;                                              -- Busy signal for sync processes (triggered 1 clk before BUSY)
-    NVM_EN            : out   std_logic;                                              -- Enable memory
-    NVM_WE            : out   std_logic;                                              -- Write enable
-    NVM_RADDR         : out   std_logic_vector(NVM_ADDR_W - 1 downto 0);              -- Read address port
-    NVM_WADDR         : out   std_logic_vector(NVM_ADDR_W - 1 downto 0);              -- Write address port
-    NVM_DIN           : out   std_logic_vector(NVM_DATA_W - 1 downto 0);              -- Data input
-    NVM_DOUT          : in    std_logic_vector(NVM_DATA_W - 1 downto 0);              -- Data output from read address
+    NVM_BUSY             : in    std_logic;                                                   -- Busy signal for Async processes
+    NVM_BUSY_SIG         : in    std_logic;                                                   -- Busy signal for sync processes (triggered 1 clk before BUSY)
+    NVM_EN               : out   std_logic;                                                   -- Enable memory
+    NVM_WE               : out   std_logic;                                                   -- Write enable
+    NVM_RADDR            : out   std_logic_vector(C_NVM_ADDR_W - 1 downto 0);                 -- Read address port
+    NVM_WADDR            : out   std_logic_vector(C_NVM_ADDR_W - 1 downto 0);                 -- Write address port
+    NVM_DIN              : out   std_logic_vector(C_NVM_DATA_W - 1 downto 0);                 -- Data input
+    NVM_DOUT             : in    std_logic_vector(C_NVM_DATA_W - 1 downto 0);                 -- Data output from read address
     ----------------------------------------------------------------------------
-    SYS_ENRG_STATUS   : in    sys_enrg_status_t;                                      -- System Energy status
+    SYS_ENRG_STATUS      : in    sys_enrg_status_t;                                           -- System Energy status
 
-    VARC_RDY          : in    std_logic;
-    SYS_STATUS        : out   sys_status_t;                                           -- System status value of sys_status_t
+    VARC_RDY             : in    std_logic;
+    SYS_STATUS           : out   sys_status_t;                                                -- System status value of sys_status_t
+    SYNC                 : out   std_logic;                                                   -- Multiple semantics: tells if TX data is valid or if RX data was accepted when 1 otherwise TX/RX lines not captured/able
 
-    DBUFCTL_START     : out   std_logic;
-    DBUFCTL_TX        : out   std_logic_vector(NVM_DATA_W - 1 downto 0);
-    DBUFCTL_RX        : in    std_logic_vector(NVM_DATA_W - 1 downto 0);
+    DBUFCTL_START        : out   std_logic;                                                   -- Start DBUFCTL process block
+    DBUFCTL_RX           : out   std_logic_vector(C_NVM_DATA_W - 1 downto 0);                 -- DBUFCTL process block RX signal
+    DBUFCTL_TX           : in    std_logic_vector(C_NVM_DATA_W - 1 downto 0);                 -- DBUFCTL process block TX signal
+    DBUFCTL_READY        : in    std_logic;                                                   -- DBUFCTL process block ready signal
 
-    RAM1_START        : out   std_logic;
-    RAM1_TX           : out   std_logic_vector(NVM_DATA_W - 1 downto 0);
-    RAM1_RX           : in    std_logic_vector(NVM_DATA_W - 1 downto 0);
-
-    RAM2_START        : out   std_logic;
-    RAM2_TX           : out   std_logic_vector(NVM_DATA_W - 1 downto 0);
-    RAM2_RX           : in    std_logic_vector(NVM_DATA_W - 1 downto 0)
+    RAM_PB_START         : out   std_logic;                                                   -- Start RAM process block
+    RAM_PB_RX            : out   std_logic_vector(C_NVM_DATA_W - 1 downto 0);                 -- RAM process block RX signal
+    RAM_PB_TX            : in    std_logic_vector(C_NVM_DATA_W - 1 downto 0);                 -- RAM proces block TX signal
+    RAM_PB_READY         : in    std_logic                                                    -- RAM_PB process block ready signal
   );
 end entity NVM_CTRL;
 
@@ -65,17 +64,14 @@ architecture RTL of NVM_CTRL is
 
   --########################### CONSTANTS 1 ####################################
 
-  constant C_NVM_FIRST_RUN_STRT_ADDR                 : natural := 0;
-  constant C_NVM_FIRST_RUN_OFFSET                    : natural := 0;
+  constant C_NVM_FIRST_RUN_STRT_ADDR                       : natural := 0;
+  constant C_NVM_FIRST_RUN_OFFSET                          : natural := 0;
 
-  constant C_NVM_DBUFCTL_STRT_ADDR                   : natural := C_NVM_FIRST_RUN_STRT_ADDR + C_NVM_FIRST_RUN_OFFSET + 1;
-  constant C_NVM_DBUFCTL_OFFSET                      : natural := 1;
+  constant C_NVM_DBUFCTL_PB_STRT_ADDR                      : natural := C_NVM_FIRST_RUN_STRT_ADDR + C_NVM_FIRST_RUN_OFFSET + 1;
+  constant C_NVM_DBUFCTL_PB_OFFSET                         : natural := 1;
 
-  constant C_NVM_RAM1_STRT_ADDR                      : natural := C_NVM_DBUFCTL_STRT_ADDR + C_NVM_DBUFCTL_OFFSET + 1;
-  constant C_NVM_RAM1_OFFSET                         : natural := (2 ** C_RAMADDR_W) - 1;
-
-  constant C_NVM_RAM2_STRT_ADDR                      : natural := C_NVM_RAM1_STRT_ADDR + C_NVM_RAM1_OFFSET + 1;
-  constant C_NVM_RAM2_OFFSET                         : natural := C_NVM_RAM1_OFFSET;
+  constant C_NVM_RAM_PB_STRT_ADDR                          : natural := C_NVM_DBUFCTL_PB_STRT_ADDR + C_NVM_DBUFCTL_PB_OFFSET + 1;
+  constant C_NVM_RAM_PB_OFFSET                             : natural := C_RAM_CONTENT_AMOUNT - 1;
 
   --########################### TYPES ##########################################
 
@@ -102,50 +98,59 @@ architecture RTL of NVM_CTRL is
 
   type proc_blk_order_t is (
     dbufctl,
-    ram1,
-    ram2,
+    ram,
     num_proc_blk_order_t
+  );
+
+  type nvm_transfer_t is (
+    dbufctl_transfer,
+    ram_transfer,
+    no_transfer
   );
 
   --########################### FUNCTIONS ######################################
 
   --########################### CONSTANTS 2 ####################################
 
-  constant C_STAGES_IN_CHKP_PROC                     : natural := proc_blk_order_t'pos(num_proc_blk_order_t);   --  DBUFCTL,RAM1,RAM2,
+  constant C_STAGES_IN_CHKP_PROC                           : natural := proc_blk_order_t'pos(num_proc_blk_order_t);                        --  DBUFCTL,RAM1,RAM2,
 
   --########################### SIGNALS ########################################
 
-  signal pbsm_start_arr                              : std_logic_vector(C_STAGES_IN_CHKP_PROC downto 0);        -- 1 extra entry because of last PBSM start_out
-  signal pbsm_pb_ready_arr                           : std_logic_vector(C_STAGES_IN_CHKP_PROC - 1 downto 0);
-  signal pbsm_pb_start_arr                           : std_logic_vector(C_STAGES_IN_CHKP_PROC - 1 downto 0);
-  signal pbsm_start                                  : std_logic;                                               -- starts alal process block state machines
-  signal pbsm_end                                    : std_logic;                                               -- signals end of all process block state machines
+  signal pbsm_start_arr                                    : std_logic_vector(C_STAGES_IN_CHKP_PROC downto 0);                             -- 1 extra entry because of last PBSM start_out
+  signal pbsm_pb_ready_arr                                 : std_logic_vector(C_STAGES_IN_CHKP_PROC - 1 downto 0);
+  signal pbsm_pb_start_arr                                 : std_logic_vector(C_STAGES_IN_CHKP_PROC - 1 downto 0);
+  signal pbsm_start                                        : std_logic;                                                                    -- starts alal process block state machines
+  signal pbsm_end                                          : std_logic;                                                                    -- signals end of all process block state machines
 
-  signal pb_dbufctl_en                               : std_logic;
-  signal pb_ram1_en                                  : std_logic;
-  signal pb_ram2_en                                  : std_logic;
+  signal nvm_active_transfer                               : nvm_transfer_t;                                                               -- NVM active transfer signal
+  signal transfer_on                                       : std_logic;
+  signal transfer_cnt                                      : natural range 0 to max(C_CHKPNT_NVM_RAM_AMOUNT, C_CHKPNT_NVM_DBUFCTL_AMOUNT); -- NVM active transfer signal
+  --signal pb_dbufctl_en                                  : std_logic;
+  --signal pb_ram_en                                      : std_logic;
 
-  signal m_fsm_pstate                                : m_fsm_t;                                                 -- main fsm present state
-  signal m_fsm_fstate                                : m_fsm_t;                                                 -- main fsm future state
+  signal m_fsm_pstate                                      : m_fsm_t;                                                                      -- main fsm present state
+  signal m_fsm_fstate                                      : m_fsm_t;                                                                      -- main fsm future state
 
-  signal chk_first_run_cmlpt                         : std_logic;                                               -- Check first run from NVM complete
-  signal first_run                                   : std_logic;                                               -- First run of the sytem
-  signal nvm_en_fr                                   : std_logic;
-  signal nvm_addr_fr                                 : unsigned(NVM_ADDR_W - 1 downto 0);
+  signal chk_first_run_cmlpt                               : std_logic;                                                                    -- Check first run from NVM complete
+  signal first_run                                         : std_logic;                                                                    -- First run of the sytem
+  signal nvm_en_fr                                         : std_logic;
+  signal nvm_addr_fr                                       : unsigned(C_NVM_ADDR_W - 1 downto 0);
 
-  signal sys_status_s                                : sys_status_t;                                            -- System status signal
-  signal sys_status_s_latch                          : sys_status_t;                                            -- System status signal
-  signal nvm_en_pb                                   : std_logic;
-  signal nvm_addr_pb                                 : unsigned(NVM_ADDR_W - 1 downto 0);
+  signal sys_status_s                                      : sys_status_t;                                                                 -- System status signal
+  signal sys_status_s_latch                                : sys_status_t;                                                                 -- System status signal
+  signal sync_gate                                         : std_logic;                                                                    -- And gate to sync signal
+  signal sync_s                                            : std_logic;
+  signal nvm_en_pb                                         : std_logic;
+  signal nvm_addr_pb                                       : unsigned(C_NVM_ADDR_W - 1 downto 0);
 
-  signal ctm_fsm_pstate                              : ctm_fsm_t;                                               -- Checkpoint Transfer Manger fsm present state
-  signal ctm_fsm_fstate                              : ctm_fsm_t;                                               -- Checkpoint Transfer Manger fsm future state
-  signal ctm_start                                   : std_logic;                                               -- Checkpoint Transfer Manger start signal
-  signal ctm_end                                     : std_logic;                                               -- Checkpoint Transfer Manger end signal
+  signal ctm_fsm_pstate                                    : ctm_fsm_t;                                                                    -- Checkpoint Transfer Manger fsm present state
+  signal ctm_fsm_fstate                                    : ctm_fsm_t;                                                                    -- Checkpoint Transfer Manger fsm future state
+  signal ctm_start                                         : std_logic;                                                                    -- Checkpoint Transfer Manger start signal
+  signal ctm_end                                           : std_logic;                                                                    -- Checkpoint Transfer Manger end signal
 
-  signal fsm_chkpnt_strt                             : std_logic;                                               -- Signals m_fsm that a checkpoint is necessary
-  signal fsm_chkpnt_strt_latch                       : std_logic;                                               -- Latch of the previous signal
-  signal halt                                        : std_logic;                                               -- Signals m_fsm that vol_arch must be halted
+  signal fsm_chkpnt_strt                                   : std_logic;                                                                    -- Signals m_fsm that a checkpoint is necessary
+  signal fsm_chkpnt_strt_latch                             : std_logic;                                                                    -- Latch of the previous signal
+  signal halt                                              : std_logic;                                                                    -- Signals m_fsm that vol_arch must be halted
 
   --########################### ARCHITECTURE BEGIN #############################
 
@@ -155,13 +160,14 @@ begin
 
   G_PBSM : for i in 0 to C_STAGES_IN_CHKP_PROC - 1 generate
 
-    U_PBSM : entity  work.pbsm
+    GI_U_PBSM : entity  work.pbsm
       port map (
-        CLK => CLK,
-        RST => RST,
-        -- from/to PBSM(m-1
+        CLK          => CLK,
+        RST          => RST,
+        NVM_BUSY_SIG => NVM_BUSY_SIG,
+        -- from/to PBSM(m-1)
         START_I => pbsm_start_arr(i),
-        -- from/to PBSM(m+1
+        -- from/to PBSM(m+1)
         START_O => pbsm_start_arr(i + 1),
         -- from/to processi
         PB_RDY_I   => pbsm_pb_ready_arr(i),
@@ -173,44 +179,45 @@ begin
   --########################## OUTPUT PORTS WIRING #############################
 
   SYS_STATUS <= sys_status_s;
+  SYNC       <= sync_s;
   --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   -- Each PBSM regulates a process block with the below sibnals.
   -- These process blocks regulate access to and from NVM for checkpopinting operations
   -- Hence the PBSM to process block mapping defines the order of execution of PBs
 
-  DBUFCTL_START <= pbsm_pb_start_arr(proc_blk_order_t'pos(dbufctl));
+  DBUFCTL_START                                    <= pbsm_pb_start_arr(proc_blk_order_t'pos(dbufctl));
+  pbsm_pb_ready_arr(proc_blk_order_t'pos(dbufctl)) <= DBUFCTL_READY;
 
-  RAM1_START <= pbsm_pb_start_arr(proc_blk_order_t'pos(ram1));
-
-  RAM2_START <= pbsm_pb_start_arr(proc_blk_order_t'pos(ram2));
+  RAM_PB_START                                 <= pbsm_pb_start_arr(proc_blk_order_t'pos(ram));
+  pbsm_pb_ready_arr(proc_blk_order_t'pos(ram)) <= RAM_PB_READY;
 
   NVM_RADDR <= std_logic_vector(nvm_addr_fr) when m_fsm_pstate = S_CHK_FIRST_RUN else
                std_logic_vector(nvm_addr_pb) when m_fsm_pstate = S_NV2V_PUSH else
-               (others => '0');
-  NVM_WADDR <= std_logic_vector(nvm_addr_pb) when sys_status_s =SYS_PUSH_CHKPNT_V2NV else
+               not std_logic_vector(nvm_addr_pb);
+  NVM_WADDR <= std_logic_vector(nvm_addr_pb) when m_fsm_pstate = S_V2NV_PUSH else
                not std_logic_vector(nvm_addr_pb);
 
-  NVM_DIN <= DBUFCTL_RX  when pb_dbufctl_en = '1'  else
-             RAM1_RX     when pb_ram1_en= '1'      else
-             RAM2_RX     when pb_ram2_en= '1'      else
-             (others => '0');
+  NVM_DIN <= DBUFCTL_TX  when nvm_active_transfer = dbufctl_transfer else
+             RAM_PB_TX   when nvm_active_transfer = ram_transfer else
+             (others => '0') when nvm_active_transfer = no_transfer;
 
   NVM_EN <= nvm_en_fr when m_fsm_pstate = S_CHK_FIRST_RUN else
             nvm_en_pb when m_fsm_pstate = S_NV2V_PUSH OR m_fsm_fstate = S_V2NV_PUSH else
             '0';
 
-  DBUFCTL_TX <= NVM_DOUT when pb_dbufctl_en = '1' else
-                (others => '0');
-  RAM1_TX    <= NVM_DOUT when pb_ram1_en = '1' else
-                (others => '0');
-  RAM2_TX    <= NVM_DOUT when pb_ram2_en = '1' else
-                (others => '0');
+  NVM_WE <= '1' when sys_status_s = SYS_PUSH_CHKPNT_V2NV AND transfer_on = '1' else
+            '0';
+
+  DBUFCTL_RX <= NVM_DOUT;
+  RAM_PB_RX  <= NVM_DOUT;
 
   --########################## COBINATORIAL FUNCTIONS ##########################
 
   pbsm_start_arr(0) <= pbsm_start;                              -- start of PBSM chain is piloted by pbsm_start
   pbsm_end          <= pbsm_start_arr(C_STAGES_IN_CHKP_PROC);   -- when last PBSM signals a statrt means that all PBSM completed
   ctm_end           <= pbsm_end;
+  sync_s            <= sync_gate AND not NVM_BUSY;
+
   --########################## PROCESSES #######################################
 
   --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -246,7 +253,7 @@ begin
 
         if (chk_first_run_cmlpt = '1') then
           if (first_run = '1') then
-            m_fsm_fstate <= S_SYS_RUN;
+            m_fsm_fstate <= S_SYS_HALT;
           else
             m_fsm_fstate <= S_NV2V_PUSH;
           end if;
@@ -314,7 +321,7 @@ begin
       when S_INIT =>
       when S_CHK_FIRST_RUN =>
         nvm_en_fr   <= '1';
-        nvm_addr_fr <= to_unsigned(C_NVM_FIRST_RUN_STRT_ADDR,nvm_addr_fr'length);
+        nvm_addr_fr <= to_unsigned(C_NVM_FIRST_RUN_STRT_ADDR, nvm_addr_fr'length);
       when S_NV2V_PUSH =>
         ctm_start    <= '1';
         sys_status_s <= SYS_PUSH_CHKPNT_NV2V;
@@ -395,9 +402,11 @@ begin
 
   --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   -- Check system's first run process
-
+  -- //TODO: first run must be fixed after first push to meory
   P_FIRST_RUN : process (CLK, RST) is
+
     variable chk_wait : std_logic;
+
   begin
 
     if (RST = '1') then
@@ -423,75 +432,110 @@ begin
   begin
 
     if (RST ='1') then
-      nvm_addr_pb       <= (others => '0');
-      NVM_WE            <= '0';
-      nvm_en_pb         <= '0';
-      pbsm_pb_ready_arr <= (others => '0');
-      pb_dbufctl_en     <= '0';
-      pb_ram1_en        <= '0';
-      pb_ram2_en        <= '0';
+      nvm_addr_pb <= (others => '0');
+      --NVM_WE              <= '0';
+      nvm_en_pb           <= '0';
+      sync_gate           <= '0';
+      nvm_active_transfer <= no_transfer;
+      transfer_on         <= '0';
+      transfer_cnt        <= 1;
     elsif (CLK'event and CLK = '1') then
-      if (pb_dbufctl_en = '1') then
-        if (nvm_addr_pb = C_NVM_DBUFCTL_STRT_ADDR + C_NVM_DBUFCTL_OFFSET) then
-          nvm_en_pb                                        <= '0';
-          pbsm_pb_ready_arr(proc_blk_order_t'pos(dbufctl)) <= '1';
-          pb_dbufctl_en                                    <= '0';
-        end if;
-        if (NVM_BUSY = '0') then
+      sync_gate <= '0';
+
+      if (transfer_on = '1') then
+        sync_gate <= '1';
+
+        -- NOTE: this increases nvm_addr correctly under NV2V. In V2NV, instaed,
+        -- it increases one too many times (in theory) but it is correctly by
+        -- the range check in Limit nvm_addr below
+        if (NVM_BUSY = '0' AND nvm_en_pb = '1') then
           nvm_addr_pb <= nvm_addr_pb + 1;
         end if;
-      elsif (pb_ram1_en ='1') then
-        if (nvm_addr_pb = C_NVM_RAM1_STRT_ADDR + C_NVM_RAM1_OFFSET) then
-          nvm_en_pb                                     <= '0';
-          pbsm_pb_ready_arr(proc_blk_order_t'pos(ram1)) <= '1';
-          pb_ram1_en                                    <= '0';
+
+        if (sync_s = '1') then
+          transfer_cnt <= transfer_cnt + 1;
         end if;
-        if (NVM_BUSY = '0') then
-          nvm_addr_pb <= nvm_addr_pb + 1;
-        end if;
-      elsif (pb_ram2_en = '1') then
-        if (nvm_addr_pb = C_NVM_RAM2_STRT_ADDR + C_NVM_RAM2_OFFSET) then
-          nvm_en_pb                                     <= '0';
-          pbsm_pb_ready_arr(proc_blk_order_t'pos(ram2)) <= '1';
-          pb_ram2_en                                    <= '0';
-        end if;
-        if (NVM_BUSY = '0') then
-          nvm_addr_pb <= nvm_addr_pb + 1;
+
+        case nvm_active_transfer is
+
+          when dbufctl_transfer =>
+            if (transfer_cnt = C_CHKPNT_NVM_DBUFCTL_AMOUNT ) then
+              transfer_on         <= '0';
+              sync_gate           <= '0';
+              nvm_active_transfer <= no_transfer;
+            end if;
+          when ram_transfer =>
+            if (sync_s = '1' AND transfer_cnt = C_CHKPNT_NVM_RAM_AMOUNT ) then
+              transfer_on         <= '0';
+              sync_gate           <= '0';
+              nvm_active_transfer <= no_transfer;
+            end if;
+          when no_transfer =>
+            transfer_cnt <= 1;
+            sync_gate    <= '0';
+
+        end case;
+
+      end if;
+
+      -- Enable transfer
+      if (pbsm_pb_start_arr(proc_blk_order_t'pos(dbufctl))='1' OR
+          pbsm_pb_start_arr(proc_blk_order_t'pos(ram))='1') then
+        transfer_on <= '1';
+        nvm_en_pb   <= '1';
+        sync_gate   <= '0';
+        if(sys_status_s= SYS_PUSH_CHKPNT_V2NV) then
+          sync_gate   <= '1';
         end if;
       end if;
 
-      if (pbsm_pb_start_arr(proc_blk_order_t'pos(dbufctl))='1') then
-        nvm_addr_pb                                      <= to_unsigned(C_NVM_DBUFCTL_STRT_ADDR, nvm_addr_pb'length);
-        nvm_en_pb                                        <= '1';
-        pbsm_pb_ready_arr(proc_blk_order_t'pos(dbufctl)) <= '0';
-        pb_dbufctl_en                                    <= '1';
-      elsif (pbsm_pb_start_arr(proc_blk_order_t'pos(ram1))='1') then
-        nvm_addr_pb                                   <= to_unsigned(C_NVM_RAM1_STRT_ADDR, nvm_addr_pb'length);
-        nvm_en_pb                                     <= '1';
-        pbsm_pb_ready_arr(proc_blk_order_t'pos(ram1)) <= '0';
-        pb_ram1_en                                    <= '1';
-      elsif (pbsm_pb_start_arr(proc_blk_order_t'pos(ram2))='1') then
-        nvm_addr_pb                                   <= to_unsigned(C_NVM_RAM2_STRT_ADDR, nvm_addr_pb'length);
-        nvm_en_pb                                     <= '1';
-        pbsm_pb_ready_arr(proc_blk_order_t'pos(ram2)) <= '0';
-        pb_ram2_en                                    <= '1';
+      -- Limit nvm_address and nvm_en
+      if (nvm_active_transfer = dbufctl_transfer) then
+        if (NVM_BUSY = '0' AND nvm_addr_pb = C_NVM_DBUFCTL_PB_STRT_ADDR + C_NVM_DBUFCTL_PB_OFFSET) then
+          nvm_en_pb   <= '0';
+          nvm_addr_pb <= nvm_addr_pb;
+        end if;
       end if;
+      if (nvm_active_transfer = ram_transfer) then
+        if (NVM_BUSY = '0' AND nvm_addr_pb = C_NVM_RAM_PB_STRT_ADDR + C_NVM_RAM_PB_OFFSET) then
+          nvm_en_pb   <= '0';
+          nvm_addr_pb <= nvm_addr_pb;
+        end if;
+      end if;
+
+      -- Enable NVM_DIN mutex, set transfer type, NVM_ADDR and init signals
+      if (pbsm_start_arr(proc_blk_order_t'pos(dbufctl))='1') then
+        nvm_active_transfer <= dbufctl_transfer;
+        nvm_addr_pb         <= to_unsigned(C_NVM_DBUFCTL_PB_STRT_ADDR, nvm_addr_pb'length);
+        nvm_en_pb           <= '0';
+        transfer_on         <= '0';
+        transfer_cnt        <= 1;
+      end if;
+      if (pbsm_start_arr(proc_blk_order_t'pos(ram))='1') then
+        nvm_active_transfer <= ram_transfer;
+        nvm_addr_pb         <= to_unsigned(C_NVM_RAM_PB_STRT_ADDR, nvm_addr_pb'length);
+        nvm_en_pb           <= '0';
+        transfer_on         <= '0';
+        transfer_cnt        <= 1;
+      end if;
+
       if (pbsm_start_arr(C_STAGES_IN_CHKP_PROC) = '1') then
-        nvm_addr_pb       <= (others => '0');
-        nvm_en_pb         <= '0';
-        pbsm_pb_ready_arr <= (others => '0');
-      end if;
-
-      if (sys_status_s=SYS_PUSH_CHKPNT_NV2V or pbsm_end ='1') then
-        NVM_WE <= '0';
-      elsif (sys_status_s = SYS_PUSH_CHKPNT_V2NV and pbsm_start = '1') then
-        NVM_WE <= '1';
+        nvm_active_transfer <= no_transfer;
+        nvm_addr_pb         <= (others => '0');
+        nvm_en_pb           <= '0';
+        transfer_on         <= '0';
+        sync_gate           <= '0';
+        transfer_cnt        <= 1;
       end if;
     end if;
 
   end process P_PROC_BLOCK;
 
-  P_FSM_INTRP_SIG_GEN : process (CLK, RST) is
+  -- --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  -- Interrupt signal generator process
+
+  -- TODO fix this it doesn't work
+  P_INTRP_SIG_GEN : process (CLK, RST) is
   begin
 
     if (RST = '1') then
@@ -523,6 +567,6 @@ begin
       end if;
     end if;
 
-  end process P_FSM_INTRP_SIG_GEN;
+  end process P_INTRP_SIG_GEN;
 
 end architecture RTL;
