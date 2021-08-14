@@ -2,8 +2,8 @@
 -- Engineer:  Simone Ruffini [simone.ruffini@tutanota.com]
 --
 -- Create Date:     Mon Jun 07 18:38 2021
--- Design Name:     DCT1D_TB
--- Module Name:     DCT1D_TB.vhd - RTL
+-- Design Name:     DCT1S_TB
+-- Module Name:     DCT1S_TB.vhd - RTL
 -- Project Name:    iMDCT
 -- Description:     1D Discrete Cosine Transform (1st stage) test bench
 --
@@ -28,14 +28,14 @@ library WORK;
 
 ----------------------------- ENTITY -------------------------------------------
 
-entity DCT1D_TB is
+entity DCT1S_TB is
   --port (
   --);
-end entity DCT1D_TB;
+end entity DCT1S_TB;
 
 ----------------------------- ARCHITECTURE -------------------------------------
 
-architecture RTL of DCT1D_TB is
+architecture RTL of DCT1S_TB is
 
   --########################### CONSTANTS 1 ####################################
   constant C_CLK_FREQ_HZ   : natural := 1000000;                      -- 1MHz
@@ -89,7 +89,7 @@ begin
   --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   -- |DBUFCTL|
   --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  U_DCT1D : entity work.dct1d
+  U_DCT1S : entity work.dct1s
     port map (
       CLK       => clk,
       RST       => rst,

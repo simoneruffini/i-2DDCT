@@ -32,8 +32,8 @@ entity RAM_MUX is
   port (
     -- MUX control ports
     SYS_STATUS                                  : in    sys_status_t;                                           -- System status value of sys_status_t
-    I_DCT1D_VARC_READY                          : in    std_logic;
-    I_DCT2D_VARC_READY                          : in    std_logic;
+    I_DCT1S_VARC_READY                          : in    std_logic;
+    I_DCT2S_VARC_READY                          : in    std_logic;
     DBUFCTL_MEMSEL                              : in    std_logic;
     -- TO/FROM RAM 1
     R1_DIN                                      : out   std_logic_vector(C_RAMDATA_W - 1 downto 0);
@@ -47,18 +47,18 @@ entity RAM_MUX is
     R2_RADDR                                    : out   std_logic_vector(C_RAMADDR_W - 1 downto 0);
     R2_WE                                       : out   std_logic;
     R2_DOUT                                     : in    std_logic_vector(C_RAMDATA_W - 1 downto 0);
-    -- I_DCT1D RAM ports
-    I_DCT1D_DIN                                 : in    std_logic_vector(C_RAMDATA_W - 1 downto 0);
-    I_DCT1D_WADDR                               : in    std_logic_vector(C_RAMADDR_W - 1 downto 0);
-    I_DCT1D_RADDR                               : in    std_logic_vector(C_RAMADDR_W - 1 downto 0);
-    I_DCT1D_WE                                  : in    std_logic;
-    I_DCT1D_DOUT                                : out   std_logic_vector(C_RAMDATA_W - 1 downto 0);
-    -- I_DCT2D RAM ports
-    I_DCT2D_DIN                                 : in    std_logic_vector(C_RAMDATA_W - 1 downto 0);
-    I_DCT2D_WADDR                               : in    std_logic_vector(C_RAMADDR_W - 1 downto 0);
-    I_DCT2D_RADDR                               : in    std_logic_vector(C_RAMADDR_W - 1 downto 0);
-    I_DCT2D_WE                                  : in    std_logic;
-    I_DCT2D_DOUT                                : out   std_logic_vector(C_RAMDATA_W - 1 downto 0);
+    -- I_DCT1S RAM ports
+    I_DCT1S_DIN                                 : in    std_logic_vector(C_RAMDATA_W - 1 downto 0);
+    I_DCT1S_WADDR                               : in    std_logic_vector(C_RAMADDR_W - 1 downto 0);
+    I_DCT1S_RADDR                               : in    std_logic_vector(C_RAMADDR_W - 1 downto 0);
+    I_DCT1S_WE                                  : in    std_logic;
+    I_DCT1S_DOUT                                : out   std_logic_vector(C_RAMDATA_W - 1 downto 0);
+    -- I_DCT2S RAM ports
+    I_DCT2S_DIN                                 : in    std_logic_vector(C_RAMDATA_W - 1 downto 0);
+    I_DCT2S_WADDR                               : in    std_logic_vector(C_RAMADDR_W - 1 downto 0);
+    I_DCT2S_RADDR                               : in    std_logic_vector(C_RAMADDR_W - 1 downto 0);
+    I_DCT2S_WE                                  : in    std_logic;
+    I_DCT2S_DOUT                                : out   std_logic_vector(C_RAMDATA_W - 1 downto 0);
     -- RAM_PB RAM ports
     RAM_PB_RAM1_DIN                             : in    std_logic_vector(C_RAMDATA_W - 1 downto 0);
     RAM_PB_RAM2_DIN                             : in    std_logic_vector(C_RAMDATA_W - 1 downto 0);
@@ -107,9 +107,9 @@ begin
   R1_RADDR <= mux_raddr;
   R2_RADDR <= mux_raddr;
 
-  -- I_DCT1D and I_DCT2D share mux_dout signal
-  I_DCT1D_DOUT <= mux_dout;
-  I_DCT2D_DOUT <= mux_dout;
+  -- I_DCT1S and I_DCT2S share mux_dout signal
+  I_DCT1S_DOUT <= mux_dout;
+  I_DCT2S_DOUT <= mux_dout;
   -- RAM PB takes RAM1 and RAM2 douts
   RAM_PB_RAM1_DOUT <= R1_DOUT;
   RAM_PB_RAM2_DOUT <= R2_DOUT;
@@ -130,9 +130,9 @@ begin
   --########################## COBINATORIAL FUNCTIONS ##########################
 
   -- RADDR mux
-  mux_raddr <= I_DCT2D_RADDR when SYS_STATUS = SYS_RUN else
-               I_DCT2D_RADDR when SYS_STATUS = SYS_VARC_INIT_CHKPNT AND I_DCT1D_VARC_READY = '1' AND I_DCT2D_VARC_READY = '0' else
-               I_DCT1D_RADDR when SYS_STATUS = SYS_VARC_INIT_CHKPNT AND I_DCT1D_VARC_READY = '0' AND I_DCT2D_VARC_READY = '0' else
+  mux_raddr <= I_DCT2S_RADDR when SYS_STATUS = SYS_RUN else
+               I_DCT2S_RADDR when SYS_STATUS = SYS_VARC_INIT_CHKPNT AND I_DCT1S_VARC_READY = '1' AND I_DCT2S_VARC_READY = '0' else
+               I_DCT1S_RADDR when SYS_STATUS = SYS_VARC_INIT_CHKPNT AND I_DCT1S_VARC_READY = '0' AND I_DCT2S_VARC_READY = '0' else
                RAM_PB_RAM_RADDR when SYS_STATUS = SYS_PUSH_CHKPNT_V2NV else
                (others => '1');
   -- DOUT mux
@@ -140,15 +140,15 @@ begin
               R2_DOUT;
 
   -- WADDR mux
-  mux_waddr <= I_DCT1D_WADDR when SYS_STATUS = SYS_RUN else
-               I_DCT1D_WADDR when SYS_STATUS = SYS_VARC_PREP_CHKPNT AND I_DCT1D_VARC_READY = '0' AND I_DCT2D_VARC_READY = '0' else
-               I_DCT2D_WADDR when SYS_STATUS = SYS_VARC_PREP_CHKPNT AND I_DCT1D_VARC_READY = '1' AND I_DCT2D_VARC_READY = '0' else
+  mux_waddr <= I_DCT1S_WADDR when SYS_STATUS = SYS_RUN else
+               I_DCT1S_WADDR when SYS_STATUS = SYS_VARC_PREP_CHKPNT AND I_DCT1S_VARC_READY = '0' AND I_DCT2S_VARC_READY = '0' else
+               I_DCT2S_WADDR when SYS_STATUS = SYS_VARC_PREP_CHKPNT AND I_DCT1S_VARC_READY = '1' AND I_DCT2S_VARC_READY = '0' else
                RAM_PB_RAM_WADDR when SYS_STATUS = SYS_PUSH_CHKPNT_NV2V else
                (others => '1');
   -- DIN mux
-  mux_din <= I_DCT1D_DIN when SYS_STATUS = SYS_RUN else
-             I_DCT1D_DIN when SYS_STATUS = SYS_VARC_PREP_CHKPNT AND I_DCT1D_VARC_READY = '0' AND I_DCT2D_VARC_READY = '0' else
-             I_DCT2D_DIN when SYS_STATUS = SYS_VARC_PREP_CHKPNT AND I_DCT1D_VARC_READY = '1' AND I_DCT2D_VARC_READY = '0' else
+  mux_din <= I_DCT1S_DIN when SYS_STATUS = SYS_RUN else
+             I_DCT1S_DIN when SYS_STATUS = SYS_VARC_PREP_CHKPNT AND I_DCT1S_VARC_READY = '0' AND I_DCT2S_VARC_READY = '0' else
+             I_DCT2S_DIN when SYS_STATUS = SYS_VARC_PREP_CHKPNT AND I_DCT1S_VARC_READY = '1' AND I_DCT2S_VARC_READY = '0' else
              (others => '1');
 
   mux_r1_din <= RAM_PB_RAM1_DIN when SYS_STATUS = SYS_PUSH_CHKPNT_NV2V else
@@ -157,9 +157,9 @@ begin
                 mux_din;
 
   -- WE mux 1
-  mux_we <= I_DCT1D_WE when SYS_STATUS = SYS_RUN else
-            I_DCT1D_WE when SYS_STATUS = SYS_VARC_PREP_CHKPNT AND I_DCT1D_VARC_READY = '0' AND I_DCT2D_VARC_READY = '0' else
-            I_DCT2D_WE when SYS_STATUS = SYS_VARC_PREP_CHKPNT AND I_DCT1D_VARC_READY = '1' AND I_DCT2D_VARC_READY = '0' else
+  mux_we <= I_DCT1S_WE when SYS_STATUS = SYS_RUN else
+            I_DCT1S_WE when SYS_STATUS = SYS_VARC_PREP_CHKPNT AND I_DCT1S_VARC_READY = '0' AND I_DCT2S_VARC_READY = '0' else
+            I_DCT2S_WE when SYS_STATUS = SYS_VARC_PREP_CHKPNT AND I_DCT1S_VARC_READY = '1' AND I_DCT2S_VARC_READY = '0' else
             '0';
   -- WE demux
   demux_r1_we <= mux_we when DBUFCTL_MEMSEL = '0' else

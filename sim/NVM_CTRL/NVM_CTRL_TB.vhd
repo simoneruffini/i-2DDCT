@@ -101,15 +101,15 @@ architecture RTL of NVM_CTRL_TB is
 
   signal fram_cmplt                                  : std_logic;                                                                                                             -- Write memory select signal
 
-  signal i_dct1d_waddr                               : std_logic_vector(C_RAMADDR_W - 1 downto 0);                                                                            -- RAM write address output
-  signal i_dct1d_raddr                               : std_logic_vector(C_RAMADDR_W - 1 downto 0);                                                                            -- RAM read address
-  signal i_dct1d_din                                 : std_logic_vector(C_RAMDATA_W - 1 downto 0);                                                                            -- RAM data input
-  signal i_dct1d_dout                                : std_logic_vector(C_RAMDATA_W - 1 downto 0);                                                                            -- RAM data out
-  signal i_dct1d_we                                  : std_logic;                                                                                                             -- RAM write enable
+  signal i_dct1s_waddr                               : std_logic_vector(C_RAMADDR_W - 1 downto 0);                                                                            -- RAM write address output
+  signal i_dct1s_raddr                               : std_logic_vector(C_RAMADDR_W - 1 downto 0);                                                                            -- RAM read address
+  signal i_dct1s_din                                 : std_logic_vector(C_RAMDATA_W - 1 downto 0);                                                                            -- RAM data input
+  signal i_dct1s_dout                                : std_logic_vector(C_RAMDATA_W - 1 downto 0);                                                                            -- RAM data out
+  signal i_dct1s_we                                  : std_logic;                                                                                                             -- RAM write enable
   signal odv                                         : std_logic;                                                                                                             -- Output data valid.
   signal dcto                                        : std_logic_vector(C_1D_OUTDATA_W - 1 downto 0);                                                                         -- DCT data output.
 
-  signal i_dct1d_varc_rdy                            : std_logic;
+  signal i_dct1s_varc_rdy                            : std_logic;
   signal i_dct2d_varc_rdy                            : std_logic;
 
   signal process_cnt                                 : natural;
@@ -236,8 +236,8 @@ begin
     port map (
       -- MUX control ports
       SYS_STATUS         => sys_status,
-      I_DCT1D_VARC_READY => i_dct1d_varc_rdy,
-      I_DCT2D_VARC_READY => '1',
+      I_DCT1S_VARC_READY => i_dct1s_varc_rdy,
+      I_DCT2S_VARC_READY => '1',
       DBUFCTL_MEMSEL     => '0',
       -- TO/FROM RAM 1
       R1_DIN   => ram1_din,
@@ -251,18 +251,18 @@ begin
       R2_RADDR => ram2_raddr,
       R2_WE    => ram2_we,
       R2_DOUT  => ram2_dout,
-      -- I_DCT1D RAM ports
-      I_DCT1D_DIN   => i_dct1d_din,
-      I_DCT1D_WADDR => i_dct1d_waddr,
-      I_DCT1D_RADDR => i_dct1d_raddr,
-      I_DCT1D_WE    => i_dct1d_we,
-      I_DCT1D_DOUT  => i_dct1d_dout,
-      -- I_DCT2D RAM ports
-      I_DCT2D_DIN   => (others => '0'),
-      I_DCT2D_WADDR => (others => '0'),
-      I_DCT2D_RADDR => (others => '0'),
-      I_DCT2D_WE    => '0',
-      I_DCT2D_DOUT  => open,
+      -- I_DCT1S RAM ports
+      I_DCT1S_DIN   => i_dct1s_din,
+      I_DCT1S_WADDR => i_dct1s_waddr,
+      I_DCT1S_RADDR => i_dct1s_raddr,
+      I_DCT1S_WE    => i_dct1s_we,
+      I_DCT1S_DOUT  => i_dct1s_dout,
+      -- I_DCT2S RAM ports
+      I_DCT2S_DIN   => (others => '0'),
+      I_DCT2S_WADDR => (others => '0'),
+      I_DCT2S_RADDR => (others => '0'),
+      I_DCT2S_WE    => '0',
+      I_DCT2S_DOUT  => open,
       -- RAM_PB RAM ports
       RAM_PB_RAM1_DIN  => ram_pb_ram1_din,
       RAM_PB_RAM2_DIN  => ram_pb_ram2_din,
@@ -298,7 +298,7 @@ begin
   --########################## OUTPUT PORTS WIRING #############################
 
   --########################## COBINATORIAL FUNCTIONS ##########################
-  varc_rdy <= '1'; --i_dct1d_varc_rdy; -- AND i_dct2d_varc_redy AND ram1_varc_rdy AND ram2_varc_rdy AND dbufctl_varc_rdy;
+  varc_rdy <= '1'; --i_dct1s_varc_rdy; -- AND i_dct2d_varc_redy AND ram1_varc_rdy AND ram2_varc_rdy AND dbufctl_varc_rdy;
 
   --########################## PROCESSES #######################################
   P_RESET_GEN : process is

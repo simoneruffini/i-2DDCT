@@ -3,16 +3,16 @@
 --
 --
 -- Create Date:     Wed Jun  9 14:39:11 CEST 2021
--- Design Name:     I_DCT1D
--- Module Name:     I_DCT1D.vhd - RTL
+-- Design Name:     I_DCT1S
+-- Module Name:     I_DCT1S.vhd - Behavioral
 -- Project Name:    iMDCT
--- Description:     intermittent 1D Discrete Cosine Transform (1st stage)
+-- Description:     intermittent Discrete Cosine Transform 1st stage
 --
 -- Revision:
 -- Revision 00 - Simone Ruffini
 --  * File Created
 -- Additional Comments:
---
+-- * Design adapted from work of Michal Krepa https://opencores.org/projects/mdct
 --------------------------------------------------------------------------------
 
 ----------------------------- PACKAGES/LIBRARIES -------------------------------
@@ -28,10 +28,11 @@ library WORK;
 
 ----------------------------- ENTITY -------------------------------------------
 
-entity I_DCT1D is
+entity I_DCT1S is
   port (
     CLK                     : in    std_logic;                                              -- Input clock
-    RST                     : in    std_logic;                                              -- Positive reset
+    RST                     : in    std_logic;                                              -- Reset signal (active high)
+    ----------------------------------------------------------
     DCTI                    : in    std_logic_vector(C_INDATA_W - 1 downto 0);              -- DCT input data
     IDV                     : in    std_logic;                                              -- Input data valid
     ----------------------------------------------------------
@@ -49,32 +50,31 @@ entity I_DCT1D is
     FRAME_CMPLT             : out   std_logic;                                              -- Write memory select signal
     -- Debug -------------------------------------------------
     ODV                     : out   std_logic;                                              -- Output data valid
-    DCTO                    : out   std_logic_vector(C_1D_OUTDATA_W - 1 downto 0);          -- DCT data output
+    DCTO                    : out   std_logic_vector(C_1S_OUTDATA_W - 1 downto 0);          -- DCT data output
     ----------------------------------------------------------
     -- Intermittent Enhancment Ports -------------------------
     SYS_STATUS              : in    sys_status_t;                                           -- System status
     VARC_RDY                : out   std_logic                                               -- Volatile Architecture Ready
     ----------------------------------------------------------
   );
-end entity I_DCT1D;
+end entity I_DCT1S;
 
 ----------------------------- ARCHITECTURE -------------------------------------
 
-architecture RTL of I_DCT1D is
+architecture BEHAVIORAL of I_DCT1S is
 
   --########################### CONSTANTS 1 ####################################
-  constant C_NV_DATA_BUF_DATA_W                     : natural := C_INDATA_W + 1;
   constant C_PIPELINE_STAGES                        : natural := 4;
 
   --########################### TYPES ##########################################
 
-  type input_data is array (N - 1 downto 0) of signed(C_INDATA_W downto 0);                                               -- NOTE: C_INDATA_W not C_INDATA_W-1, one bit extra
+  type input_data is array (N - 1 downto 0) of signed(C_INDATA_W downto 0);                                                   -- One extra bit                                               -- NOTE: C_INDATA_W not C_INDATA_W-1, one bit extra
 
   type ram_waddr_delay_t is array (natural range <>) of std_logic_vector(C_RAMADDR_W - 1 downto 0);
 
   -- I_DCT Main FSM states type
 
-  type i_dct1d_m_fsm_t is (
+  type i_dct1s_m_fsm_t is (
     S_INIT,
     S_HALT,
     S_WAIT_DBUF_CMPLT,
@@ -88,41 +88,41 @@ architecture RTL of I_DCT1D is
   --########################### FUNCTIONS ######################################
 
   --########################### CONSTANTS 2 ####################################
-  constant C_DCT1D_CHKP_IN_RAM_STRT_ADDR            : natural := (C_FRAME_SIZE - 1) + 1;                                  -- start address in ram where DCT1D state/checkpoint is saved
-  constant C_DCT1D_CHKP_IN_RAM_OFST                 : natural := C_DCT1D_CHKPNT_RAM_SIZE - 1;                                 -- length of data saved in ram for DCT1D state/checkpoint: DBUF(N) + ROW_COL
+  constant C_DCT1S_CHKP_IN_RAM_STRT_ADDR            : natural := (C_FRAME_SIZE - 1) + 1;                                      -- start address in ram where DCT1S state/checkpoint is saved
+  constant C_DCT1S_CHKP_IN_RAM_OFST                 : natural := C_DCT1S_CHKPNT_RAM_SIZE - 1;                                 -- length of data saved in ram for DCT1S state/checkpoint: DBUF(N) + ROW_COL
 
-  constant C_RAM_DBUF_STRT_ADDR                     : natural := C_DCT1D_CHKP_IN_RAM_STRT_ADDR;
+  constant C_RAM_DBUF_STRT_ADDR                     : natural := C_DCT1S_CHKP_IN_RAM_STRT_ADDR;
   constant C_RAM_DBUF_OFST                          : natural := N - 1;
   constant C_RAM_ROW_COL_STRT_ADDR                  : natural := C_RAM_DBUF_STRT_ADDR + C_RAM_DBUF_OFST + 1;
   constant C_RAM_ROW_COL_OFST                       : natural := 0;
 
   --########################### SIGNALS ########################################
 
-  signal m_pstate                                   : i_dct1d_m_fsm_t;                                                    -- I_DCT1D main fsm present state
-  signal m_fstate                                   : i_dct1d_m_fsm_t;                                                    -- I_DCT1D main fsm future state
+  signal m_pstate                                   : i_dct1s_m_fsm_t;                                                        -- I_DCT1S main fsm present state
+  signal m_fstate                                   : i_dct1s_m_fsm_t;                                                        -- I_DCT1S main fsm future state
 
-  signal push_chkpnt_ram_cmplt                      : std_logic;                                                          -- Push checkpoint data to RAM complete signal
-  signal pull_chkpnt_ram_cmplt                      : std_logic;                                                          -- Pull checkpoint data from RAM complete signal
+  signal push_chkpnt_ram_cmplt                      : std_logic;                                                              -- Push checkpoint data to RAM complete signal
+  signal pull_chkpnt_ram_cmplt                      : std_logic;                                                              -- Pull checkpoint data from RAM complete signal
 
-  signal varc_rdy_s                                 : std_logic;                                                          -- Volatile architecture ready signal
-  signal i_dct_halt                                 : std_logic;                                                          -- Halt all idct
-  signal i_dct_halt_input                           : std_logic;                                                          -- Halt only input stage of idct leaving rest working
+  signal varc_rdy_s                                 : std_logic;                                                              -- Volatile architecture ready signal
+  signal i_dct_halt                                 : std_logic;                                                              -- Halt all idct
+  signal i_dct_halt_input                           : std_logic;                                                              -- Halt only input stage of idct leaving rest working
 
   signal dbuf                                       : input_data;
   signal dcti_shift_reg                             : input_data;
 
-  signal col_cnt                                    : unsigned(ilog2(C_FRAME_SIZE) / 2 - 1 downto 0);                     -- Counter for column positioning inside RAM
-  signal row_cnt                                    : unsigned(ilog2(C_FRAME_SIZE) / 2 - 1 downto 0);                     -- Counter for row position inside RAM (transposition)
-  signal inpt_cnt                                   : unsigned(ilog2(N) - 1 downto 0);                                    -- Counter for received input data
+  signal col_cnt                                    : unsigned(ilog2(N) - 1 downto 0);                                        -- Counter for column positioning inside RAM
+  signal row_cnt                                    : unsigned(ilog2(N) - 1 downto 0);                                        -- Counter for row position inside RAM (transposition)
+  signal inpt_cnt                                   : unsigned(ilog2(N) - 1 downto 0);                                        -- Counter for received input data
 
   signal ram_we_s                                   : std_logic;
   signal frame_cmplt_s                              : std_logic;
   signal stage2_start                               : std_logic;
-  signal stage2_cnt                                 : unsigned (ilog2(N + 1) - 1 downto 0);                               -- Counter for stage2, needs to count N+1 values for init purposes
-  signal col_cnt2                                   : unsigned(ilog2(C_FRAME_SIZE) / 2 - 1 downto 0);
+  signal stage2_cnt                                 : unsigned (ilog2(N + 1) - 1 downto 0);                                   -- Counter for stage2, needs to count N+1 values for init purposes
+  signal col_cnt2                                   : unsigned(ilog2(N) - 1 downto 0);
   signal ram_waddr_s                                : std_logic_vector(C_RAMADDR_W - 1 downto 0);
 
-  signal is_even                                    : std_logic;                                                          -- if is_even = '1' then this stage in the pipeline is computing an even row, else, if '0' an odd one.
+  signal is_even                                    : std_logic;                                                              -- if is_even = '1' then this stage in the pipeline is computing an even row, else, if '0' an odd one.
   signal is_even_d                                  : std_logic_vector((C_PIPELINE_STAGES - 1) - 1 downto 0);
   signal ram_we_d                                   : std_logic_vector(C_PIPELINE_STAGES - 1 downto 0);
   signal ram_waddr_d                                : ram_waddr_delay_t (C_PIPELINE_STAGES - 1 downto 0);
@@ -139,27 +139,27 @@ architecture RTL of I_DCT1D is
   signal dcto_3                                     : std_logic_vector(C_PL1_DATA_W - 1 downto 0);
   signal dcto_4                                     : std_logic_vector(C_PL1_DATA_W - 1 downto 0);
 
-  signal dbuf_cmplt_d                               : std_logic_vector((1 + C_PIPELINE_STAGES) - 1 downto 0);             -- Data Buffer Complete Delay : Once stage2_cnt = N-1 last data of dbuf goes first through ROM then in Pipleline and it's computation completes
-  signal last_dbuf_cmplt                            : std_logic;                                                          -- LAST data buffer complete/computed and saved to ram
+  signal dbuf_cmplt_d                               : std_logic_vector((1 + C_PIPELINE_STAGES) - 1 downto 0);                 -- Data Buffer Complete Delay : Once stage2_cnt = N-1 last data of dbuf goes first through ROM then in Pipleline and it's computation completes
+  signal last_dbuf_cmplt                            : std_logic;                                                              -- LAST data buffer complete/computed and saved to ram
 
-  signal push_chkpnt_to_ram_en                      : std_logic;                                                          -- Enalbe procedure that pushes current I_DCT1D status as a checkpoint to ram
-  signal pull_chkpnt_from_ram_en                    : std_logic;                                                          -- Enable procedure that pulls checkpoint from ram and stores to I_DCT1D
-  signal ram_xaddr_incr_en                          : std_logic;                                                          -- Enable increase of ram_Xaddr
+  signal push_chkpnt_to_ram_en                      : std_logic;                                                              -- Enalbe procedure that pushes current I_DCT1S status as a checkpoint to ram
+  signal pull_chkpnt_from_ram_en                    : std_logic;                                                              -- Enable procedure that pulls checkpoint from ram and stores to I_DCT1S
+  signal ram_xaddr_incr_en                          : std_logic;                                                              -- Enable increase of ram_Xaddr
 
-  signal ram_xaddr_drct                             : unsigned (C_RAMADDR_W - 1 downto 0);                                -- When in direct mode (no I_DCT1D pipeline) either raddr or wadddr are drived not both, this signal is then mapped to the correct one
-  signal ram_din_drct                               : std_logic_vector(C_RAMDATA_W - 1 downto 0);                         -- Direct signal from ram din
-  signal ram_we_drct                                : std_logic;                                                          -- Direct signal to ram wirte enable, goes over I_DCT1D pipeline
+  signal ram_xaddr_drct                             : unsigned (C_RAMADDR_W - 1 downto 0);                                    -- When in direct mode (no I_DCT1S pipeline) either raddr or wadddr are drived not both, this signal is then mapped to the correct one
+  signal ram_din_drct                               : std_logic_vector(C_RAMDATA_W - 1 downto 0);                             -- Direct signal from ram din
+  signal ram_we_drct                                : std_logic;                                                              -- Direct signal to ram wirte enable, goes over I_DCT1S pipeline
 
-  signal dbuf_from_ram                              : std_logic;                                                          -- Current data reqeuested from ram is dbuf
-  signal dbuf_from_ram_d1                           : std_logic;                                                          -- Delay of above (used to compensate ram output delay)
-  signal row_col_from_ram                           : std_logic;                                                          -- Current data requested from ram is row_col
-  signal row_col_from_ram_d1                        : std_logic;                                                          -- Delay of above (used to compensate ram output delay)
+  signal dbuf_from_ram                              : std_logic;                                                              -- Current data reqeuested from ram is dbuf
+  signal dbuf_from_ram_d1                           : std_logic;                                                              -- Delay of above (used to compensate ram output delay)
+  signal row_col_from_ram                           : std_logic;                                                              -- Current data requested from ram is row_col
+  signal row_col_from_ram_d1                        : std_logic;                                                              -- Delay of above (used to compensate ram output delay)
 
   --########################### ARCHITECTURE BEGIN #############################
 
 begin
 
-  assert(C_RAM_DBUF_OFST + C_RAM_ROW_COL_OFST <= C_DCT1D_CHKP_IN_RAM_OFST)
+  assert(C_RAM_DBUF_OFST + C_RAM_ROW_COL_OFST <= C_DCT1S_CHKP_IN_RAM_OFST)
     report "Values saved in ram use more space then available"
     severity failure;
 
@@ -169,7 +169,7 @@ begin
 
   --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   -- multiplexers for direct drive of ram signals (during V2NV/NV2V ops)
-  -- or DCT1D pipeline control
+  -- or DCT1S pipeline control
 
   RAM_WADDR <= ram_waddr_d(ram_waddr_d'length - 1) when push_chkpnt_to_ram_en = '0' else       -- 4 clock dealy
                std_logic_vector(ram_xaddr_drct);                                               -- address drived from push chkpnt procedure
@@ -182,7 +182,7 @@ begin
                std_logic_vector(ram_xaddr_drct);                                         -- address drived from pull chkpnt procedure
 
   ODV         <= ram_we_d(ram_we_d'length - 1);                       -- 4 clock dealy
-  DCTO        <= std_logic_vector(resize(signed(dcto_4(C_PL1_DATA_W - 1 downto 12)), C_1D_OUTDATA_W));
+  DCTO        <= std_logic_vector(resize(signed(dcto_4(C_PL1_DATA_W - 1 downto 12)), C_1S_OUTDATA_W));
   FRAME_CMPLT <= frame_cmplt_s_d(frame_cmplt_s_d'length - 1);         -- 4 clock delay
   VARC_RDY    <= varc_rdy_s;
 
@@ -382,15 +382,15 @@ begin
         -- Enable PULL/PUSH checkpoint procedure
         if (m_pstate = S_PULL_CHKPNT_RAM AND pull_chkpnt_from_ram_en = '0') then
           pull_chkpnt_from_ram_en <= '1';
-          ram_xaddr_drct          <= to_unsigned(C_DCT1D_CHKP_IN_RAM_STRT_ADDR, ram_xaddr_drct'length);
+          ram_xaddr_drct          <= to_unsigned(C_DCT1S_CHKP_IN_RAM_STRT_ADDR, ram_xaddr_drct'length);
         elsif (m_pstate = S_PUSH_CHKPNT_RAM AND push_chkpnt_to_ram_en = '0') then
           push_chkpnt_to_ram_en <= '1';
-          ram_xaddr_drct        <= to_unsigned(C_DCT1D_CHKP_IN_RAM_STRT_ADDR, ram_xaddr_drct'length);
+          ram_xaddr_drct        <= to_unsigned(C_DCT1S_CHKP_IN_RAM_STRT_ADDR, ram_xaddr_drct'length);
         end if;
 
         -- Ram address caclucator
         if (ram_xaddr_incr_en = '1') then
-          if (to_integer(ram_xaddr_drct) < C_DCT1D_CHKP_IN_RAM_STRT_ADDR + C_DCT1D_CHKP_IN_RAM_OFST) then
+          if (to_integer(ram_xaddr_drct) < C_DCT1S_CHKP_IN_RAM_STRT_ADDR + C_DCT1S_CHKP_IN_RAM_OFST) then
             ram_xaddr_drct <= ram_xaddr_drct + 1;
           end if;
         end if;
@@ -412,7 +412,7 @@ begin
 
           if (to_integer(ram_xaddr_drct) = C_RAM_ROW_COL_STRT_ADDR + C_RAM_ROW_COL_OFST) then
             ram_xaddr_incr_en     <= '0';
-            pull_chkpnt_ram_cmplt <= '1';                                                                           -- Pulse to let know I_DCT1D_fsm that pull prcedure completed succesfully
+            pull_chkpnt_ram_cmplt <= '1';                                                                           -- Pulse to let know I_DCT1S_fsm that pull prcedure completed succesfully
           end if;
 
           dbuf_from_ram_d1    <= dbuf_from_ram;
@@ -425,7 +425,7 @@ begin
           if (row_col_from_ram_d1 = '1') then
             row_cnt <= resize(unsigned(RAM_DOUT), row_cnt'length);
 
-            stage2_start <= '1';                                                                                    -- Most important signal: makes I_DCT1D restart from checkpoint
+            stage2_start <= '1';                                                                                    -- Most important signal: makes I_DCT1S restart from checkpoint
 
             pull_chkpnt_from_ram_en <= '0';
           end if;
@@ -445,7 +445,7 @@ begin
             ram_din_drct <= std_logic_vector(resize(row_cnt, ram_din_drct'length));
           end if;
 
-          if (to_integer(ram_xaddr_drct)= C_DCT1D_CHKP_IN_RAM_STRT_ADDR + C_DCT1D_CHKP_IN_RAM_OFST) then
+          if (to_integer(ram_xaddr_drct)= C_DCT1S_CHKP_IN_RAM_STRT_ADDR + C_DCT1S_CHKP_IN_RAM_OFST) then
             ram_we_drct           <= '0';                                                                           -- disable write enable
             ram_xaddr_incr_en     <= '0';                                                                           -- disabe ram_Xaddr increase procedure
             push_chkpnt_to_ram_en <= '0';                                                                           -- disable push checkpoint to ram procedure
@@ -465,20 +465,20 @@ begin
         -- 1st stage
         --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         if (IDV = '1' AND i_dct_halt_input = '0') then
-          inpt_cnt <= inpt_cnt + 1; -- 0->N-1 (7)
+          inpt_cnt <= inpt_cnt + 1;                                                                                 -- 0->N-1 (7)
 
           -- Input data is level shifted. This will range DC coeff to boundary 9 bits
 
           -- DCTI shift register: right shift input data
           dcti_shift_reg(N - 2 downto 0) <= dcti_shift_reg(N - 1 downto 1);
-          dcti_shift_reg(N - 1)          <= SIGNED('0' & DCTI) - LEVEL_SHIFT;
+          dcti_shift_reg(N - 1)          <= signed('0' & DCTI) - LEVEL_SHIFT;
           if (inpt_cnt = N - 1) then
             -- after this sum dbuf is in range of -256 to 254 (min to max)
-            dbuf(0) <= dcti_shift_reg(1) + (SIGNED('0' & DCTI) - LEVEL_SHIFT);
+            dbuf(0) <= dcti_shift_reg(1) + (signed('0' & DCTI) - LEVEL_SHIFT);
             dbuf(1) <= dcti_shift_reg(2) + dcti_shift_reg(7);
             dbuf(2) <= dcti_shift_reg(3) + dcti_shift_reg(6);
             dbuf(3) <= dcti_shift_reg(4) + dcti_shift_reg(5);
-            dbuf(4) <= dcti_shift_reg(1) - (SIGNED('0' & DCTI) - LEVEL_SHIFT);
+            dbuf(4) <= dcti_shift_reg(1) - (signed('0' & DCTI) - LEVEL_SHIFT);
             dbuf(5) <= dcti_shift_reg(2) - dcti_shift_reg(7);
             dbuf(6) <= dcti_shift_reg(3) - dcti_shift_reg(6);
             dbuf(7) <= dcti_shift_reg(4) - dcti_shift_reg(5);
@@ -493,19 +493,19 @@ begin
         -- 2nd stage
         --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         if (stage2_cnt < N) then
-          stage2_cnt <= stage2_cnt + 1;  --  0->N (8)
+          stage2_cnt <= stage2_cnt + 1;                                                                             --  0->N (8)
 
           -- write RAM
           ram_we_s <= '1';
           -- reverse col/row order for transposition purpose
           ram_waddr_s <= std_logic_vector(resize(unsigned(col_cnt2 & row_cnt), ram_waddr_s'length));
           -- increment column counter
-          col_cnt  <= col_cnt + 1;     -- 0->N-1 (7)
-          col_cnt2 <= col_cnt2 + 1;    -- 0->N-1 (7)
+          col_cnt  <= col_cnt + 1;                                                                                  -- 0->N-1 (7)
+          col_cnt2 <= col_cnt2 + 1;                                                                                 -- 0->N-1 (7)
 
           -- finished processing one input row
           if (col_cnt = 0) then
-            row_cnt <= row_cnt + 1; -- 0->N-1 (7)
+            row_cnt <= row_cnt + 1;                                                                                 -- 0->N-1 (7)
 
             -- Signal a complete frame to DBUFCTL (resultin in switch to 2nd memory)
             if (row_cnt = N - 1) then
@@ -587,55 +587,55 @@ begin
       if (i_dct_halt= '1') then
       else
         if (is_even = '1') then               -- is even
-          dcto_1 <= STD_LOGIC_VECTOR(RESIZE
-                                     (RESIZE(SIGNED(ROME_DOUT(0)), C_PL1_DATA_W) +
-                                       (RESIZE(SIGNED(ROME_DOUT(1)), C_PL1_DATA_W - 1) & '0') +
-                                       (RESIZE(SIGNED(ROME_DOUT(2)), C_PL1_DATA_W - 2) & "00"),
+          dcto_1 <= std_logic_vector(resize
+                                     (resize(signed(ROME_DOUT(0)), C_PL1_DATA_W) +
+                                       (resize(signed(ROME_DOUT(1)), C_PL1_DATA_W - 1) & '0') +
+                                       (resize(signed(ROME_DOUT(2)), C_PL1_DATA_W - 2) & "00"),
                                        C_PL1_DATA_W));
         else
-          dcto_1 <= STD_LOGIC_VECTOR(RESIZE
-                                     (RESIZE(SIGNED(ROMO_DOUT(0)), C_PL1_DATA_W) +
-                                       (RESIZE(SIGNED(ROMO_DOUT(1)), C_PL1_DATA_W - 1) & '0') +
-                                       (RESIZE(SIGNED(ROMO_DOUT(2)), C_PL1_DATA_W - 2) & "00"),
+          dcto_1 <= std_logic_vector(resize
+                                     (resize(signed(ROMO_DOUT(0)), C_PL1_DATA_W) +
+                                       (resize(signed(ROMO_DOUT(1)), C_PL1_DATA_W - 1) & '0') +
+                                       (resize(signed(ROMO_DOUT(2)), C_PL1_DATA_W - 2) & "00"),
                                        C_PL1_DATA_W));
         end if;
         if (is_even_d(1 - 1) = '1') then      -- is even 1 clk delay
-          dcto_2 <= STD_LOGIC_VECTOR(RESIZE
+          dcto_2 <= std_logic_vector(resize
                                      (signed(dcto_1) +
-                                       (RESIZE(SIGNED(rome_dout_d1(3)), C_PL1_DATA_W - 3) & "000") +
-                                       (RESIZE(SIGNED(rome_dout_d1(4)), C_PL1_DATA_W - 4) & "0000"),
+                                       (resize(signed(rome_dout_d1(3)), C_PL1_DATA_W - 3) & "000") +
+                                       (resize(signed(rome_dout_d1(4)), C_PL1_DATA_W - 4) & "0000"),
                                        C_PL1_DATA_W));
         else
-          dcto_2 <= STD_LOGIC_VECTOR(RESIZE
+          dcto_2 <= std_logic_vector(resize
                                      (signed(dcto_1) +
-                                       (RESIZE(SIGNED(romo_dout_d1(3)), C_PL1_DATA_W - 3) & "000") +
-                                       (RESIZE(SIGNED(romo_dout_d1(4)), C_PL1_DATA_W - 4) & "0000"),
+                                       (resize(signed(romo_dout_d1(3)), C_PL1_DATA_W - 3) & "000") +
+                                       (resize(signed(romo_dout_d1(4)), C_PL1_DATA_W - 4) & "0000"),
                                        C_PL1_DATA_W));
         end if;
         if (is_even_d(2 - 1) = '1') then      -- is even 2 clock delay
-          dcto_3 <= STD_LOGIC_VECTOR(RESIZE
+          dcto_3 <= std_logic_vector(resize
                                      (signed(dcto_2) +
-                                       (RESIZE(SIGNED(rome_dout_d2(5)), C_PL1_DATA_W - 5) & "00000") +
-                                       (RESIZE(SIGNED(rome_dout_d2(6)), C_PL1_DATA_W - 6) & "000000"),
+                                       (resize(signed(rome_dout_d2(5)), C_PL1_DATA_W - 5) & "00000") +
+                                       (resize(signed(rome_dout_d2(6)), C_PL1_DATA_W - 6) & "000000"),
                                        C_PL1_DATA_W));
         else
-          dcto_3 <= STD_LOGIC_VECTOR(RESIZE
+          dcto_3 <= std_logic_vector(resize
                                      (signed(dcto_2) +
-                                       (RESIZE(SIGNED(romo_dout_d2(5)), C_PL1_DATA_W - 5) & "00000") +
-                                       (RESIZE(SIGNED(romo_dout_d2(6)), C_PL1_DATA_W - 6) & "000000"),
+                                       (resize(signed(romo_dout_d2(5)), C_PL1_DATA_W - 5) & "00000") +
+                                       (resize(signed(romo_dout_d2(6)), C_PL1_DATA_W - 6) & "000000"),
                                        C_PL1_DATA_W));
         end if;
         if (is_even_d(3 - 1) = '1') then      -- is even 3 clock delay
-          dcto_4 <= STD_LOGIC_VECTOR(RESIZE
+          dcto_4 <= std_logic_vector(resize
                                      (signed(dcto_3) +
-                                       (RESIZE(SIGNED(rome_dout_d3(7)), C_PL1_DATA_W - 7) & "0000000") -
-                                       (RESIZE(SIGNED(rome_dout_d3(8)), C_PL1_DATA_W - 8) & "00000000"),
+                                       (resize(signed(rome_dout_d3(7)), C_PL1_DATA_W - 7) & "0000000") -
+                                       (resize(signed(rome_dout_d3(8)), C_PL1_DATA_W - 8) & "00000000"),
                                        C_PL1_DATA_W));
         else
-          dcto_4 <= STD_LOGIC_VECTOR(RESIZE
+          dcto_4 <= std_logic_vector(resize
                                      (signed(dcto_3) +
-                                       (RESIZE(SIGNED(romo_dout_d3(7)), C_PL1_DATA_W - 7) & "0000000") -
-                                       (RESIZE(SIGNED(romo_dout_d3(8)), C_PL1_DATA_W - 8) & "00000000"),
+                                       (resize(signed(romo_dout_d3(7)), C_PL1_DATA_W - 7) & "0000000") -
+                                       (resize(signed(romo_dout_d3(8)), C_PL1_DATA_W - 8) & "00000000"),
                                        C_PL1_DATA_W));
         end if;
       end if;
@@ -646,7 +646,7 @@ begin
   --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   -- Rom address generator: read precomputed MAC results from LUT
 
-  P_ROMADDR : process (CLK, RST) is
+  P_ROMX_ADDR : process (CLK, RST) is
   begin
 
     if (RST = '1') then
@@ -672,12 +672,12 @@ begin
       end if;
     end if;
 
-  end process P_ROMADDR;
+  end process P_ROMX_ADDR;
 
   --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   -- Rom data output delay used by pipeline
 
-  P_ROMDATAO_D1 : process (CLK, RST) is
+  P_ROMX_DOUT_D : process (CLK, RST) is
   begin
 
     if (RST = '1') then
@@ -699,8 +699,8 @@ begin
       end if;
     end if;
 
-  end process P_ROMDATAO_D1;
+  end process P_ROMX_DOUT_D;
 
-end architecture RTL;
+end architecture BEHAVIORAL;
 
 --------------------------------------------------------------------------------

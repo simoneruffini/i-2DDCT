@@ -1,12 +1,12 @@
-# launch this script on DCT1D_TB in GUI with:
+# launch this script on DCT1S_TB in GUI with:
 # source ./path/to/script
 restart
 run 50 us
 
-set databuf_path "/DCT1D_TB/U_DCT1D/databuf_reg"
-set gen_cnt_path "/DCT1D_TB/P_DCT_DATA_GEN/process_cnt"
-set row_cnt_path "/DCT1D_TB/U_DCT1D/row_cnt"
-set stage2_start_path "/DCT1D_TB/U_DCT1D/stage2_start"
+set databuf_path "/DCT1S_TB/U_DCT1S/databuf_reg"
+set gen_cnt_path "/DCT1S_TB/P_DCT_DATA_GEN/process_cnt"
+set row_cnt_path "/DCT1S_TB/U_DCT1S/row_cnt"
+set stage2_start_path "/DCT1S_TB/U_DCT1S/stage2_start"
 
 ## get a string rapresentation of:
 set databuf [get_value -radix unsigned $databuf_path]
@@ -17,7 +17,7 @@ set num_of_cycles [expr {($tb_data_gen_cnt-10)/8}]
 set restart_val_gen_cnt [expr {$num_of_cycles*8+ 10}]
 
 run 15 us
-add_force -cancel_after 4us /DCT1D_TB/rst 1 
+add_force -cancel_after 4us /DCT1S_TB/rst 1 
 run 4 us
 
 set databuf_list [split $databuf ,]

@@ -27,7 +27,7 @@ package i_mdct_pkg is
   function ilog2 (x: natural) return natural;
 
   constant C_INDATA_W     : natural := 8;  -- Input data width
-  constant C_1D_OUTDATA_W : natural := 10; -- I DCT1D output data width
+  constant C_1S_OUTDATA_W : natural := 10; -- I DCT1S output data width
   constant C_OUTDATA_W    : natural := 12; -- Output data width
   constant N              : natural := 8;  -- Input frame base size
 
@@ -36,10 +36,10 @@ package i_mdct_pkg is
 
   -- Size of a full frame of data
   constant C_FRAME_SIZE : natural := N * N;                                                                --(64)
-  -- Size of DCT1D checkpoint in RAM: DBUF + ROW_COL
-  constant C_DCT1D_CHKPNT_RAM_SIZE : natural := N + 1;                                                     --(8)
+  -- Size of DCT1S checkpoint in RAM: DBUF + ROW_COL
+  constant C_DCT1S_CHKPNT_RAM_SIZE : natural := N + 1;                                                     --(8)
   -- Amount of content inside RAM (number of words)
-  constant C_RAM_CONTENT_AMOUNT : natural := C_FRAME_SIZE + C_DCT1D_CHKPNT_RAM_SIZE;                       --(73)
+  constant C_RAM_CONTENT_AMOUNT : natural := C_FRAME_SIZE + C_DCT1S_CHKPNT_RAM_SIZE;                       --(73)
   -- Amount of data to store inside NVM w.r.t RAM
   constant C_CHKPNT_NVM_RAM_AMOUNT : natural := C_RAM_CONTENT_AMOUNT;                                      --(73)
   -- Amount of data to store inside NVM w.r.t DBUFCTL
@@ -50,12 +50,12 @@ package i_mdct_pkg is
   constant C_ROMDATA_W : natural := C_OUTDATA_W + 2;   -- ROM data width
   constant C_ROMADDR_W : natural := ilog2(C_ROM_SIZE); -- ROM address width
 
-  constant C_RAMDATA_W : natural := C_1D_OUTDATA_W;              -- RAM data width
+  constant C_RAMDATA_W : natural := C_1S_OUTDATA_W;              -- RAM data width
   constant C_RAMADDR_W : natural := ilog2(C_RAM_CONTENT_AMOUNT); -- RAM address width
 
   constant LEVEL_SHIFT  : natural := 128;                      -- probably (2^8)/2
-  constant C_PL1_DATA_W : natural := C_ROMDATA_W + C_INDATA_W; -- Pipeline 1D data width
-  constant C_PL2_DATA_W : natural := C_PL1_DATA_W + 2;         -- Pipeline 2D data width
+  constant C_PL1_DATA_W : natural := C_ROMDATA_W + C_INDATA_W; -- Pipeline 1S data width
+  constant C_PL2_DATA_W : natural := C_PL1_DATA_W + 2;         -- Pipeline 2S data width
 
   ------------------------------------------------------------------------------
   -- NVM constants
