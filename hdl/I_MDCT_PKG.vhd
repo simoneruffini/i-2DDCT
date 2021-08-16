@@ -37,7 +37,7 @@ package i_mdct_pkg is
   -- Size of a full frame of data
   constant C_FRAME_SIZE : natural := N * N;                                                                --(64)
   -- Size of DCT1S checkpoint in RAM: DBUF + ROW_COL
-  constant C_DCT1S_CHKPNT_RAM_SIZE : natural := N + 1;                                                     --(8)
+  constant C_DCT1S_CHKPNT_RAM_SIZE : natural := N + 1;                                                     --(9)
   -- Amount of content inside RAM (number of words)
   constant C_RAM_CONTENT_AMOUNT : natural := C_FRAME_SIZE + C_DCT1S_CHKPNT_RAM_SIZE;                       --(73)
   -- Amount of data to store inside NVM w.r.t RAM
@@ -47,15 +47,15 @@ package i_mdct_pkg is
   -- Size of a system checkpoint (number of words): 1 RAM size ,1 data in DBUFCTL and FIRST run.
   constant C_CHKPNT_NVM_SYS_AMOUNT : natural := C_CHKPNT_NVM_RAM_AMOUNT + C_CHKPNT_NVM_DBUFCTL_AMOUNT + 1; --(76)
 
-  constant C_ROMDATA_W : natural := C_OUTDATA_W + 2;   -- ROM data width
-  constant C_ROMADDR_W : natural := ilog2(C_ROM_SIZE); -- ROM address width
+  constant C_ROMDATA_W : natural := C_OUTDATA_W + 2;   -- ROM data width (14)
+  constant C_ROMADDR_W : natural := ilog2(C_ROM_SIZE); -- ROM address width (6)
 
-  constant C_RAMDATA_W : natural := C_1S_OUTDATA_W;              -- RAM data width
-  constant C_RAMADDR_W : natural := ilog2(C_RAM_CONTENT_AMOUNT); -- RAM address width
+  constant C_RAMDATA_W : natural := C_1S_OUTDATA_W;              -- RAM data width (10)
+  constant C_RAMADDR_W : natural := ilog2(C_RAM_CONTENT_AMOUNT); -- RAM address width (7)
 
   constant LEVEL_SHIFT  : natural := 128;                      -- probably (2^8)/2
-  constant C_PL1_DATA_W : natural := C_ROMDATA_W + C_INDATA_W; -- Pipeline 1S data width
-  constant C_PL2_DATA_W : natural := C_PL1_DATA_W + 2;         -- Pipeline 2S data width
+  constant C_PL1_DATA_W : natural := C_ROMDATA_W + C_INDATA_W; -- Pipeline 1S data width (22)
+  constant C_PL2_DATA_W : natural := C_PL1_DATA_W + 2;         -- Pipeline 2S data width (24)
 
   ------------------------------------------------------------------------------
   -- NVM constants

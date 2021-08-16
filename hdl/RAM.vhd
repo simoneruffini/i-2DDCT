@@ -61,14 +61,19 @@ architecture RTL of RAM is
 
   --########################### FUNCTIONS ######################################
 
+  -- Takes 32 hexadecimal values from RamFileName  and returns an array of them
+  -- NOTE: values must be 32bit hex
+
   impure function initramfromfile (RamFileName : in string) return mem_type is
     file     RamFile     : text is in RamFileName;
     variable ramfileline : line;
+    variable tmpword     : std_logic_vector(31 downto 0);
     variable ram         : mem_type;
   begin
     for I in 0 to (2 ** ADDR_W) - 1 loop
       readline (RamFile, ramfileline);
-      hread(ramfileline, ram(I));
+      hread(ramfileline, tmpword);
+      ram(i) := std_logic_vector(resize(unsigned(tmpword), DATA_W));
 
     end loop;
     return ram;
@@ -78,7 +83,7 @@ architecture RTL of RAM is
 
   --########################### SIGNALS ########################################
 
-  signal mem                    : mem_type ; --:= initramfromfile("ramInit10bit.txt");
+  signal mem                    : mem_type := initramfromfile("ramInit10bit.txt");
   signal read_addr              : std_logic_vector(ADDR_W - 1 downto 0);
 
   --########################### ARCHITECTURE BEGIN #############################
