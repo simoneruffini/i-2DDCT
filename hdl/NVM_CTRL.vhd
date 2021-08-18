@@ -5,7 +5,7 @@
 -- Create Date:     Wed Jun  26 14:39:11 CEST 2021
 -- Design Name:     NVM_CTRL
 -- Module Name:     NVM_CTRL.vhd - RTL
--- Project Name:    iMDCT
+-- Project Name:    i-2DDCT
 -- Description:     Non volatile memory controller
 --
 -- Revision:
@@ -24,7 +24,7 @@ library IEEE;
 -- User libraries
 
 library WORK;
-  use WORK.I_MDCT_PKG.all;
+  use WORK.I_2DDCT_PKG.all;
 
 ----------------------------- ENTITY -------------------------------------------
 

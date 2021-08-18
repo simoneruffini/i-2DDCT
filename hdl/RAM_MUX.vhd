@@ -5,7 +5,7 @@
 -- Create Date:    Wed Jul 28 10:45:46 CEST 2021
 -- Design Name:    RAM_MUX - RTL
 -- Module Name:    RAM_MUX.vhd
--- Project Name:   iMDCT
+-- Project Name:   i-2DDCT
 -- Description:
 --
 -- Revision:
@@ -24,7 +24,7 @@ library IEEE;
 -- User libraries
 
 library WORK;
-  use WORK.I_MDCT_PKG.all;
+  use WORK.I_2DDCT_PKG.all;
 
 ----------------------------- ENTITY -------------------------------------------
 
@@ -136,8 +136,8 @@ begin
                RAM_PB_RAM_RADDR when SYS_STATUS = SYS_PUSH_CHKPNT_V2NV else
                (others => '1');
   -- DOUT mux
-  mux_dout <= R1_DOUT when DBUFCTL_MEMSEL = '0' else
-              R2_DOUT;
+  mux_dout <= R2_DOUT when DBUFCTL_MEMSEL = '0' else
+              R1_DOUT;
 
   -- WADDR mux
   mux_waddr <= I_DCT1S_WADDR when SYS_STATUS = SYS_RUN else
@@ -164,7 +164,7 @@ begin
   -- WE demux
   demux_r1_we <= mux_we when DBUFCTL_MEMSEL = '0' else
                  '0';
-  demux_r1_we <= mux_we when DBUFCTL_MEMSEL = '1' else
+  demux_r2_we <= mux_we when DBUFCTL_MEMSEL = '1' else
                  '0';
 
   -- R1_WE mux

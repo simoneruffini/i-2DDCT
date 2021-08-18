@@ -3,10 +3,10 @@
 --
 --
 -- Create Date:     Wed Jun  9 14:39:11 CEST 2021
--- Design Name:     I_MDCT_PKG
--- Module Name:     I_MDCT_PKG.vhd
--- Project Name:    iMDCT
--- Description:     Package for Intermittent MDCT core
+-- Design Name:     I_2DDCT_PKG
+-- Module Name:     I_2DDCT_PKG.vhd
+-- Project Name:    i-2DDCT
+-- Description:     Package for Intermittent 2DDCT core
 --
 -- Revision:
 -- Revision 00 - Simone Ruffini
@@ -20,7 +20,7 @@ library IEEE;
   use IEEE.NUMERIC_STD.all;
   use IEEE.math_real.all;
 
-package i_mdct_pkg is
+package i_2ddct_pkg is
 
   function max (x: integer; y:integer) return integer;
 
@@ -111,9 +111,9 @@ package i_mdct_pkg is
 
   type rom2_addr_t is array(0 to 10) of STD_LOGIC_VECTOR(C_ROMADDR_W - 1 downto 0);
 
-end package i_mdct_pkg;
+end package i_2ddct_pkg;
 
-package body i_mdct_pkg is
+package body i_2ddct_pkg is
 
   function max (x: integer; y:integer) return integer is
   begin
@@ -132,4 +132,4 @@ package body i_mdct_pkg is
     return natural(ceil(log2(real(x))));
   end function;
 
-end package body i_mdct_pkg;
+end package body i_2ddct_pkg;

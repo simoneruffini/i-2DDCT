@@ -5,7 +5,7 @@
 -- Create Date:     Wed Jun  9 14:39:11 CEST 2021
 -- Design Name:     I_DCT1S
 -- Module Name:     I_DCT1S.vhd - Behavioral
--- Project Name:    iMDCT
+-- Project Name:    i-2DDCT
 -- Description:     intermittent Discrete Cosine Transform 1st stage
 --
 -- Revision:
@@ -24,7 +24,7 @@ library IEEE;
 -- User libraries
 
 library WORK;
-  use WORK.I_MDCT_PKG.all;
+  use WORK.I_2DDCT_PKG.all;
 
 ----------------------------- ENTITY -------------------------------------------
 
@@ -456,14 +456,18 @@ begin
           ram_we_drct       <= '0';
           ram_din_drct      <= (others => '0');
         end if;
-      else
+      else                                                                                                          
+        --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        -- NORMAL EXECUTION
+        --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
         stage2_start  <= '0';
         ram_we_s      <= '0';
         frame_cmplt_s <= '0';
 
-        --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         -- 1st stage
-        --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         if (IDV = '1' AND i_dct_halt_input = '0') then
           inpt_cnt <= inpt_cnt + 1;                                                                                 -- 0->N-1 (7)
 
@@ -487,11 +491,11 @@ begin
             stage2_start <= '1';
           end if;
         end if;
-        --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         -- 2nd stage
-        --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         if (stage2_cnt < N) then
           stage2_cnt <= stage2_cnt + 1;                                                                             --  0->N (8)
 
@@ -655,6 +659,7 @@ begin
     elsif (CLK'event and CLK = '1') then
       if (i_dct_halt = '1') then
       else
+        -- read precomputed MAC results from LUT
         for i in 0 to 8 loop
           -- even
           ROME_ADDR(i) <= std_logic_vector(col_cnt(ilog2(C_FRAME_SIZE) / 2 - 1 downto 1)) &

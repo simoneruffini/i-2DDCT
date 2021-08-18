@@ -5,7 +5,7 @@
 -- Create Date:     Mon Jul 26 17:11:08 CEST 2021
 -- Design Name:     RAM_PB - RTL
 -- Module Name:     RAM_PB.vhd
--- Project Name:    iMDCT
+-- Project Name:    i-2DDCT
 -- Description:
 --
 -- Revision:
@@ -24,7 +24,7 @@ library IEEE;
 -- User libraries
 
 library WORK;
-  use WORK.I_MDCT_PKG.all;
+  use WORK.I_2DDCT_PKG.all;
 
 ----------------------------- ENTITY -------------------------------------------
 

@@ -6,7 +6,7 @@
       <db_ref path="NVM_CTRL_TB_behav.wdb" id="1">
          <top_modules>
             <top_module name="NVM_CTRL_TB" />
-            <top_module name="i_mdct_pkg" />
+            <top_module name="i_2ddct_pkg" />
             <top_module name="norm_pkg" />
          </top_modules>
       </db_ref>

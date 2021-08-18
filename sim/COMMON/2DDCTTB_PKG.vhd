@@ -5,13 +5,13 @@
 --                                                                            --
 --------------------------------------------------------------------------------
 --
--- Title       : MDCTTB_PKG
--- Design      : MDCT Core
+-- Title       : 2DDCTTB_PKG
+-- Design      : 2DDCT Core
 -- Author      : Michal Krepa
 --
 --------------------------------------------------------------------------------
 --
--- File        : MDCTTB_PKG.VHD
+-- File        : 2DDCTTB_PKG.VHD
 -- Created     : Sat Mar 5 2006
 --
 --------------------------------------------------------------------------------
@@ -29,9 +29,9 @@ library STD;
   use STD.TEXTIO.all;
   
 library WORK;
-  use WORK.MDCT_PKG.all;
+  use WORK.2DDCT_PKG.all;
 
-package MDCTTB_PKG is
+package 2DDCTTB_PKG is
     
     ----------------------------------------------
     -- constant section 1
@@ -201,12 +201,12 @@ package MDCTTB_PKG is
                             (to_signed(FP,C_ROMDATA_W),to_signed(DM,C_ROMDATA_W),to_signed(GP,C_ROMDATA_W),to_signed(EP,C_ROMDATA_W)),
                             (to_signed(GP,C_ROMDATA_W),to_signed(FM,C_ROMDATA_W),to_signed(EP,C_ROMDATA_W),to_signed(DM,C_ROMDATA_W))
                             );
-end MDCTTB_PKG;
+end 2DDCTTB_PKG;
 
 --------------------------------------------------
 -- PACKAGE BODY
 --------------------------------------------------                        
-package body MDCTTB_PKG is  
+package body 2DDCTTB_PKG is  
   --------------------------------------------------------------------------
   -- converts an INTEGER into a CHARACTER
   -- for 0 to 9 the obvious mapping is used, higher
@@ -464,4 +464,4 @@ package body MDCTTB_PKG is
   end COMPUTE_PSNR;
                       
    
-end MDCTTB_PKG;
+end 2DDCTTB_PKG;

@@ -6,8 +6,8 @@
       <db_ref path="DCT1S_TB_behav.wdb" id="1">
          <top_modules>
             <top_module name="DCT1S_TB" />
-            <top_module name="mdct_pkg" />
-            <top_module name="mdcttb_pkg" />
+            <top_module name="2ddct_pkg" />
+            <top_module name="2ddcttb_pkg" />
          </top_modules>
       </db_ref>
    </db_ref_list>

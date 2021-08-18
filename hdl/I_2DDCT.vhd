@@ -3,10 +3,10 @@
 --            Simone Ruffini [simone.ruffini@tutanota.com]
 --
 -- Create Date:     Sat Feb 25 16:12 2006
--- Design Name:     MDCT core
--- Module Name:     MDCT.vhd - RTL
--- Project Name:    iMDCT
--- Description:     Multidimensional Discrite Cosine Transform module
+-- Design Name:     2DDCT core
+-- Module Name:     2DDCT.vhd - RTL
+-- Project Name:    i-2DDCT
+-- Description:     Two-dimensional Discrete Cosine Transform module
 --                  top level with memories
 --
 -- Revision:
@@ -26,28 +26,28 @@ library IEEE;
 -- User libraries
 
 library WORK;
-  use WORK.MDCT_PKG.all;
+  use WORK.2DDCT_PKG.all;
 
 ----------------------------- ENTITY -------------------------------------------
 
-entity MDCT is
+entity I_2DDCT is
   port (
     CLK           : in    std_logic;                             -- Input clock
     RST           : in    std_logic;                             -- Positive reset
-    MDCTI         : in    std_logic_vector(IP_W - 1 downto 0);   -- MDCT data input
+    2DDCTI         : in    std_logic_vector(IP_W - 1 downto 0);   -- 2DDCT data input
     IDV           : in    std_logic;                             -- Input data valid
 
-    MDCTO         : out   std_logic_vector(COE_W - 1 downto 0);  -- MDCT data output
+    2DDCTO         : out   std_logic_vector(COE_W - 1 downto 0);  -- 2DDCT data output
     ODV           : out   std_logic;                             -- Output data valid
     -- debug
     DCTO1         : out   std_logic_vector(OP_W - 1 downto 0);   -- DCT output of first stage
     ODV1          : out   std_logic                              -- Output data valid of first stage
   );
-end entity MDCT;
+end entity I_2DDCT;
 
 ----------------------------- ARCHITECTURE -------------------------------------
 
-architecture RTL of MDCT is
+architecture RTL of 2DDCT is
 
   --########################### CONSTANTS 1 ####################################
 
@@ -59,10 +59,10 @@ architecture RTL of MDCT is
 
   --########################### SIGNALS ########################################
 
-  signal ram_dout_s              : std_logic_vector(RAMDATA_W - 1 downto 0);
-  signal ram_raddr_s             : std_logic_vector(RAMADRR_W - 1 downto 0);
-  signal ram_waddr_s             : std_logic_vector(RAMADRR_W - 1 downto 0);
-  signal ram_din_s               : std_logic_vector(RAMDATA_W - 1 downto 0);
+  signal ram_dout_s              : std_logic_vector(C_RAMDATA_W - 1 downto 0);
+  signal ram_raddr_s             : std_logic_vector(C_RAMADDR_W - 1 downto 0);
+  signal ram_waddr_s             : std_logic_vector(C_RAMADDR_W - 1 downto 0);
+  signal ram_din_s               : std_logic_vector(C_RAMDATA_W - 1 downto 0);
   signal ram_we_s                : std_logic;
 
   signal rome_dout_s             : t_rom1datao;
@@ -77,8 +77,8 @@ architecture RTL of MDCT is
 
   signal trigger2_s              : std_logic;
   signal trigger1_s              : std_logic;
-  signal ram1_dout_s             : std_logic_vector(RAMDATA_W - 1 downto 0);
-  signal ram2_dout_s             : std_logic_vector(RAMDATA_W - 1 downto 0);
+  signal ram1_dout_s             : std_logic_vector(C_RAMDATA_W - 1 downto 0);
+  signal ram2_dout_s             : std_logic_vector(C_RAMDATA_W - 1 downto 0);
   signal ram1_we_s               : std_logic;
   signal ram2_we_s               : std_logic;
   signal memswitchrd_s           : std_logic;
@@ -127,7 +127,7 @@ begin
     port map (
       CLK       => CLK,
       RST       => RST,
-      DCTI      => MDCTI,
+      DCTI      => 2DDCTI,
       IDV       => IDV,
       ROME_DOUT => rome_dout_s,
       ROMO_DOUT => romo_dout_s,
@@ -155,7 +155,7 @@ begin
       DATAREADY => dataready_s,
 
       ODV          => ODV,
-      DCTO         => MDCTO,
+      DCTO         => 2DDCTO,
       ROMEADDRO    => rome2_addr_s,
       ROMOADDRO    => romo2_addr_s,
       RAMRADDRO    => ram_raddr_s,
@@ -167,6 +167,10 @@ begin
   -- |RAM1|
   --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   U1_RAM : entity work.ram
+    generic map(
+     DATA_W=>C_RAMDATA_W,
+     ADDR_W=>C_RAMADDR_W 
+    )
     port map (
       D     => ram_din_s,
       WADDR => ram_waddr_s,
@@ -181,6 +185,10 @@ begin
   -- |RAM2|
   --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   U2_RAM : entity work.ram
+    generic map(
+     DATA_W=>C_RAMDATA_W,
+     ADDR_W=>C_RAMADDR_W 
+    )
     port map (
       D     => ram_din_s,
       WADDR => ram_waddr_s,

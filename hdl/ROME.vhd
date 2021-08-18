@@ -6,7 +6,7 @@
 --------------------------------------------------------------------------------
 --
 -- Title       : DCT
--- Design      : MDCT Core
+-- Design      : 2DDCT Core
 -- Author      : Michal Krepa
 --
 --------------------------------------------------------------------------------
@@ -27,7 +27,7 @@
 library IEEE; 
   use IEEE.STD_LOGIC_1164.all;
   use IEEE.STD_LOGIC_arith.all;
-  use WORK.I_MDCT_PKG.all;
+  use WORK.I_2DDCT_PKG.all;
 
 entity ROME is 
   port( 

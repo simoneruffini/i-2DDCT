@@ -4,7 +4,7 @@
 -- Create Date:     Mon Jun 07 18:38 2021
 -- Design Name:     I_DCT2S_TB
 -- Module Name:     I_DCT2S_TB.vhd - RTL
--- Project Name:    iMDCT
+-- Project Name:    i-2DDCT
 -- Description:     1D Discrete Cosine Transform (1st stage) test bench
 --
 -- Revision:
@@ -27,8 +27,8 @@ library STD;
 -- User libraries
 
 library WORK;
-  use WORK.I_MDCT_PKG.all;
-  --use WORK.MDCTTB_PKG.all;
+  use WORK.I_2DDCT_PKG.all;
+  --use WORK.2DDCTTB_PKG.all;
 
 ----------------------------- ENTITY -------------------------------------------
 
@@ -94,6 +94,10 @@ begin
   --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   -- |I_DCT2S|
   --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  -- |I_DCT2S|
+  --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   U_IDCT2S : entity work.i_dct2s
     port map (
       CLK => clk,
@@ -113,6 +117,7 @@ begin
       DCTO    => dcto,
       RMEMSEL => rmemsel,
       ----------------------------------------------------------
+      SYS_STATUS => sys_status,
       NEW_FRAME => new_frame
     );
 

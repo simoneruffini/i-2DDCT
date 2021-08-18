@@ -4,7 +4,7 @@
 -- Create Date:     Tue Aug  3 16:53:35 CEST 2021
 -- Design Name:     NVM_CTRL_TB
 -- Module Name:     NVM_CTRL_TB.vhd - RTL
--- Project Name:    iMDCT
+-- Project Name:    i-2DDCT
 -- Description:     Intermittent Multidimensional Discrete Cosine Transform test bench
 --
 -- Revision:
@@ -23,9 +23,9 @@ library IEEE;
 -- User libraries
 
 library WORK;
-  use WORK.I_MDCT_PKG.all;
+  use WORK.I_2DDCT_PKG.all;
   --use WORK.NORM_PKG.all;
-  -- use WORK.MDCTTB_PKG.all;
+  -- use WORK.2DDCTTB_PKG.all;
 
 ----------------------------- ENTITY -------------------------------------------
 

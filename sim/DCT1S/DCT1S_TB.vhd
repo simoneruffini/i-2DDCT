@@ -4,7 +4,7 @@
 -- Create Date:     Mon Jun 07 18:38 2021
 -- Design Name:     DCT1S_TB
 -- Module Name:     DCT1S_TB.vhd - RTL
--- Project Name:    iMDCT
+-- Project Name:    i-2DDCT
 -- Description:     1D Discrete Cosine Transform (1st stage) test bench
 --
 -- Revision:
@@ -23,8 +23,8 @@ library IEEE;
 -- User libraries
 
 library WORK;
-  use WORK.MDCT_PKG.all;
-  use WORK.MDCTTB_PKG.all;
+  use WORK.2DDCT_PKG.all;
+  use WORK.2DDCTTB_PKG.all;
 
 ----------------------------- ENTITY -------------------------------------------
 

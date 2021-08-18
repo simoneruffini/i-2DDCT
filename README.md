@@ -1,6 +1,6 @@
-# Intermittent Multidimensional Discrete Cosine Transform
+# Intermittent Two-Dimensional Discrete Cosine Transform
 
-This core implements a multidimensional discrete cosine transform accelerator
+This core implements a two-dimensional discrete cosine transform accelerator
 with effective response to a transient based envirronment.   
 
 ## Description

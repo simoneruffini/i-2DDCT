@@ -6,7 +6,7 @@
 -- Create Date:     Sat Mar 5 7:37 2006
 -- Design Name:     RAM
 -- Module Name:     RAM.vhd - RTL
--- Project Name:    iMDCT
+-- Project Name:    i-2DDCT
 -- Description:     RAM
 --
 -- Revision:

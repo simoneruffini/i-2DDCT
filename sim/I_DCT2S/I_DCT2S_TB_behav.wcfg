@@ -6,7 +6,7 @@
       <db_ref path="I_DCT2S_TB_behav.wdb" id="1">
          <top_modules>
             <top_module name="I_DCT2S_TB" />
-            <top_module name="i_mdct_pkg" />
+            <top_module name="i_2ddct_pkg" />
          </top_modules>
       </db_ref>
    </db_ref_list>

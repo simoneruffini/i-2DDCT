@@ -6,7 +6,7 @@
 -- Create Date:     Wed Jun 30 23:43:08 CEST 2021
 -- Design Name:     PBSM
 -- Module Name:     PBSM.vhd - RTL
--- Project Name:    i-MDCT
+-- Project Name:    i-2DDCT
 -- Description:     Process Block State Machine used to control consecutive processes
 --
 -- Revision:
