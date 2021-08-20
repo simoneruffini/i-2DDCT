@@ -43,6 +43,7 @@ entity NVM_CTRL is
     NVM_DOUT             : in    std_logic_vector(C_NVM_DATA_W - 1 downto 0);                 -- Data output from read address
     ----------------------------------------------------------------------------
     SYS_ENRG_STATUS      : in    sys_enrg_status_t;                                           -- System Energy status
+    FIRST_RUN            : in    std_logic;                                                   -- First system run
 
     VARC_RDY             : in    std_logic;
     SYS_STATUS           : out   sys_status_t;                                                -- System status value of sys_status_t
@@ -64,14 +65,11 @@ architecture RTL of NVM_CTRL is
 
   --########################### CONSTANTS 1 ####################################
 
-  constant C_NVM_FIRST_RUN_STRT_ADDR                       : natural := 0;
-  constant C_NVM_FIRST_RUN_OFFSET                          : natural := 0;
-
-  constant C_NVM_DBUFCTL_PB_STRT_ADDR                      : natural := C_NVM_FIRST_RUN_STRT_ADDR + C_NVM_FIRST_RUN_OFFSET + 1;
-  constant C_NVM_DBUFCTL_PB_OFFSET                         : natural := 1;
+  constant C_NVM_DBUFCTL_PB_STRT_ADDR                      : natural := 0;
+  constant C_NVM_DBUFCTL_PB_OFFSET                         : natural := C_CHKPNT_NVM_DBUFCTL_AMOUNT - 1;
 
   constant C_NVM_RAM_PB_STRT_ADDR                          : natural := C_NVM_DBUFCTL_PB_STRT_ADDR + C_NVM_DBUFCTL_PB_OFFSET + 1;
-  constant C_NVM_RAM_PB_OFFSET                             : natural := C_RAM_CONTENT_AMOUNT - 1;
+  constant C_NVM_RAM_PB_OFFSET                             : natural := C_CHKPNT_NVM_RAM_AMOUNT - 1;
 
   --########################### TYPES ##########################################
 
@@ -79,7 +77,6 @@ architecture RTL of NVM_CTRL is
 
   type m_fsm_t is (
     S_INIT,
-    S_CHK_FIRST_RUN,
     S_NV2V_PUSH,
     S_VARC_INIT_CHKPNT,
     S_SYS_HALT,
@@ -130,11 +127,6 @@ architecture RTL of NVM_CTRL is
 
   signal m_fsm_pstate                                      : m_fsm_t;                                                                      -- main fsm present state
   signal m_fsm_fstate                                      : m_fsm_t;                                                                      -- main fsm future state
-
-  signal chk_first_run_cmlpt                               : std_logic;                                                                    -- Check first run from NVM complete
-  signal first_run                                         : std_logic;                                                                    -- First run of the sytem
-  signal nvm_en_fr                                         : std_logic;
-  signal nvm_addr_fr                                       : unsigned(C_NVM_ADDR_W - 1 downto 0);
 
   signal sys_status_s                                      : sys_status_t;                                                                 -- System status signal
   signal sys_status_s_latch                                : sys_status_t;                                                                 -- System status signal
@@ -191,8 +183,7 @@ begin
   RAM_PB_START                                 <= pbsm_pb_start_arr(proc_blk_order_t'pos(ram));
   pbsm_pb_ready_arr(proc_blk_order_t'pos(ram)) <= RAM_PB_READY;
 
-  NVM_RADDR <= std_logic_vector(nvm_addr_fr) when m_fsm_pstate = S_CHK_FIRST_RUN else
-               std_logic_vector(nvm_addr_pb) when m_fsm_pstate = S_NV2V_PUSH else
+  NVM_RADDR <= std_logic_vector(nvm_addr_pb) when m_fsm_pstate = S_NV2V_PUSH else
                not std_logic_vector(nvm_addr_pb);
   NVM_WADDR <= std_logic_vector(nvm_addr_pb) when m_fsm_pstate = S_V2NV_PUSH else
                not std_logic_vector(nvm_addr_pb);
@@ -201,8 +192,7 @@ begin
              RAM_PB_TX   when nvm_active_transfer = ram_transfer else
              (others => '0') when nvm_active_transfer = no_transfer;
 
-  NVM_EN <= nvm_en_fr when m_fsm_pstate = S_CHK_FIRST_RUN else
-            nvm_en_pb when m_fsm_pstate = S_NV2V_PUSH OR m_fsm_fstate = S_V2NV_PUSH else
+  NVM_EN <= nvm_en_pb when m_fsm_pstate = S_NV2V_PUSH OR m_fsm_fstate = S_V2NV_PUSH else
             '0';
 
   NVM_WE <= '1' when sys_status_s = SYS_PUSH_CHKPNT_V2NV AND transfer_on = '1' else
@@ -239,7 +229,7 @@ begin
   --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   -- Future state computation for main fsm (combinatorial process)
 
-  P_M_FSM_FUT_S : process (m_fsm_pstate, chk_first_run_cmlpt, first_run, ctm_end, fsm_chkpnt_strt, halt, VARC_RDY) is
+  P_M_FSM_FUT_S : process (m_fsm_pstate, FIRST_RUN, ctm_end, fsm_chkpnt_strt, halt, VARC_RDY) is
   begin
 
     -- Default
@@ -248,15 +238,11 @@ begin
     case m_fsm_pstate is
 
       when S_INIT =>
-        m_fsm_fstate <= S_CHK_FIRST_RUN;
-      when S_CHK_FIRST_RUN =>
 
-        if (chk_first_run_cmlpt = '1') then
-          if (first_run = '1') then
-            m_fsm_fstate <= S_SYS_HALT;
-          else
-            m_fsm_fstate <= S_NV2V_PUSH;
-          end if;
+        if (FIRST_RUN = '1') then
+          m_fsm_fstate <= S_SYS_HALT;
+        else
+          m_fsm_fstate <= S_NV2V_PUSH;
         end if;
 
       when S_NV2V_PUSH =>
@@ -273,20 +259,18 @@ begin
 
       when S_SYS_HALT =>
 
-        if (halt = '1') then
+        if (fsm_chkpnt_strt= '1') then
+          m_fsm_fstate <= S_VARC_PREP_CHKPNT;
+        elsif (halt = '1') then
           m_fsm_fstate <= S_SYS_HALT;
-        elsif (fsm_chkpnt_strt ='0') then
+        else
           m_fsm_fstate <= S_SYS_RUN;
-        elsif (fsm_chkpnt_strt= '1') then
-          m_fsm_fstate <= S_V2NV_PUSH;
         end if;
 
       when S_SYS_RUN =>
 
         if (halt = '1') then
           m_fsm_fstate <= S_SYS_HALT;
-        elsif (fsm_chkpnt_strt= '1') then
-          m_fsm_fstate <= S_VARC_PREP_CHKPNT;
         end if;
 
       when S_VARC_PREP_CHKPNT =>
@@ -319,9 +303,6 @@ begin
     case m_fsm_pstate is
 
       when S_INIT =>
-      when S_CHK_FIRST_RUN =>
-        nvm_en_fr   <= '1';
-        nvm_addr_fr <= to_unsigned(C_NVM_FIRST_RUN_STRT_ADDR, nvm_addr_fr'length);
       when S_NV2V_PUSH =>
         ctm_start    <= '1';
         sys_status_s <= SYS_PUSH_CHKPNT_NV2V;
@@ -401,31 +382,6 @@ begin
   end process P_CTM_FSM_OUTPUTS;
 
   --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  -- Check system's first run process
-  -- //TODO: first run must be fixed after first push to meory
-  P_FIRST_RUN : process (CLK, RST) is
-
-    variable chk_wait : std_logic;
-
-  begin
-
-    if (RST = '1') then
-      chk_first_run_cmlpt <= '0';
-      first_run           <= '0';
-      chk_wait := '0';
-    elsif (CLK'event and CLK = '1') then
-      if (chk_wait = '1' AND NVM_BUSY = '0') then
-        chk_first_run_cmlpt <= '1';
-        first_run           <= NVM_DOUT(0);
-      end if;
-      if (m_fsm_pstate = S_CHK_FIRST_RUN) then
-        chk_wait := '1';
-      end if;
-    end if;
-
-  end process P_FIRST_RUN;
-
-  --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   -- Process blocks process, managaes NVM access
 
   P_PROC_BLOCK : process (CLK, RST) is
@@ -459,13 +415,13 @@ begin
         case nvm_active_transfer is
 
           when dbufctl_transfer =>
-            if (transfer_cnt = C_CHKPNT_NVM_DBUFCTL_AMOUNT ) then
+            if (sync_s = '1' AND transfer_cnt = C_CHKPNT_NVM_DBUFCTL_AMOUNT) then
               transfer_on         <= '0';
               sync_gate           <= '0';
               nvm_active_transfer <= no_transfer;
             end if;
           when ram_transfer =>
-            if (sync_s = '1' AND transfer_cnt = C_CHKPNT_NVM_RAM_AMOUNT ) then
+            if (sync_s = '1' AND transfer_cnt = C_CHKPNT_NVM_RAM_AMOUNT) then
               transfer_on         <= '0';
               sync_gate           <= '0';
               nvm_active_transfer <= no_transfer;
@@ -484,21 +440,25 @@ begin
         transfer_on <= '1';
         nvm_en_pb   <= '1';
         sync_gate   <= '0';
-        if(sys_status_s= SYS_PUSH_CHKPNT_V2NV) then
-          sync_gate   <= '1';
+        if (sys_status_s= SYS_PUSH_CHKPNT_V2NV) then
+          sync_gate <= '1';
         end if;
       end if;
 
       -- Limit nvm_address and nvm_en
       if (nvm_active_transfer = dbufctl_transfer) then
         if (NVM_BUSY = '0' AND nvm_addr_pb = C_NVM_DBUFCTL_PB_STRT_ADDR + C_NVM_DBUFCTL_PB_OFFSET) then
-          nvm_en_pb   <= '0';
+          if (transfer_cnt > 1) then
+            nvm_en_pb <= '0';
+          end if;
           nvm_addr_pb <= nvm_addr_pb;
         end if;
       end if;
       if (nvm_active_transfer = ram_transfer) then
         if (NVM_BUSY = '0' AND nvm_addr_pb = C_NVM_RAM_PB_STRT_ADDR + C_NVM_RAM_PB_OFFSET) then
-          nvm_en_pb   <= '0';
+          if (transfer_cnt > 1) then
+            nvm_en_pb <= '0';
+          end if;
           nvm_addr_pb <= nvm_addr_pb;
         end if;
       end if;
@@ -542,28 +502,29 @@ begin
       halt            <= '0';
       fsm_chkpnt_strt <= '0';
     elsif (CLK'event and CLK = '1') then
+      -- Defaults
+      fsm_chkpnt_strt <= '0';
 
       case SYS_ENRG_STATUS is
 
         when sys_enrg_hazard =>
           halt <= '1';
-        when sys_enrg_wrng =>
-          fsm_chkpnt_strt <= '1';
           -- Push a checkpoint to NVM only once
-          if (fsm_chkpnt_strt = '1' and fsm_chkpnt_strt = fsm_chkpnt_strt_latch) then
-            fsm_chkpnt_strt <= '0';
+          if (fsm_chkpnt_strt_latch = '0') then
+            fsm_chkpnt_strt <= '1';
           end if;
         when sys_enrg_ok =>
           halt            <= '0';
           fsm_chkpnt_strt <= '0';
-          -- Reset latch
-          fsm_chkpnt_strt_latch <= '0';
 
       end case;
 
       -- Latch (reset only when sys is able to run: energy ok)
       if (fsm_chkpnt_strt = '1') then
         fsm_chkpnt_strt_latch <= '1';
+      end if;
+      if (SYS_ENRG_STATUS = sys_enrg_ok AND sys_status_s = SYS_HALT) then
+        fsm_chkpnt_strt_latch <= '0';
       end if;
     end if;
 

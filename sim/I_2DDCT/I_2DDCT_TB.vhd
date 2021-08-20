@@ -39,9 +39,9 @@ end entity I_2DDCT_TB;
 architecture RTL of I_2DDCT_TB is
 
   --########################### CONSTANTS 1 ####################################
-  constant C_CLK_FREQ_HZ             : natural := 1000000;                                                                                                    -- 1MHz
-  constant C_CLK_PERIOD_NS           : time := 1e09 / C_CLK_FREQ_HZ * 1 ns;
-  constant C_NV_MEM_ACCESS_TIME_NS   : natural := 1e09 / C_CLK_FREQ_HZ * 4;
+  constant C_CLK_FREQ_HZ               : natural := 1000000;                                                                                                    -- 1MHz
+  constant C_CLK_PERIOD_NS             : time := 1e09 / C_CLK_FREQ_HZ * 1 ns;
+  constant C_NV_MEM_ACCESS_TIME_NS     : natural := 1e09 / C_CLK_FREQ_HZ * 4;
 
   --########################### TYPES ##########################################
 
@@ -50,88 +50,89 @@ architecture RTL of I_2DDCT_TB is
   --########################### CONSTANTS 2 ####################################
 
   --########################### SIGNALS ########################################
-  signal clk                         : std_logic;
-  signal rst                         : std_logic;
+  signal clk                           : std_logic;
+  signal rst                           : std_logic;
 
-  signal nvm_busy                    : std_logic;
-  signal nvm_busy_s                  : std_logic;
-  signal nvm_en                      : std_logic;
-  signal nvm_we                      : std_logic;
-  signal nvm_raddr                   : std_logic_vector(C_NVM_ADDR_W - 1 downto 0);
-  signal nvm_waddr                   : std_logic_vector(C_NVM_ADDR_W - 1 downto 0);
-  signal nvm_din                     : std_logic_vector(C_NVM_DATA_W - 1 downto 0);
-  signal nvm_dout                    : std_logic_vector(C_NVM_DATA_W - 1 downto 0);
-  signal nvm_ctrl_sync : std_logic;
+  signal nvm_busy                      : std_logic;
+  signal nvm_busy_s                    : std_logic;
+  signal nvm_en                        : std_logic;
+  signal nvm_we                        : std_logic;
+  signal nvm_raddr                     : std_logic_vector(C_NVM_ADDR_W - 1 downto 0);
+  signal nvm_waddr                     : std_logic_vector(C_NVM_ADDR_W - 1 downto 0);
+  signal nvm_din                       : std_logic_vector(C_NVM_DATA_W - 1 downto 0);
+  signal nvm_dout                      : std_logic_vector(C_NVM_DATA_W - 1 downto 0);
+  signal nvm_ctrl_sync                 : std_logic;
 
-  signal sys_enrg_status             : sys_enrg_status_t;                                                                                                     -- System energy status
+  signal sys_enrg_status               : sys_enrg_status_t;                                                                                                     -- System energy status
+  signal first_run                     : std_logic;
 
-  signal varc_rdy                    : std_logic;
-  signal sys_status                  : sys_status_t;                                                                                                          -- System status value of sys_status_t
+  signal varc_rdy                      : std_logic;
+  signal sys_status                    : sys_status_t;                                                                                                          -- System status value of sys_status_t
 
-  signal dbufctl_start               : std_logic;
-  signal dbufctl_tx                  : std_logic_vector(C_NVM_DATA_W - 1 downto 0);
-  signal dbufctl_rx                  : std_logic_vector(C_NVM_DATA_W - 1 downto 0);
+  signal dbufctl_start                 : std_logic;
+  signal dbufctl_tx                    : std_logic_vector(C_NVM_DATA_W - 1 downto 0);
+  signal dbufctl_rx                    : std_logic_vector(C_NVM_DATA_W - 1 downto 0);
   signal dbufctl_ready                 : std_logic;
 
-  signal ram_pb_start                : std_logic;
-  signal ram_pb_tx                   : std_logic_vector(C_NVM_DATA_W - 1 downto 0);
-  signal ram_pb_rx                   : std_logic_vector(C_NVM_DATA_W - 1 downto 0);
+  signal ram_pb_start                  : std_logic;
+  signal ram_pb_tx                     : std_logic_vector(C_NVM_DATA_W - 1 downto 0);
+  signal ram_pb_rx                     : std_logic_vector(C_NVM_DATA_W - 1 downto 0);
   signal ram_pb_ready                  : std_logic;
 
-  signal ram_pb_ram1_din             : std_logic_vector(C_RAMDATA_W - 1 downto 0);
-  signal ram_pb_ram2_din             : std_logic_vector(C_RAMDATA_W - 1 downto 0);
-  signal ram_pb_ram_waddr            : std_logic_vector(C_RAMADDR_W - 1 downto 0);
-  signal ram_pb_ram_raddr            : std_logic_vector(C_RAMADDR_W - 1 downto 0);
-  signal ram_pb_ram_we               : std_logic;
-  signal ram_pb_ram1_dout            : std_logic_vector(C_RAMDATA_W - 1 downto 0);
-  signal ram_pb_ram2_dout            : std_logic_vector(C_RAMDATA_W - 1 downto 0);
+  signal ram_pb_ram1_din               : std_logic_vector(C_RAMDATA_W - 1 downto 0);
+  signal ram_pb_ram2_din               : std_logic_vector(C_RAMDATA_W - 1 downto 0);
+  signal ram_pb_ram_waddr              : std_logic_vector(C_RAMADDR_W - 1 downto 0);
+  signal ram_pb_ram_raddr              : std_logic_vector(C_RAMADDR_W - 1 downto 0);
+  signal ram_pb_ram_we                 : std_logic;
+  signal ram_pb_ram1_dout              : std_logic_vector(C_RAMDATA_W - 1 downto 0);
+  signal ram_pb_ram2_dout              : std_logic_vector(C_RAMDATA_W - 1 downto 0);
 
-  signal dcti                        : std_logic_vector(C_INDATA_W - 1 downto 0);                                                                             -- DCT input data
-  signal idv                         : std_logic;                                                                                                             -- Input data valid
+  signal dcti                          : std_logic_vector(C_INDATA_W - 1 downto 0);                                                                             -- DCT input data
+  signal idv                           : std_logic;                                                                                                             -- Input data valid
 
-  signal rome1_addr                  : rom1_addr_t;                                                                                                           -- ROME address output
-  signal romo1_addr                  : rom1_addr_t;                                                                                                           -- ROMO address output
-  signal rome1_dout                  : rom1_data_t;                                                                                                           -- ROME data output
-  signal romo1_dout                  : rom1_data_t;                                                                                                           -- ROMO data output
+  signal rome1_addr                    : rom1_addr_t;                                                                                                           -- ROME address output
+  signal romo1_addr                    : rom1_addr_t;                                                                                                           -- ROMO address output
+  signal rome1_dout                    : rom1_data_t;                                                                                                           -- ROME data output
+  signal romo1_dout                    : rom1_data_t;                                                                                                           -- ROMO data output
 
-  signal rome2_addr                  : rom2_addr_t;                                                                                                           -- ROME address output
-  signal romo2_addr                  : rom2_addr_t;                                                                                                           -- ROMO address output
-  signal rome2_dout                  : rom2_data_t;                                                                                                           -- ROME data output
-  signal romo2_dout                  : rom2_data_t;                                                                                                           -- ROMO data output
+  signal rome2_addr                    : rom2_addr_t;                                                                                                           -- ROME address output
+  signal romo2_addr                    : rom2_addr_t;                                                                                                           -- ROMO address output
+  signal rome2_dout                    : rom2_data_t;                                                                                                           -- ROME data output
+  signal romo2_dout                    : rom2_data_t;                                                                                                           -- ROMO data output
 
-  signal ram1_waddr, ram2_waddr      : std_logic_vector(C_RAMADDR_W - 1 downto 0);                                                                            -- RAM write address output
-  signal ram1_raddr, ram2_raddr      : std_logic_vector(C_RAMADDR_W - 1 downto 0);                                                                            -- RAM read address
-  signal ram1_din,   ram2_din        : std_logic_vector(C_RAMDATA_W - 1 downto 0);                                                                            -- RAM data input
-  signal ram1_dout,  ram2_dout       : std_logic_vector(C_RAMDATA_W - 1 downto 0);                                                                            -- RAM data out
-  signal ram1_we,    ram2_we         : std_logic;                                                                                                             -- RAM write enable
+  signal ram1_waddr, ram2_waddr        : std_logic_vector(C_RAMADDR_W - 1 downto 0);                                                                            -- RAM write address output
+  signal ram1_raddr, ram2_raddr        : std_logic_vector(C_RAMADDR_W - 1 downto 0);                                                                            -- RAM read address
+  signal ram1_din,   ram2_din          : std_logic_vector(C_RAMDATA_W - 1 downto 0);                                                                            -- RAM data input
+  signal ram1_dout,  ram2_dout         : std_logic_vector(C_RAMDATA_W - 1 downto 0);                                                                            -- RAM data out
+  signal ram1_we,    ram2_we           : std_logic;                                                                                                             -- RAM write enable
 
-  signal frame_cmplt                  : std_logic;                                                                                                             -- Write memory select signal
+  signal frame_cmplt                   : std_logic;                                                                                                             -- Write memory select signal
 
-  signal i_dct1s_waddr               : std_logic_vector(C_RAMADDR_W - 1 downto 0);                                                                            -- RAM write address output
-  signal i_dct1s_raddr               : std_logic_vector(C_RAMADDR_W - 1 downto 0);                                                                            -- RAM read address
-  signal i_dct1s_din                 : std_logic_vector(C_RAMDATA_W - 1 downto 0);                                                                            -- RAM data input
-  signal i_dct1s_dout                : std_logic_vector(C_RAMDATA_W - 1 downto 0);                                                                            -- RAM data out
-  signal i_dct1s_we                  : std_logic;                                                                                                             -- RAM write enable
-  signal odv1                        : std_logic;                                                                                                             -- Output data valid.
-  signal dcto1                       : std_logic_vector(C_1S_OUTDATA_W - 1 downto 0);                                                                         -- DCT data output.
+  signal i_dct1s_waddr                 : std_logic_vector(C_RAMADDR_W - 1 downto 0);                                                                            -- RAM write address output
+  signal i_dct1s_raddr                 : std_logic_vector(C_RAMADDR_W - 1 downto 0);                                                                            -- RAM read address
+  signal i_dct1s_din                   : std_logic_vector(C_RAMDATA_W - 1 downto 0);                                                                            -- RAM data input
+  signal i_dct1s_dout                  : std_logic_vector(C_RAMDATA_W - 1 downto 0);                                                                            -- RAM data out
+  signal i_dct1s_we                    : std_logic;                                                                                                             -- RAM write enable
+  signal odv1                          : std_logic;                                                                                                             -- Output data valid.
+  signal dcto1                         : std_logic_vector(C_1S_OUTDATA_W - 1 downto 0);                                                                         -- DCT data output.
 
-  signal i_dct1s_varc_rdy            : std_logic;
+  signal i_dct1s_varc_rdy              : std_logic;
 
-  signal odv                         : std_logic;                                                                                                             -- Output data valid.
-  signal dcto                        : std_logic_vector(C_OUTDATA_W - 1 downto 0);                                                                            -- DCT data output.
+  signal odv                           : std_logic;                                                                                                             -- Output data valid.
+  signal dcto                          : std_logic_vector(C_OUTDATA_W - 1 downto 0);                                                                            -- DCT data output.
 
-  signal i_dct2s_waddr               : std_logic_vector(C_RAMADDR_W - 1 downto 0);                                                                            -- RAM write address output
-  signal i_dct2s_raddr               : std_logic_vector(C_RAMADDR_W - 1 downto 0);                                                                            -- RAM read address
-  signal i_dct2s_din                 : std_logic_vector(C_RAMDATA_W - 1 downto 0);                                                                            -- RAM data input
-  signal i_dct2s_dout                : std_logic_vector(C_RAMDATA_W - 1 downto 0);                                                                            -- RAM data out
-  signal i_dct2s_we                  : std_logic;                                                                                                             -- RAM write enable
+  signal i_dct2s_waddr                 : std_logic_vector(C_RAMADDR_W - 1 downto 0);                                                                            -- RAM write address output
+  signal i_dct2s_raddr                 : std_logic_vector(C_RAMADDR_W - 1 downto 0);                                                                            -- RAM read address
+  signal i_dct2s_din                   : std_logic_vector(C_RAMDATA_W - 1 downto 0);                                                                            -- RAM data input
+  signal i_dct2s_dout                  : std_logic_vector(C_RAMDATA_W - 1 downto 0);                                                                            -- RAM data out
+  signal i_dct2s_we                    : std_logic;                                                                                                             -- RAM write enable
 
-  signal rmemsel                     : std_logic;
-  signal newframe                    : std_logic;
-  signal i_dct2s_varc_rdy            : std_logic;
-  signal dbufctl_memsel : std_logic;
+  signal rmemsel                       : std_logic;
+  signal newframe                      : std_logic;
+  signal i_dct2s_varc_rdy              : std_logic;
+  signal dbufctl_memsel                : std_logic;
 
-  signal process_cnt                 : natural;
+  signal process_cnt                   : natural;
 
   --########################### ARCHITECTURE BEGIN #############################
 
@@ -194,6 +195,7 @@ begin
       NVM_DOUT     => nvm_dout,
       ----------------------------------------------------------------------------
       SYS_ENRG_STATUS => sys_enrg_status,
+      FIRST_RUN       => first_run,
 
       VARC_RDY   => varc_rdy,
       SYS_STATUS => sys_status,
@@ -201,7 +203,7 @@ begin
 
       DBUFCTL_START => dbufctl_start,
       DBUFCTL_TX    => dbufctl_tx,
-      DBUFCTL_RX    => dbufctl_rx, 
+      DBUFCTL_RX    => dbufctl_rx,
       DBUFCTL_READY => dbufctl_ready,
 
       RAM_PB_START => ram_pb_start,
@@ -310,12 +312,10 @@ begin
       RMEMSEL => rmemsel,
       ----------------------------------------------------------
       NEW_FRAME => frame_cmplt,
-      ----------------------------------------------------------
-      DATAREADY    => '1',
-      DATAREADYACK => open,
       -- Intermittent Enhancment Ports -------------------------
-      SYS_STATUS => sys_status,
-      VARC_RDY   => i_dct2s_varc_rdy
+      SYS_STATUS     => sys_status,
+      DCT1S_VARC_RDY => i_dct1s_varc_rdy,
+      VARC_RDY       => i_dct2s_varc_rdy
       ----------------------------------------------------------
     );
 
@@ -444,17 +444,6 @@ begin
   varc_rdy <= i_dct1s_varc_rdy AND i_dct2s_varc_rdy; --AND ram1_varc_rdy AND ram2_varc_rdy AND dbufctl_varc_rdy;
 
   --########################## PROCESSES #######################################
-  P_RESET_GEN : process is
-  begin
-
-    rst <= '0';
-    wait for 10 * C_CLK_PERIOD_NS;
-    rst <= '1';
-    wait for C_CLK_PERIOD_NS;
-    rst <= '0';
-    wait;
-
-  end process P_RESET_GEN;
 
   P_DCT_DATA_GEN : process (clk, rst) is
 
@@ -465,8 +454,8 @@ begin
       idv         <= '0';
       process_cnt <= 0;
     elsif (clk'event AND clk = '1') then
-      idv  <= '0';
-      dcti <= (others => '0');
+      idv       <= '0';
+      dcti      <= (others => '0');
       if (sys_status = SYS_RUN) then
         idv         <= '1';
         dcti        <= std_logic_vector(to_unsigned(process_cnt, dcti'length));
@@ -476,30 +465,53 @@ begin
 
   end process P_DCT_DATA_GEN;
 
-  P_SYS_ENRG_STAT_GEN : process is
+  P_GLOBAL_SIG : process is
   begin
 
-    --sys_enrg_status <= sys_enrg_hazard;
-    --wait for 20 * C_CLK_PERIOD_NS;
+    rst             <= '0';
     sys_enrg_status <= sys_enrg_ok;
-    --wait for 300 * C_CLK_PERIOD_NS;
-    --sys_enrg_status <= sys_enrg_wrng;
-    --wait for 200 * C_CLK_PERIOD_NS;
+    first_run <= '1';
+    wait for 10 * C_CLK_PERIOD_NS;
+    rst             <= '1';
+    wait for C_CLK_PERIOD_NS;
+    rst             <= '0';
+    wait for 10 * C_CLK_PERIOD_NS;
+    first_run <= '0';
+    wait for 300 * C_CLK_PERIOD_NS;
+    sys_enrg_status <= sys_enrg_hazard;
+    wait for 400 * C_CLK_PERIOD_NS;
+    rst             <= '1';
+    sys_enrg_status <= sys_enrg_ok;
+    wait for C_CLK_PERIOD_NS;
+    rst             <= '0';
     --sys_enrg_status <= sys_enrg_ok;
     wait;
 
-  end process P_SYS_ENRG_STAT_GEN;
+  end process P_GLOBAL_SIG;
 
-  P_DBUFCTL: process (clk,rst)is 
+  P_DBUFCTL : process (clk, rst) is
   begin
+
     if (rst = '1') then
       dbufctl_memsel <= '0';
+      dbufctl_ready  <= '1';
     elsif (clk'event AND clk = '1') then
       if (frame_cmplt = '1') then
         dbufctl_memsel <= not dbufctl_memsel;
       end if;
+      if (dbufctl_start = '1') then
+        dbufctl_ready <= '0';
+        dbufctl_tx    <= (0=>dbufctl_memsel, others => '0');
+      end if;
+      if (dbufctl_ready = '0') then
+        if (nvm_ctrl_sync = '0') then
+          dbufctl_ready <= '1';
+        end if;
+      end if;
     end if;
-  end process;
+
+  end process P_DBUFCTL;
+
 end architecture RTL;
 
 --------------------------------------------------------------------------------

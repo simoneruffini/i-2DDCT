@@ -83,18 +83,23 @@ architecture RTL of RAM_MUX is
   --########################### CONSTANTS 2 ####################################
 
   --########################### SIGNALS ########################################
-  signal mux_raddr            : std_logic_vector(C_RAMADDR_W - 1 downto 0);
-  signal mux_waddr            : std_logic_vector(C_RAMADDR_W - 1 downto 0);
-  signal mux_din              : std_logic_vector(C_RAMDATA_W - 1 downto 0);
-  signal mux_r1_din           : std_logic_vector(C_RAMDATA_W - 1 downto 0);
-  signal mux_r2_din           : std_logic_vector(C_RAMDATA_W - 1 downto 0);
-  signal mux_dout             : std_logic_vector(C_RAMDATA_W - 1 downto 0);
+  signal mux_raddr                    : std_logic_vector(C_RAMADDR_W - 1 downto 0);
+  signal mux_waddr                    : std_logic_vector(C_RAMADDR_W - 1 downto 0);
+  signal mux_din                      : std_logic_vector(C_RAMDATA_W - 1 downto 0);
+  signal mux_r1_din                   : std_logic_vector(C_RAMDATA_W - 1 downto 0);
+  signal mux_r2_din                   : std_logic_vector(C_RAMDATA_W - 1 downto 0);
+  signal dct1s_mux_dout               : std_logic_vector(C_RAMDATA_W - 1 downto 0);
+  signal dct2s_mux_dout               : std_logic_vector(C_RAMDATA_W - 1 downto 0);
 
-  signal demux_r1_we          : std_logic;
-  signal demux_r2_we          : std_logic;
-  signal mux_we               : std_logic;
-  signal mux_r1_we            : std_logic;
-  signal mux_r2_we            : std_logic;
+  signal run_mux_r1_we                : std_logic;
+  signal run_mux_r2_we                : std_logic;
+  signal dct1s_push_mux_r1_we         : std_logic;
+  signal dct1s_push_mux_r2_we         : std_logic;
+  signal dct2s_push_mux_r1_we         : std_logic;
+  signal dct2s_push_mux_r2_we         : std_logic;
+
+  signal mux_r1_we                    : std_logic;
+  signal mux_r2_we                    : std_logic;
 
   --########################### ARCHITECTURE BEGIN #############################
 
@@ -108,8 +113,8 @@ begin
   R2_RADDR <= mux_raddr;
 
   -- I_DCT1S and I_DCT2S share mux_dout signal
-  I_DCT1S_DOUT <= mux_dout;
-  I_DCT2S_DOUT <= mux_dout;
+  I_DCT1S_DOUT <= dct1s_mux_dout;
+  I_DCT2S_DOUT <= dct2s_mux_dout;
   -- RAM PB takes RAM1 and RAM2 douts
   RAM_PB_RAM1_DOUT <= R1_DOUT;
   RAM_PB_RAM2_DOUT <= R2_DOUT;
@@ -136,8 +141,10 @@ begin
                RAM_PB_RAM_RADDR when SYS_STATUS = SYS_PUSH_CHKPNT_V2NV else
                (others => '1');
   -- DOUT mux
-  mux_dout <= R2_DOUT when DBUFCTL_MEMSEL = '0' else
-              R1_DOUT;
+  dct2s_mux_dout <= R2_DOUT when DBUFCTL_MEMSEL = '0' else
+                    R1_DOUT;
+  dct1s_mux_dout <= R2_DOUT when DBUFCTL_MEMSEL = '1' else
+                    R1_DOUT;
 
   -- WADDR mux
   mux_waddr <= I_DCT1S_WADDR when SYS_STATUS = SYS_RUN else
@@ -156,24 +163,36 @@ begin
   mux_r2_din <= RAM_PB_RAM2_DIN when SYS_STATUS = SYS_PUSH_CHKPNT_NV2V else
                 mux_din;
 
-  -- WE mux 1
-  mux_we <= I_DCT1S_WE when SYS_STATUS = SYS_RUN else
-            I_DCT1S_WE when SYS_STATUS = SYS_VARC_PREP_CHKPNT AND I_DCT1S_VARC_READY = '0' AND I_DCT2S_VARC_READY = '0' else
-            I_DCT2S_WE when SYS_STATUS = SYS_VARC_PREP_CHKPNT AND I_DCT1S_VARC_READY = '1' AND I_DCT2S_VARC_READY = '0' else
-            '0';
-  -- WE demux
-  demux_r1_we <= mux_we when DBUFCTL_MEMSEL = '0' else
-                 '0';
-  demux_r2_we <= mux_we when DBUFCTL_MEMSEL = '1' else
-                 '0';
+  -- WE mux during RUN (DCT1S controls we)
+  run_mux_r1_we <= I_DCT1S_WE when DBUFCTL_MEMSEL = '0' else
+                   '0';
+  run_mux_r2_we <= I_DCT1S_WE when DBUFCTL_MEMSEL = '1' else
+                   '0';
 
+  -- WE mux during DCT1S ram push
+  dct1s_push_mux_r1_we <= I_DCT1S_WE when DBUFCTL_MEMSEL = '0' else
+                          '0';
+  dct1s_push_mux_r2_we <= I_DCT1S_WE when DBUFCTL_MEMSEL = '1' else
+                          '0';
+
+  -- WE mux during DCT2S ram push
+  dct2s_push_mux_r1_we <= I_DCT2S_WE when DBUFCTL_MEMSEL = '1' else
+                          '0';
+  dct2s_push_mux_r2_we <= I_DCT2S_WE when DBUFCTL_MEMSEL = '0' else
+                          '0';
   -- R1_WE mux
-  mux_r1_we <= RAM_PB_RAM_WE when SYS_STATUS = SYS_PUSH_CHKPNT_NV2V  else
-               demux_r1_we;
+  mux_r1_we <= run_mux_r1_we when SYS_STATUS = SYS_RUN else
+               dct1s_push_mux_r1_we when SYS_STATUS = SYS_VARC_PREP_CHKPNT AND I_DCT1S_VARC_READY = '0' AND I_DCT2S_VARC_READY = '0' else
+               dct2s_push_mux_r1_we when SYS_STATUS = SYS_VARC_PREP_CHKPNT AND I_DCT1S_VARC_READY = '1' AND I_DCT2S_VARC_READY = '0' else
+               RAM_PB_RAM_WE when SYS_STATUS = SYS_PUSH_CHKPNT_NV2V  else
+               '0';
 
   -- R2_WE mux
-  mux_r2_we <= RAM_PB_RAM_WE when SYS_STATUS = SYS_PUSH_CHKPNT_NV2V  else
-               demux_r2_we;
+  mux_r2_we <= run_mux_r2_we when SYS_STATUS = SYS_RUN else
+               dct1s_push_mux_r2_we when SYS_STATUS = SYS_VARC_PREP_CHKPNT AND I_DCT1S_VARC_READY = '0' AND I_DCT2S_VARC_READY = '0' else
+               dct2s_push_mux_r2_we when SYS_STATUS = SYS_VARC_PREP_CHKPNT AND I_DCT1S_VARC_READY = '1' AND I_DCT2S_VARC_READY = '0' else
+               RAM_PB_RAM_WE when SYS_STATUS = SYS_PUSH_CHKPNT_NV2V  else
+               '0';
 
   --########################## PROCESSES #######################################
 

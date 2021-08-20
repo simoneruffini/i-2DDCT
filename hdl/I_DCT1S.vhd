@@ -82,6 +82,8 @@ architecture BEHAVIORAL of I_DCT1S is
     S_WAIT_PUSH_CHKPNT_V2NV,
     S_WAIT_PUSH_CHKPNT_NV2V,
     S_PULL_CHKPNT_RAM,
+    S_WAIT_SYS_CHNG,
+    S_WAIT_SYS_CHNG_2,
     S_RUN
   );
 
@@ -253,6 +255,12 @@ begin
       when S_PUSH_CHKPNT_RAM =>
 
         if (push_chkpnt_ram_cmplt = '1') then
+          m_fstate <= S_WAIT_SYS_CHNG;
+        end if;
+
+      when S_WAIT_SYS_CHNG =>
+
+        if (SYS_STATUS /= SYS_VARC_PREP_CHKPNT) then
           m_fstate <= S_HALT;
         end if;
 
@@ -271,6 +279,12 @@ begin
       when S_PULL_CHKPNT_RAM =>
 
         if (pull_chkpnt_ram_cmplt = '1') then
+          m_fstate <= S_WAIT_SYS_CHNG_2;
+        end if;
+
+      when S_WAIT_SYS_CHNG_2 =>
+
+        if (SYS_STATUS /= SYS_VARC_INIT_CHKPNT) then
           m_fstate <= S_HALT;
         end if;
 
@@ -301,9 +315,6 @@ begin
       when S_INIT =>
       when S_HALT =>
         i_dct_halt <= '1';
-      when S_WAIT_DBUF_CMPLT =>
-        i_dct_halt       <= '0';
-        i_dct_halt_input <= '1';
       when S_PUSH_CHKPNT_RAM =>
 
         if (push_chkpnt_ram_cmplt = '1') then
@@ -332,6 +343,23 @@ begin
 
       when S_RUN =>
         i_dct_halt <= '0';
+
+      when S_WAIT_DBUF_CMPLT =>
+        i_dct_halt       <= '0';
+        i_dct_halt_input <= '1';
+      when S_WAIT_SYS_CHNG =>
+        varc_rdy_s <= '1';
+
+        if (SYS_STATUS /= SYS_VARC_PREP_CHKPNT) then
+          varc_rdy_s <= '0';
+        end if;
+
+      when S_WAIT_SYS_CHNG_2 =>
+        varc_rdy_s <= '1';
+
+        if (SYS_STATUS /= SYS_VARC_INIT_CHKPNT) then
+          varc_rdy_s <= '0';
+        end if;
 
     end case;
 
@@ -379,11 +407,16 @@ begin
       push_chkpnt_ram_cmplt <= '0';
 
       if (i_dct_halt = '1') then
+        --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        -- HALTED EXECUTION
+        --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
         -- Enable PULL/PUSH checkpoint procedure
-        if (m_pstate = S_PULL_CHKPNT_RAM AND pull_chkpnt_from_ram_en = '0') then
+        -- If in PULL/PUSH state and the transfer was not already enabled and we did not just finish it (avoid consecutive restart)
+        if (m_pstate = S_PULL_CHKPNT_RAM AND pull_chkpnt_from_ram_en = '0' AND pull_chkpnt_ram_cmplt = '0') then
           pull_chkpnt_from_ram_en <= '1';
           ram_xaddr_drct          <= to_unsigned(C_DCT1S_CHKP_IN_RAM_STRT_ADDR, ram_xaddr_drct'length);
-        elsif (m_pstate = S_PUSH_CHKPNT_RAM AND push_chkpnt_to_ram_en = '0') then
+        elsif (m_pstate = S_PUSH_CHKPNT_RAM AND push_chkpnt_to_ram_en = '0' AND push_chkpnt_ram_cmplt = '0') then
           push_chkpnt_to_ram_en <= '1';
           ram_xaddr_drct        <= to_unsigned(C_DCT1S_CHKP_IN_RAM_STRT_ADDR, ram_xaddr_drct'length);
         end if;
@@ -456,7 +489,7 @@ begin
           ram_we_drct       <= '0';
           ram_din_drct      <= (others => '0');
         end if;
-      else                                                                                                          
+      else
         --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         -- NORMAL EXECUTION
         --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -545,10 +578,17 @@ begin
       ram_we_d        <= (others => '0');
       ram_waddr_d     <= (others => (others => '0'));
       frame_cmplt_s_d <= (others => '0');
-      dbuf_cmplt_d    <= (others => '1');       -- the buffer is complete when we start
+      dbuf_cmplt_d    <= (others => '0');
     elsif (CLK'event and CLK = '1') then
       if (i_dct_halt = '1') then
+      --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      -- HALTED EXECUTION
+      --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
       else
+        --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        -- NORMAL EXECUTION
+        --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
         -- stge2_cnt first bit represents even (=0) or odd (=1) row computation in the pipeline
         is_even <= not stage2_cnt(0);
 
@@ -566,7 +606,10 @@ begin
         frame_cmplt_s_d(0)                                    <= frame_cmplt_s;
 
         dbuf_cmplt_d(dbuf_cmplt_d'length - 1 downto 1) <= dbuf_cmplt_d(dbuf_cmplt_d'length - 2 downto 0);
-        if (stage2_cnt >= N - 1) then           -- //TODO check if not only N
+
+        -- If stage2_cnt counted N-1 times then last "pixel" was pushed in pipeline
+        -- thus the current dbuf is fully consumed
+        if (stage2_cnt = N - 1) then
           dbuf_cmplt_d(0) <= '1';
         else
           dbuf_cmplt_d(0) <= '0';
@@ -588,8 +631,15 @@ begin
       dcto_3 <= (others => '0');
       dcto_4 <= (others => '0');
     elsif (CLK'event and CLK = '1') then
-      if (i_dct_halt= '1') then
+      if (i_dct_halt = '1') then
+      --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      -- HALTED EXECUTION
+      --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
       else
+        --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        -- NORMAL EXECUTION
+        --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
         if (is_even = '1') then               -- is even
           dcto_1 <= std_logic_vector(resize
                                      (resize(signed(ROME_DOUT(0)), C_PL1_DATA_W) +
@@ -658,7 +708,14 @@ begin
       ROMO_ADDR <= (others => (others => '0'));
     elsif (CLK'event and CLK = '1') then
       if (i_dct_halt = '1') then
+      --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      -- HALTED EXECUTION
+      --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
       else
+        --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        -- NORMAL EXECUTION
+        --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
         -- read precomputed MAC results from LUT
         for i in 0 to 8 loop
           -- even
@@ -694,7 +751,14 @@ begin
       romo_dout_d3 <= (others => (others => '0'));
     elsif (CLK'event and CLK = '1') then
       if (i_dct_halt = '1') then
+      --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      -- HALTED EXECUTION
+      --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
       else
+        --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        -- NORMAL EXECUTION
+        --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
         rome_dout_d1 <= ROME_DOUT;
         romo_dout_d1 <= ROMO_DOUT;
         rome_dout_d2 <= rome_dout_d1;

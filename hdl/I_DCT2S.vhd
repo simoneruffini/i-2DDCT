@@ -30,31 +30,29 @@ library WORK;
 
 entity I_DCT2S is
   port (
-    CLK          : in    std_logic;                                              -- Input Clock
-    RST          : in    std_logic;                                              -- Reset signal (active high)
+    CLK            : in    std_logic;                                              -- Input Clock
+    RST            : in    std_logic;                                              -- Reset signal (active high)
     ----------------------------------------------------------
-    RAM_WADDR    : out   std_logic_vector(C_RAMADDR_W - 1 downto 0);             -- RAM write address output
-    RAM_RADDR    : out   std_logic_vector(C_RAMADDR_W - 1 downto 0);             -- RAM write address output
-    RAM_DIN      : out   std_logic_vector(C_RAMDATA_W - 1 downto 0);             -- RAM data input
-    RAM_DOUT     : in    std_logic_vector(C_RAMDATA_W - 1 downto 0);             -- RAM data input
-    RAM_WE       : out   std_logic;                                              -- RAM write enable
+    RAM_WADDR      : out   std_logic_vector(C_RAMADDR_W - 1 downto 0);             -- RAM write address output
+    RAM_RADDR      : out   std_logic_vector(C_RAMADDR_W - 1 downto 0);             -- RAM write address output
+    RAM_DIN        : out   std_logic_vector(C_RAMDATA_W - 1 downto 0);             -- RAM data input
+    RAM_DOUT       : in    std_logic_vector(C_RAMDATA_W - 1 downto 0);             -- RAM data input
+    RAM_WE         : out   std_logic;                                              -- RAM write enable
     ----------------------------------------------------------
-    ROME_ADDR    : out   rom2_addr_t;                                            -- ROME address output
-    ROMO_ADDR    : out   rom2_addr_t;                                            -- ROMO address output
-    ROME_DOUT    : in    rom2_data_t;                                            -- ROME data output
-    ROMO_DOUT    : in    rom2_data_t;                                            -- ROMO data output
+    ROME_ADDR      : out   rom2_addr_t;                                            -- ROME address output
+    ROMO_ADDR      : out   rom2_addr_t;                                            -- ROMO address output
+    ROME_DOUT      : in    rom2_data_t;                                            -- ROME data output
+    ROMO_DOUT      : in    rom2_data_t;                                            -- ROMO data output
     ----------------------------------------------------------
-    ODV          : out   std_logic;                                              -- Output Data Valid signal
-    DCTO         : out   std_logic_vector(C_OUTDATA_W - 1 downto 0);             -- DCT output
-    RMEMSEL      : out   std_logic;                                              -- Mem select read operation (changes ram_dout input from ram1 to ram2 and viceversa)
+    ODV            : out   std_logic;                                              -- Output Data Valid signal
+    DCTO           : out   std_logic_vector(C_OUTDATA_W - 1 downto 0);             -- DCT output
+    RMEMSEL        : out   std_logic;                                              -- Mem select read operation (changes ram_dout input from ram1 to ram2 and viceversa)
     ----------------------------------------------------------
-    NEW_FRAME    : in    std_logic;                                              -- New frame available il ram
-    ----------------------------------------------------------
-    DATAREADY    : in    std_logic;                                              -- New data available from DCT2S (memories just switched)
-    DATAREADYACK : out   std_logic;                                              -- Acknowledge data ready (don't know why)
+    NEW_FRAME      : in    std_logic;                                              -- New frame available il ram
     -- Intermittent Enhancment Ports -------------------------
-    SYS_STATUS   : in    sys_status_t;                                           -- System status
-    VARC_RDY     : out   std_logic                                               -- Volatile Architecture Ready
+    SYS_STATUS     : in    sys_status_t;                                           -- System status
+    DCT1S_VARC_RDY : in    std_logic;
+    VARC_RDY       : out   std_logic                                               -- Volatile Architecture Ready
     ----------------------------------------------------------
   );
 end entity I_DCT2S;
@@ -76,10 +74,14 @@ architecture BEHAVIORAL of I_DCT2S is
     S_INIT,
     S_HALT,
     S_WAIT_DBUF_CMPLT,
+    S_WAIT_DCT1S_PUSH,
     S_PUSH_CHKPNT_RAM,
     S_WAIT_PUSH_CHKPNT_V2NV,
     S_WAIT_PUSH_CHKPNT_NV2V,
+    S_WAIT_DCT1S_PULL,
     S_PULL_CHKPNT_RAM,
+    S_WAIT_SYS_CHNG,
+    S_WAIT_SYS_CHNG_2,
     S_RUN
   );
 
@@ -150,14 +152,11 @@ architecture BEHAVIORAL of I_DCT2S is
   signal ram_din_s                                           : std_logic_vector(C_RAMDATA_W - 1 downto 0);                             -- Direct signal to ram din
   signal ram_we_s                                            : std_logic;                                                              -- Direct signal to ram wirte enable, goes over I_DCT1S pipeline
 
-  signal dbuf_from_ram                              : std_logic;                                                              -- Current data reqeuested from ram is dbuf
-  signal dbuf_from_ram_d1                           : std_logic;                                                              -- Delay of above (used to compensate ram output delay)
-  signal ram_row_from_ram                           : std_logic;                                                              -- Current data requested from ram is row_col
-  signal ram_row_from_ram_d1                        : std_logic;                                                              -- Delay of above (used to compensate ram output delay)
+  signal dbuf_from_ram                                       : std_logic;                                                              -- Current data reqeuested from ram is dbuf
+  signal dbuf_from_ram_d1                                    : std_logic;                                                              -- Delay of above (used to compensate ram output delay)
+  signal ram_row_from_ram                                    : std_logic;                                                              -- Current data requested from ram is row_col
+  signal ram_row_from_ram_d1                                 : std_logic;                                                              -- Delay of above (used to compensate ram output delay)
 
-  -- TODO: stuff to check
-  signal rmemsel_reg                                         : std_logic;
-  signal dataready_2_reg                                     : std_logic;
   --########################### ARCHITECTURE BEGIN #############################
 
 begin
@@ -185,10 +184,6 @@ begin
 
   VARC_RDY <= varc_rdy_s;
 
-
-  -- TODO : check this signal if necessary
-  rmemsel <= rmemsel_reg;
-
   --########################## COBINATORIAL FUNCTIONS ##########################
   last_dbuf_cmplt <= dbuf_cmplt_d(dbuf_cmplt_d'length - 1);
 
@@ -211,7 +206,13 @@ begin
   --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   -- Future state computation for I_DCT Main fsm (combinatorial process)
 
-  P_I_DCT_M_FSM_FUT_S : process (m_pstate, SYS_STATUS, last_dbuf_cmplt, push_chkpnt_ram_cmplt, pull_chkpnt_ram_cmplt) is
+  P_I_DCT_M_FSM_FUT_S : process (
+                          m_pstate, 
+                          SYS_STATUS, 
+                          last_dbuf_cmplt, 
+                          push_chkpnt_ram_cmplt, 
+                          pull_chkpnt_ram_cmplt,
+                          DCT1S_VARC_RDY) is
   begin
 
     -- Default
@@ -240,7 +241,7 @@ begin
           when SYS_PUSH_CHKPNT_NV2V =>
             m_fstate <= S_WAIT_PUSH_CHKPNT_NV2V;
           when SYS_VARC_INIT_CHKPNT =>
-            m_fstate <= S_PULL_CHKPNT_RAM;
+            m_fstate <= S_WAIT_DCT1S_PULL;
           when SYS_RUN =>
             m_fstate <= S_RUN;
 
@@ -249,12 +250,24 @@ begin
       when S_WAIT_DBUF_CMPLT =>
 
         if (last_dbuf_cmplt='1') then
+          m_fstate <= S_WAIT_DCT1S_PUSH;
+        end if;
+
+      when S_WAIT_DCT1S_PUSH =>
+
+        if (DCT1S_VARC_RDY = '1') then
           m_fstate <= S_PUSH_CHKPNT_RAM;
         end if;
 
       when S_PUSH_CHKPNT_RAM =>
 
         if (push_chkpnt_ram_cmplt = '1') then
+          m_fstate <= S_WAIT_SYS_CHNG;
+        end if;
+
+      when S_WAIT_SYS_CHNG =>
+
+        if (SYS_STATUS /= SYS_VARC_PREP_CHKPNT) then
           m_fstate <= S_HALT;
         end if;
 
@@ -270,9 +283,21 @@ begin
           m_fstate <= S_HALT;
         end if;
 
+      when S_WAIT_DCT1S_PULL =>
+
+        if (DCT1S_VARC_RDY = '1') then
+          m_fstate <= S_PULL_CHKPNT_RAM;
+        end if;
+
       when S_PULL_CHKPNT_RAM =>
 
         if (pull_chkpnt_ram_cmplt = '1') then
+          m_fstate <= S_WAIT_SYS_CHNG_2;
+        end if;
+
+      when S_WAIT_SYS_CHNG_2 =>
+
+        if (SYS_STATUS /= SYS_VARC_INIT_CHKPNT) then
           m_fstate <= S_HALT;
         end if;
 
@@ -301,11 +326,9 @@ begin
     case m_pstate is
 
       when S_INIT =>
+      --no outputs
       when S_HALT =>
         i_dct_halt <= '1';
-      when S_WAIT_DBUF_CMPLT =>
-        i_dct_halt       <= '0';
-        i_dct_halt_input <= '1';
       when S_PUSH_CHKPNT_RAM =>
 
         if (push_chkpnt_ram_cmplt = '1') then
@@ -334,6 +357,28 @@ begin
 
       when S_RUN =>
         i_dct_halt <= '0';
+
+      when S_WAIT_DBUF_CMPLT =>
+        i_dct_halt       <= '0';
+        i_dct_halt_input <= '1';
+      when S_WAIT_DCT1S_PUSH =>
+      --no outputs
+      when S_WAIT_DCT1S_PULL =>
+        --no outputs
+
+      when S_WAIT_SYS_CHNG =>
+        varc_rdy_s <= '1';
+
+        if (SYS_STATUS /= SYS_VARC_PREP_CHKPNT) then
+          varc_rdy_s <= '0';
+        end if;
+
+      when S_WAIT_SYS_CHNG_2 =>
+        varc_rdy_s <= '1';
+
+        if (SYS_STATUS /= SYS_VARC_INIT_CHKPNT) then
+          varc_rdy_s <= '0';
+        end if;
 
     end case;
 
@@ -373,8 +418,6 @@ begin
       ram_row_from_ram    <= '0';
       ram_row_from_ram_d1 <= '0';
 
-      dataready_2_reg <= '0';                                                                                       -- TODO delete
-      rmemsel_reg     <= '0';
     elsif (CLK='1' and CLK'event) then
       -- Global Defaults
       pull_chkpnt_ram_cmplt <= '0';
@@ -386,10 +429,11 @@ begin
         --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
         -- Enable PULL/PUSH checkpoint procedure
-        if (m_pstate = S_PULL_CHKPNT_RAM AND pull_chkpnt_from_ram_en = '0') then
+        -- If in PULL/PUSH state and the transfer was not already enabled and we did not just finish it (avoid consecutive restart)
+        if (m_pstate = S_PULL_CHKPNT_RAM AND pull_chkpnt_from_ram_en = '0' AND pull_chkpnt_ram_cmplt = '0') then
           pull_chkpnt_from_ram_en <= '1';
           ram_xaddr_drct          <= to_unsigned(C_DCT2S_CHKP_IN_RAM_STRT_ADDR, ram_xaddr_drct'length);
-        elsif (m_pstate = S_PUSH_CHKPNT_RAM AND push_chkpnt_to_ram_en = '0') then
+        elsif (m_pstate = S_PUSH_CHKPNT_RAM AND push_chkpnt_to_ram_en = '0' AND push_chkpnt_ram_cmplt = '0') then
           push_chkpnt_to_ram_en <= '1';
           ram_xaddr_drct        <= to_unsigned(C_DCT2S_CHKP_IN_RAM_STRT_ADDR, ram_xaddr_drct'length);
         end if;
@@ -410,7 +454,6 @@ begin
           ram_row_from_ram  <= '0';
           ram_xaddr_incr_en <= '1';
 
-
           if (to_integer(ram_xaddr_drct) >= C_DBUF_RAM_STRT_ADDR and to_integer(ram_xaddr_drct) < C_DBUF_RAM_STRT_ADDR + C_DBUF_RAM_OFST) then
             dbuf_from_ram <= '1';
           elsif (to_integer(ram_xaddr_drct) >= C_DBUF_RAM_STRT_ADDR + C_DBUF_RAM_OFST and to_integer(ram_xaddr_drct) < C_RAM_ROW_RAM_STRT_ADDR + C_RAM_ROW_RAM_OFST) then
@@ -430,8 +473,9 @@ begin
             dbuf(dbuf'length - 1 downto 1) <= dbuf(dbuf'length - 2 downto 0);
           end if;
           if (ram_row_from_ram_d1 = '1') then
+            ram_row2 <= resize(unsigned(RAM_DOUT), ram_row'length);
             ram_row <= resize(unsigned(RAM_DOUT), ram_row'length);
-
+            stage1_en <= '1';
             stage2_start <= '1';                                                                                    -- Most important signal: makes I_DCT2S restart from checkpoint
 
             pull_chkpnt_from_ram_en <= '0';
@@ -449,7 +493,7 @@ begin
             dbuf(dbuf'length - 1 downto 1) <= dbuf(dbuf'length - 2 downto 0);
             ram_din_s                      <= std_logic_vector(resize(dbuf(dbuf'length - 1), ram_din_s'length));    -- data is arithmetically adjusted (with 1's in MSbits) since dbuf is signed
           elsif (to_integer(ram_xaddr_drct) >= C_DBUF_RAM_STRT_ADDR + C_DBUF_RAM_OFST and to_integer(ram_xaddr_drct) < C_RAM_ROW_RAM_STRT_ADDR + C_RAM_ROW_RAM_OFST) then
-            ram_din_s <= std_logic_vector(resize(ram_row, ram_din_s'length));
+            ram_din_s <= std_logic_vector(resize(ram_row2, ram_din_s'length)); -- WARNING: ram_row2 is transferred because ram_row is 1 address/clock in advance for ram delay purposes
           end if;
 
           if (to_integer(ram_xaddr_drct)= C_DCT2S_CHKP_IN_RAM_STRT_ADDR + C_DCT2S_CHKP_IN_RAM_OFST) then
@@ -472,8 +516,6 @@ begin
         --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         stage2_start    <= '0';
         odv_s           <= '0';
-        DATAREADYACK    <= '0';
-        dataready_2_reg <= dataready;                                                                               -- TODO delete
 
         --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         -- 1st stage
@@ -501,8 +543,6 @@ begin
             if (ram_row2 = N - 1) then
               stage1_en <= '0';
               ram_col   <= (others => '0');
-              -- release memory
-              rmemsel_reg <= not rmemsel_reg;
             end if;
 
             -- after this sum dbuf is in range of -256 to 254 (min to max)
@@ -543,17 +583,6 @@ begin
         --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         -- New Frame available in RAM
         --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        ----------------------------------
-        -- wait for new data
-        ----------------------------------
-        -- one of ram buffers has new data, process it
-        --if (dataready = '1' and dataready_2_reg = '0') then
-        --  stage1_en <= '1';
-        --  -- to account for 1T RAM delay, increment RAM address counter
-        --  ram_col2 <= (others => '0');
-        --  ram_col  <= (0=>'1', others => '0');
-        --  DATAREADYACK <= '1';
-        --end if;
         if (NEW_FRAME = '1') then
           stage1_en <= '1';
           -- to account for 1T RAM delay, increment RAM address counter
@@ -576,7 +605,7 @@ begin
       is_even      <= '0';
       is_even_d    <= (others => '0');
       odv_d        <= (others => '0');
-      dbuf_cmplt_d <= (others => '1');
+      dbuf_cmplt_d <= (others => '0');
     elsif (CLK'event and CLK = '1') then
       if (i_dct_halt = '1') then
       --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -600,9 +629,9 @@ begin
 
         dbuf_cmplt_d(dbuf_cmplt_d'length - 1 downto 1) <= dbuf_cmplt_d(dbuf_cmplt_d'length - 2 downto 0);
 
-        -- If stage2_cnt counted 8 or more times (after reset) then
-        -- a frame was completed/computed and pushed outside
-        if (stage2_cnt >= N - 1) then
+        -- If stage2_cnt counted N-1 times then last "pixel" was pushed in pipeline
+        -- thus the current dbuf is fully consumed
+        if (stage2_cnt = N - 1) then
           dbuf_cmplt_d(0) <= '1';
         else
           dbuf_cmplt_d(0) <= '0';
