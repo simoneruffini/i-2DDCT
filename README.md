@@ -21,6 +21,10 @@ The scope of this core is to demonstrate the use of this
 ## Dependencies
 For plug and play usage this dependencies are requeired:
 - [VSG](https://github.com/jeremiah-c-leary/vhdl-style-guide) > 3.1.0
+- [PYTHON](https://www.python.org/) > 3.8.10
+	- [Matplotlip](https://matplotlib.org/) > 3.4.3
+	- [Pillow](https://python-pillow.org/) > 7.0.0
+	- [NumPY](https://numpy.org/) > 1.21.2
 - [GO](https://golang.org/) > 1.16.5
 - [VIVADO 2020.2](https://www.xilinx.com/support/download/index.html/content/xilinx/en/downloadNav/vivado-design-tools/2020-2.html)
 
