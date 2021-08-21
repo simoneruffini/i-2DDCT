@@ -23,8 +23,8 @@ library IEEE;
 -- User libraries
 
 library WORK;
-  use WORK.2DDCT_PKG.all;
-  use WORK.2DDCTTB_PKG.all;
+  use WORK.I_2DDCT_PKG.all;
+  use WORK.I_2DDCTTB_PKG.all;
 
 ----------------------------- ENTITY -------------------------------------------
 
@@ -148,7 +148,7 @@ begin
         ADDR => romo_addr(i),
         CLK  => clk,
 
-        DATAO => romo_dout(i)
+        DOUT => romo_dout(i)
       );
 
   end generate G_ROM_ST1;

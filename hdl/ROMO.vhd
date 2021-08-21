@@ -37,7 +37,7 @@ entity ROMO is
        addr         : in  STD_LOGIC_VECTOR(C_ROMADDR_W-1 downto 0);
        clk          : in  STD_LOGIC;  
        
-       datao        : out STD_LOGIC_VECTOR(C_ROMDATA_W-1 downto 0) 
+       dout        : out STD_LOGIC_VECTOR(C_ROMDATA_W-1 downto 0) 
   );          
   
 end ROMO; 
@@ -121,7 +121,7 @@ begin
   process(clk)
   begin
    if clk = '1' and clk'event then
-	  datao <= rom( CONV_INTEGER(UNSIGNED(addr)) ); 
+	  dout <= rom( CONV_INTEGER(UNSIGNED(addr)) ); 
    end if;
   end process;
       

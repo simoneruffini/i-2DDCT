@@ -5,13 +5,13 @@
 --                                                                            --
 --------------------------------------------------------------------------------
 --
--- Title       : 2DDCTTB_PKG
+-- Title       : I_2DDCTTB_PKG
 -- Design      : 2DDCT Core
 -- Author      : Michal Krepa
 --
 --------------------------------------------------------------------------------
 --
--- File        : 2DDCTTB_PKG.VHD
+-- File        : I_2DDCTTB_PKG.VHD
 -- Created     : Sat Mar 5 2006
 --
 --------------------------------------------------------------------------------
@@ -29,9 +29,9 @@ library STD;
   use STD.TEXTIO.all;
   
 library WORK;
-  use WORK.2DDCT_PKG.all;
+  use WORK.I_2DDCT_PKG.all;
 
-package 2DDCTTB_PKG is
+package I_2DDCTTB_PKG is
     
     ----------------------------------------------
     -- constant section 1
@@ -47,7 +47,7 @@ package 2DDCTTB_PKG is
           of SIGNED(C_ROMDATA_W-1 downto 0);
     type VECTOR4       is array (0 to N/2-1) of REAL;
     type N_LINES_TYPE  is array (0 to N-1)
-          of STD_LOGIC_VECTOR(0 to MAX_IMAGE_SIZE_X*IP_W-1);
+          of STD_LOGIC_VECTOR(0 to MAX_IMAGE_SIZE_X*C_INDATA_W-1);
     type IMAGE_TYPE    is array (0 to MAX_IMAGE_SIZE_Y-1,
                                  0 to MAX_IMAGE_SIZE_X-1) of INTEGER;
                                  
@@ -74,18 +74,18 @@ package 2DDCTTB_PKG is
     -- constant section 2
     ----------------------------------------------  
     -- set below to true to enable quantization in testbench
-    constant CLK_FREQ_C        : INTEGER := 50;
+    constant CLK_FREQ_C        : INTEGER := C_CLK_FREQ_HZ;
     constant HOLD_TIME         : TIME := 1 ns;
     constant ENABLE_QUANTIZATION_C : BOOLEAN := FALSE; 
     constant HEX_BASE          : INTEGER := 16;
     constant DEC_BASE          : INTEGER := 10;
     constant RUN_FULL_IMAGE    : BOOLEAN := FALSE;
-    constant FILEIN_NAME_C     : STRING := "SOURCE\TESTBENCH\lena512.txt";
-    constant FILEERROR_NAME_C  : STRING := "SOURCE\TESTBENCH\imagee.txt";
-    constant FILEIMAGEO_NAME_C : STRING := "SOURCE\TESTBENCH\imageo.txt";
+    constant FILEIN_NAME_C     : STRING := "lena512.txt";
+    constant FILEERROR_NAME_C  : STRING := "imagee.txt";
+    constant FILEIMAGEO_NAME_C : STRING := "imageo.txt";
     constant MAX_ERROR_1D      : INTEGER := 1;
     constant MAX_ERROR_2D      : INTEGER := 4;
-    constant MAX_PIX_VAL       : INTEGER := 2**IP_W-1;
+    constant MAX_PIX_VAL       : INTEGER := 2**C_INDATA_W-1;
     constant null_data_r       : MATRIX_TYPE := 
                           (
                           (000.0,000.0,000.0,000.0,000.0,000.0,000.0,000.0),
@@ -201,12 +201,12 @@ package 2DDCTTB_PKG is
                             (to_signed(FP,C_ROMDATA_W),to_signed(DM,C_ROMDATA_W),to_signed(GP,C_ROMDATA_W),to_signed(EP,C_ROMDATA_W)),
                             (to_signed(GP,C_ROMDATA_W),to_signed(FM,C_ROMDATA_W),to_signed(EP,C_ROMDATA_W),to_signed(DM,C_ROMDATA_W))
                             );
-end 2DDCTTB_PKG;
+end I_2DDCTTB_PKG;
 
 --------------------------------------------------
 -- PACKAGE BODY
 --------------------------------------------------                        
-package body 2DDCTTB_PKG is  
+package body I_2DDCTTB_PKG is  
   --------------------------------------------------------------------------
   -- converts an INTEGER into a CHARACTER
   -- for 0 to 9 the obvious mapping is used, higher
@@ -334,14 +334,14 @@ package body 2DDCTTB_PKG is
        end loop;       
        
        -- transpose matrix by writing in row order
-       ref_dct_matrix(0,x) := INTEGER(fYe(0)/REAL((2**(COE_W-1))));
-       ref_dct_matrix(1,x) := INTEGER(fYo(0)/REAL((2**(COE_W-1))));
-       ref_dct_matrix(2,x) := INTEGER(fYe(1)/REAL((2**(COE_W-1))));
-       ref_dct_matrix(3,x) := INTEGER(fYo(1)/REAL((2**(COE_W-1))));
-       ref_dct_matrix(4,x) := INTEGER(fYe(2)/REAL((2**(COE_W-1))));
-       ref_dct_matrix(5,x) := INTEGER(fYo(2)/REAL((2**(COE_W-1))));
-       ref_dct_matrix(6,x) := INTEGER(fYe(3)/REAL((2**(COE_W-1))));
-       ref_dct_matrix(7,x) := INTEGER(fYo(3)/REAL((2**(COE_W-1))));
+       ref_dct_matrix(0,x) := INTEGER(fYe(0)/REAL((2**(C_OUTDATA_W-1))));
+       ref_dct_matrix(1,x) := INTEGER(fYo(0)/REAL((2**(C_OUTDATA_W-1))));
+       ref_dct_matrix(2,x) := INTEGER(fYe(1)/REAL((2**(C_OUTDATA_W-1))));
+       ref_dct_matrix(3,x) := INTEGER(fYo(1)/REAL((2**(C_OUTDATA_W-1))));
+       ref_dct_matrix(4,x) := INTEGER(fYe(2)/REAL((2**(C_OUTDATA_W-1))));
+       ref_dct_matrix(5,x) := INTEGER(fYo(2)/REAL((2**(C_OUTDATA_W-1))));
+       ref_dct_matrix(6,x) := INTEGER(fYe(3)/REAL((2**(C_OUTDATA_W-1))));
+       ref_dct_matrix(7,x) := INTEGER(fYo(3)/REAL((2**(C_OUTDATA_W-1))));
        
      end loop;  
      
@@ -463,5 +463,4 @@ package body 2DDCTTB_PKG is
   
   end COMPUTE_PSNR;
                       
-   
-end 2DDCTTB_PKG;
+end I_2DDCTTB_PKG;

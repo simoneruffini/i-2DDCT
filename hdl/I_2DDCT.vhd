@@ -26,28 +26,45 @@ library IEEE;
 -- User libraries
 
 library WORK;
-  use WORK.2DDCT_PKG.all;
+  use WORK.I_2DDCT_PKG.all;
 
 ----------------------------- ENTITY -------------------------------------------
 
 entity I_2DDCT is
   port (
-    CLK           : in    std_logic;                             -- Input clock
-    RST           : in    std_logic;                             -- Positive reset
-    2DDCTI         : in    std_logic_vector(IP_W - 1 downto 0);   -- 2DDCT data input
-    IDV           : in    std_logic;                             -- Input data valid
+    CLK                             : in    std_logic;                                       -- Input clock
+    RST                             : in    std_logic;                                       -- Positive reset
+    ----------------------------------------------------------------------------
+    DIN                             : in    std_logic_vector(C_INDATA_W - 1 downto 0);       -- 2DDCT data input
+    IDV                             : in    std_logic;                                       -- Input data valid
+    DOUT                            : out   std_logic_vector(C_OUTDATA_W - 1 downto 0);      -- 2DDCT data output
+    ODV                             : out   std_logic;                                       -- Output data valid
+    ----------------------------------------------------------------------------
+    -- Intermitent enhancement ports
+    FIRST_RUN                       : in    std_logic;
+    NVM_CTRL_SYNC                   : in    std_logic;
+    SYS_STATUS                      : in    sys_status_t;
+    VARC_READY                      : out   std_logic;
 
-    2DDCTO         : out   std_logic_vector(COE_W - 1 downto 0);  -- 2DDCT data output
-    ODV           : out   std_logic;                             -- Output data valid
+    RAM_PB_START                    : in    std_logic;
+    RAM_PB_RX                       : in    std_logic_vector(C_NVM_DATA_W - 1 downto 0);
+    RAM_PB_TX                       : out   std_logic_vector(C_NVM_DATA_W - 1 downto 0);
+    RAM_PB_READY                    : out   std_logic;
+
+    DBUFCTL_START                   : in    std_logic;
+    DBUFCTL_RX                      : in    std_logic_vector(C_NVM_DATA_W - 1 downto 0);
+    DBUFCTL_TX                      : out   std_logic_vector(C_NVM_DATA_W - 1 downto 0);
+    DBUFCTL_READY                   : out   std_logic;
+    ----------------------------------------------------------------------------
     -- debug
-    DCTO1         : out   std_logic_vector(OP_W - 1 downto 0);   -- DCT output of first stage
-    ODV1          : out   std_logic                              -- Output data valid of first stage
+    DCTO1                           : out   std_logic_vector(C_1S_OUTDATA_W - 1 downto 0);   -- DCT output of first stage
+    ODV1                            : out   std_logic                                        -- Output data valid of first stage
   );
 end entity I_2DDCT;
 
 ----------------------------- ARCHITECTURE -------------------------------------
 
-architecture RTL of 2DDCT is
+architecture RTL of I_2DDCT is
 
   --########################### CONSTANTS 1 ####################################
 
@@ -59,169 +76,170 @@ architecture RTL of 2DDCT is
 
   --########################### SIGNALS ########################################
 
-  signal ram_dout_s              : std_logic_vector(C_RAMDATA_W - 1 downto 0);
-  signal ram_raddr_s             : std_logic_vector(C_RAMADDR_W - 1 downto 0);
-  signal ram_waddr_s             : std_logic_vector(C_RAMADDR_W - 1 downto 0);
-  signal ram_din_s               : std_logic_vector(C_RAMDATA_W - 1 downto 0);
-  signal ram_we_s                : std_logic;
+  signal i_dct1s_waddr                 : std_logic_vector(C_RAMADDR_W - 1 downto 0);                                                                            -- RAM write address output
+  signal i_dct1s_raddr                 : std_logic_vector(C_RAMADDR_W - 1 downto 0);                                                                            -- RAM read address
+  signal i_dct1s_din                   : std_logic_vector(C_RAMDATA_W - 1 downto 0);                                                                            -- RAM data input
+  signal i_dct1s_dout                  : std_logic_vector(C_RAMDATA_W - 1 downto 0);                                                                            -- RAM data out
+  signal i_dct1s_we                    : std_logic;                                                                                                             -- RAM write enable
 
-  signal rome_dout_s             : t_rom1datao;
-  signal romo_dout_s             : t_rom1datao;
-  signal rome_addr_s             : t_rom1addro;
-  signal romo_addr_s             : t_rom1addro;
+  signal frame_cmplt                   : std_logic;                                                                                                             -- Write memory select signal
 
-  signal rome2_dout_s            : t_rom2datao;
-  signal romo2_dout_s            : t_rom2datao;
-  signal rome2_addr_s            : t_rom2addro;
-  signal romo2_addr_s            : t_rom2addro;
+  signal i_dct1s_varc_rdy              : std_logic;
 
-  signal trigger2_s              : std_logic;
-  signal trigger1_s              : std_logic;
-  signal ram1_dout_s             : std_logic_vector(C_RAMDATA_W - 1 downto 0);
-  signal ram2_dout_s             : std_logic_vector(C_RAMDATA_W - 1 downto 0);
-  signal ram1_we_s               : std_logic;
-  signal ram2_we_s               : std_logic;
-  signal memswitchrd_s           : std_logic;
-  signal memswitchwr_s           : std_logic;
-  signal wmemsel_s               : std_logic;
-  signal rmemsel_s               : std_logic;
-  signal dataready_s             : std_logic;
-  signal datareadyack_s          : std_logic;
+  signal i_dct2s_waddr                 : std_logic_vector(C_RAMADDR_W - 1 downto 0);                                                                            -- RAM write address output
+  signal i_dct2s_raddr                 : std_logic_vector(C_RAMADDR_W - 1 downto 0);                                                                            -- RAM read address
+  signal i_dct2s_din                   : std_logic_vector(C_RAMDATA_W - 1 downto 0);                                                                            -- RAM data input
+  signal i_dct2s_dout                  : std_logic_vector(C_RAMDATA_W - 1 downto 0);                                                                            -- RAM data out
+  signal i_dct2s_we                    : std_logic;                                                                                                             -- RAM write enable
 
+  signal i_dct2s_varc_rdy              : std_logic;
+
+  signal ram1_waddr, ram2_waddr        : std_logic_vector(C_RAMADDR_W - 1 downto 0);                                                                            -- RAM write address output
+  signal ram1_raddr, ram2_raddr        : std_logic_vector(C_RAMADDR_W - 1 downto 0);                                                                            -- RAM read address
+  signal ram1_din,   ram2_din          : std_logic_vector(C_RAMDATA_W - 1 downto 0);                                                                            -- RAM data input
+  signal ram1_dout,  ram2_dout         : std_logic_vector(C_RAMDATA_W - 1 downto 0);                                                                            -- RAM data out
+  signal ram1_we,    ram2_we           : std_logic;                                                                                                             -- RAM write enable
+
+  signal rome1_addr                    : rom1_addr_t;                                                                                                           -- ROME address output
+  signal romo1_addr                    : rom1_addr_t;                                                                                                           -- ROMO address output
+  signal rome1_dout                    : rom1_data_t;                                                                                                           -- ROME data output
+  signal romo1_dout                    : rom1_data_t;                                                                                                           -- ROMO data output
+
+  signal rome2_addr                    : rom2_addr_t;                                                                                                           -- ROME address output
+  signal romo2_addr                    : rom2_addr_t;                                                                                                           -- ROMO address output
+  signal rome2_dout                    : rom2_data_t;                                                                                                           -- ROME data output
+  signal romo2_dout                    : rom2_data_t;                                                                                                           -- ROMO data output
+
+  signal dbufctl_memsel                : std_logic;
+
+  signal ram_pb_ram1_din               : std_logic_vector(C_RAMDATA_W - 1 downto 0);
+  signal ram_pb_ram2_din               : std_logic_vector(C_RAMDATA_W - 1 downto 0);
+  signal ram_pb_ram_waddr              : std_logic_vector(C_RAMADDR_W - 1 downto 0);
+  signal ram_pb_ram_raddr              : std_logic_vector(C_RAMADDR_W - 1 downto 0);
+  signal ram_pb_ram_we                 : std_logic;
+  signal ram_pb_ram1_dout              : std_logic_vector(C_RAMDATA_W - 1 downto 0);
+  signal ram_pb_ram2_dout              : std_logic_vector(C_RAMDATA_W - 1 downto 0);
+
+  -- TODO delete
+  signal dbufctl_pb_ready_s            : std_logic;
   --########################### ARCHITECTURE BEGIN #############################
-
-  --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  --                             ram_din_s
-  --      +-------------------+  ram_waddr_s +------+  ram_raddr_s +-------------------+
-  --      |      U_DCT1D      |-----------+->|U1_RAM|<-+-----------|      U_DCT2D      |
-  --      |                   |            \ +------+ /            |                   |
-  --      |                   | <--------+  >+------+<             |                   |
-  --      |                   |          |   |U2_RAM|              |                   |
-  --      +-------------------+ <-----+  |   +------+       +----> +-------------------+
-  --                |                 |  |  ram1_dout_s     |                |
-  --     rome_addr_s|romo_addr_s      |  |  ram2_dout_s     |    rome2_addr_s|romo2_addr_s
-  --     rome_dout_s|romo_dout_s      |  |     |  |         |    rome2_dout_s|romo2_dout_s
-  --                |                 |  |     v  v         |                |
-  --                |                 |  |   --------       |                |
-  --    +-----------v-----------+     |  |   \      /<-+    |    +-----------v-----------+
-  --    | U1_ROME     U1_ROMO   |     |  |    ------   |    |    | U2_ROME     U2_ROMO   |
-  --    |    +--+       +--+    |     |  +------+      |    |    |    +--+       +--+    |
-  --    |    |+--+      |+--+   |     |                |    |    |    |+--+      |+--+   |
-  --    |  \ +|+--+   \ +|+--+  |     +---------------------+    |  \ +|+--+   \ +|+--+  |
-  --    |   \ +|+--+   \ +|+--+ |     |      U_DBUFCTL      |    |   \ +|+--+   \ +|+--+ |
-  --    | 9x \ +|-+| 9x \ +|-+| |     |                     |    | 9x \ +|-+| 9x \ +|-+| |
-  --    |     - +--+     - +--+ |     +---------------------+    |     - +--+     - +--+ |
-  --    +-----------------------+                                +-----------------------+
-  --
-  --
-  --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 begin
 
   --########################### ENTITY DEFINITION ##############################
 
   --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  -- |1D DCT|
+  -- |IDCT1S|
   --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  U_DCT1D : entity work.dct1d
+  U_I_DCT1S : entity work.i_dct1s
     port map (
-      CLK       => CLK,
-      RST       => RST,
-      DCTI      => 2DDCTI,
-      IDV       => IDV,
-      ROME_DOUT => rome_dout_s,
-      ROMO_DOUT => romo_dout_s,
-
-      ODV       => ODV1,
-      DCTO      => DCTO1,
-      ROME_ADDR => rome_addr_s,
-      ROMO_ADDR => romo_addr_s,
-      RAM_WADDR => ram_waddr_s,
-      RAM_DIN   => ram_din_s,
-      RAM_WE    => ram_we_s,
-      WMEMSEL   => wmemsel_s
+      CLK => CLK,
+      RST => RST,
+      ----------------------------------------------------------
+      DCTI => DIN,
+      IDV  => IDV,
+      ----------------------------------------------------------
+      ROME_ADDR => rome1_addr,
+      ROMO_ADDR => romo1_addr,
+      ROME_DOUT => rome1_dout,
+      ROMO_DOUT => romo1_dout,
+      ----------------------------------------------------------
+      RAM_WADDR   => i_dct1s_waddr,
+      RAM_RADDR   => i_dct1s_raddr,
+      RAM_DIN     => i_dct1s_din,
+      RAM_DOUT    => i_dct1s_dout,
+      RAM_WE      => i_dct1s_we,
+      FRAME_CMPLT => frame_cmplt,
+      -- debug -------------------------------------------------
+      ODV  => odv1,
+      DCTO => dcto1,
+      -- Intermittent Enhancment Ports -------------------------
+      SYS_STATUS => SYS_STATUS,
+      VARC_RDY   => i_dct1s_varc_rdy
+      ----------------------------------------------------------
     );
 
   --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  -- |1D DCT|
+  -- |IDCT2S|
   --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  U_DCT2D : entity work.dct2d
+  U_I_DCT2S : entity work.i_dct2s
     port map (
-      CLK       => CLK,
-      RST       => RST,
-      ROME_DOUT => rome2_dout_s,
-      ROMO_DOUT => romo2_dout_s,
-      RAMDATAO  => ram_dout_s,
-      DATAREADY => dataready_s,
-
-      ODV          => ODV,
-      DCTO         => 2DDCTO,
-      ROMEADDRO    => rome2_addr_s,
-      ROMOADDRO    => romo2_addr_s,
-      RAMRADDRO    => ram_raddr_s,
-      RMEMSEL      => rmemsel_s,
-      DATAREADYACK => datareadyack_s
+      CLK => CLK,
+      RST => RST,
+      ----------------------------------------------------------
+      RAM_WADDR => i_dct2s_waddr,
+      RAM_RADDR => i_dct2s_raddr,
+      RAM_DIN   => i_dct2s_din,
+      RAM_DOUT  => i_dct2s_dout,
+      RAM_WE    => i_dct2s_we,
+      ----------------------------------------------------------
+      ROME_ADDR => rome2_addr,
+      ROMO_ADDR => romo2_addr,
+      ROME_DOUT => rome2_dout,
+      ROMO_DOUT => romo2_dout,
+      ----------------------------------------------------------
+      ODV  => ODV,
+      DCTO => DOUT,
+      ----------------------------------------------------------
+      NEW_FRAME => frame_cmplt,
+      -- Intermittent Enhancment Ports -------------------------
+      SYS_STATUS     => SYS_STATUS,
+      DCT1S_VARC_RDY => i_dct1s_varc_rdy,
+      VARC_RDY       => i_dct2s_varc_rdy
+      ----------------------------------------------------------
     );
 
   --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   -- |RAM1|
   --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   U1_RAM : entity work.ram
-    generic map(
-     DATA_W=>C_RAMDATA_W,
-     ADDR_W=>C_RAMADDR_W 
+    generic map (
+      DATA_W => C_RAMDATA_W,
+      ADDR_W => C_RAMADDR_W
     )
     port map (
-      D     => ram_din_s,
-      WADDR => ram_waddr_s,
-      RADDR => ram_raddr_s,
-      WE    => ram1_we_s,
-      CLK   => CLK,
+      CLK => CLK,
 
-      Q => ram1_dout_s
+      DIN   => ram1_din,
+      WADDR => ram1_waddr,
+      RADDR => ram1_raddr,
+      WE    => ram1_we,
+      DOUT  => ram1_dout
     );
 
   --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   -- |RAM2|
   --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   U2_RAM : entity work.ram
-    generic map(
-     DATA_W=>C_RAMDATA_W,
-     ADDR_W=>C_RAMADDR_W 
+    generic map (
+      DATA_W => C_RAMDATA_W,
+      ADDR_W => C_RAMADDR_W
     )
     port map (
-      D     => ram_din_s,
-      WADDR => ram_waddr_s,
-      RADDR => ram_raddr_s,
-      WE    => ram2_we_s,
-      CLK   => CLK,
+      CLK => CLK,
 
-      Q => ram2_dout_s
+      DIN   => ram2_din,
+      WADDR => ram2_waddr,
+      RADDR => ram2_raddr,
+      WE    => ram2_we,
+      DOUT  => ram2_dout
     );
 
-  -- double buffer switch
-  ram1_we_s  <= ram_we_s when memswitchwr_s = '0' else
-                '0';
-  ram2_we_s  <= ram_we_s when memswitchwr_s = '1' else
-                '0';
-  ram_dout_s <= ram1_dout_s when memswitchrd_s = '0' else
-                ram2_dout_s;
+  ----~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ---- |DBUFCTL|
+  ----~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  --U_DBUFCTL : entity work.dbufctl
+  --  port map (
+  --    CLK          => CLK,
+  --    RST          => RST,
+  --    WMEMSEL      => wmemsel_s,
+  --    RMEMSEL      => rmemsel_s,
+  --    DATAREADYACK => datareadyack_s,
 
-  --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  -- |DBUFCTL|
-  --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  U_DBUFCTL : entity work.dbufctl
-    port map (
-      CLK          => CLK,
-      RST          => RST,
-      WMEMSEL      => wmemsel_s,
-      RMEMSEL      => rmemsel_s,
-      DATAREADYACK => datareadyack_s,
-
-      MEMSWITCHWR => memswitchwr_s,
-      MEMSWITCHRD => memswitchrd_s,
-      DATAREADY   => dataready_s
-    );
+  --    MEMSWITCHWR => memswitchwr_s,
+  --    MEMSWITCHRD => memswitchrd_s,
+  --    DATAREADY   => dataready_s
+  --  );
 
   --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   -- |First stage ROMs|
@@ -234,10 +252,10 @@ begin
     --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     U1_ROME : entity work.rome
       port map (
-        ADDR => rome_addr_s(i),
+        ADDR => rome1_addr(i),
         CLK  => CLK,
 
-        DATAO => rome_dout_s(i)
+        DOUT => rome1_dout(i)
       );
 
     --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -245,10 +263,10 @@ begin
     --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     U1_ROMO : entity work.romo
       port map (
-        ADDR => romo_addr_s(i),
+        ADDR => romo1_addr(i),
         CLK  => CLK,
 
-        DATAO => romo_dout_s(i)
+        DOUT => romo1_dout(i)
       );
 
   end generate G_ROM_ST1;
@@ -264,10 +282,10 @@ begin
     --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     U2_ROME : entity work.rome
       port map (
-        ADDR => rome2_addr_s(i),
+        ADDR => rome2_addr(i),
         CLK  => CLK,
 
-        DOUT => rome2_dout_s(i)
+        DOUT => rome2_dout(i)
       );
 
     --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -275,13 +293,117 @@ begin
     --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     U2_ROMO : entity work.romo
       port map (
-        ADDR => romo2_addr_s(i),
+        ADDR => romo2_addr(i),
         CLK  => CLK,
 
-        DOUT => romo2_dout_s(i)
+        DOUT => romo2_dout(i)
       );
 
   end generate G_ROM_ST2;
+
+  --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  -- |RAM_MUX|
+  --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  U_RAM_MUX : entity work.ram_mux
+    port map (
+      -- MUX control ports
+      SYS_STATUS         => SYS_STATUS,
+      I_DCT1S_VARC_READY => i_dct1s_varc_rdy,
+      I_DCT2S_VARC_READY => i_dct2s_varc_rdy,
+      DBUFCTL_MEMSEL     => dbufctl_memsel,
+      -- TO/FROM RAM 1
+      R1_DIN   => ram1_din,
+      R1_WADDR => ram1_waddr,
+      R1_RADDR => ram1_raddr,
+      R1_WE    => ram1_we,
+      R1_DOUT  => ram1_dout,
+      -- TO/FROM RAM 2
+      R2_DIN   => ram2_din,
+      R2_WADDR => ram2_waddr,
+      R2_RADDR => ram2_raddr,
+      R2_WE    => ram2_we,
+      R2_DOUT  => ram2_dout,
+      -- I_DCT1S RAM ports
+      I_DCT1S_DIN   => i_dct1s_din,
+      I_DCT1S_WADDR => i_dct1s_waddr,
+      I_DCT1S_RADDR => i_dct1s_raddr,
+      I_DCT1S_WE    => i_dct1s_we,
+      I_DCT1S_DOUT  => i_dct1s_dout,
+      -- I_DCT2S RAM ports
+      I_DCT2S_DIN   => i_dct2s_din,
+      I_DCT2S_WADDR => i_dct2s_waddr,
+      I_DCT2S_RADDR => i_dct2s_raddr,
+      I_DCT2S_WE    => i_dct2s_we,
+      I_DCT2S_DOUT  => i_dct2s_dout,
+      -- RAM_PB RAM ports
+      RAM_PB_RAM1_DIN  => ram_pb_ram1_din,
+      RAM_PB_RAM2_DIN  => ram_pb_ram2_din,
+      RAM_PB_RAM_WADDR => ram_pb_ram_waddr,
+      RAM_PB_RAM_RADDR => ram_pb_ram_raddr,
+      RAM_PB_RAM_WE    => ram_pb_ram_we,
+      RAM_PB_RAM1_DOUT => ram_pb_ram1_dout,
+      RAM_PB_RAM2_DOUT => ram_pb_ram2_dout
+    );
+
+  --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  -- |RAMP_PB|
+  --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  U_RAM_PB : entity work.ram_pb
+    port map (
+      CLK => CLK,
+      RST => RST,
+      ----------------------------------------------------------
+      SYS_STATUS    => SYS_STATUS,
+      NVM_CTRL_SYNC => NVM_CTRL_SYNC,
+      ----------------------------------------------------------
+      START => RAM_PB_START,
+      RX    => RAM_PB_RX,
+      TX    => RAM_PB_TX,
+      READY => RAM_PB_READY,
+      ----------------------------------------------------------
+      RAM1_DIN  => ram_pb_ram1_din,
+      RAM2_DIN  => ram_pb_ram2_din,
+      RAM_WADDR => ram_pb_ram_waddr,
+      RAM_RADDR => ram_pb_ram_raddr,
+      RAM_WE    => ram_pb_ram_we,
+      RAM1_DOUT => ram_pb_ram1_dout,
+      RAM2_DOUT => ram_pb_ram2_dout
+    );
+
+  --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  -- |DBUFCTL_PB|
+  --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  P_DBUFCTL : process (clk, rst) is
+  begin
+
+    if (rst = '1') then
+      dbufctl_memsel <= '0';
+      dbufctl_ready  <= '1';
+      dbufctl_ready  <= '1';
+    elsif (clk'event AND clk = '1') then
+      if (frame_cmplt = '1') then
+        dbufctl_memsel <= not dbufctl_memsel;
+      end if;
+      if (DBUFCTL_START = '1') then
+        dbufctl_pb_ready_s <= '0';
+        DBUFCTL_TX         <= (0=>dbufctl_memsel, others => '0');
+      end if;
+      if (dbufctl_pb_ready_s = '0') then
+        if (nvm_ctrl_sync = '0') then
+          dbufctl_pb_ready_s <= '1';
+        end if;
+      end if;
+    end if;
+
+  end process P_DBUFCTL;
+
+  --########################## OUTPUT PORTS WIRING #############################
+  VARC_READY    <= i_dct1s_varc_rdy AND i_dct2s_varc_rdy;
+  DBUFCTL_READY <= dbufctl_pb_ready_s;
+
+  --########################## COBINATORIAL FUNCTIONS ##########################
 
   --########################## PROCESSES #######################################
 

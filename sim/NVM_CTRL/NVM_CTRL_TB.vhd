@@ -25,7 +25,7 @@ library IEEE;
 library WORK;
   use WORK.I_2DDCT_PKG.all;
   --use WORK.NORM_PKG.all;
-  -- use WORK.2DDCTTB_PKG.all;
+  -- use WORK.I_2DDCTTB_PKG.all;
 
 ----------------------------- ENTITY -------------------------------------------
 

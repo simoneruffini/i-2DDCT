@@ -46,7 +46,6 @@ entity I_DCT2S is
     ----------------------------------------------------------
     ODV            : out   std_logic;                                              -- Output Data Valid signal
     DCTO           : out   std_logic_vector(C_OUTDATA_W - 1 downto 0);             -- DCT output
-    RMEMSEL        : out   std_logic;                                              -- Mem select read operation (changes ram_dout input from ram1 to ram2 and viceversa)
     ----------------------------------------------------------
     NEW_FRAME      : in    std_logic;                                              -- New frame available il ram
     -- Intermittent Enhancment Ports -------------------------

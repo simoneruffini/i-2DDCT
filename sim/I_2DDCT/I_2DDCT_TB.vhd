@@ -24,8 +24,6 @@ library IEEE;
 
 library WORK;
   use WORK.I_2DDCT_PKG.all;
-  --use WORK.NORM_PKG.all;
-  -- use WORK.2DDCTTB_PKG.all;
 
 ----------------------------- ENTITY -------------------------------------------
 
@@ -39,9 +37,7 @@ end entity I_2DDCT_TB;
 architecture RTL of I_2DDCT_TB is
 
   --########################### CONSTANTS 1 ####################################
-  constant C_CLK_FREQ_HZ               : natural := 1000000;                                                                                                    -- 1MHz
   constant C_CLK_PERIOD_NS             : time := 1e09 / C_CLK_FREQ_HZ * 1 ns;
-  constant C_NV_MEM_ACCESS_TIME_NS     : natural := 1e09 / C_CLK_FREQ_HZ * 4;
 
   --########################### TYPES ##########################################
 
@@ -61,13 +57,14 @@ architecture RTL of I_2DDCT_TB is
   signal nvm_waddr                     : std_logic_vector(C_NVM_ADDR_W - 1 downto 0);
   signal nvm_din                       : std_logic_vector(C_NVM_DATA_W - 1 downto 0);
   signal nvm_dout                      : std_logic_vector(C_NVM_DATA_W - 1 downto 0);
-  signal nvm_ctrl_sync                 : std_logic;
 
   signal sys_enrg_status               : sys_enrg_status_t;                                                                                                     -- System energy status
   signal first_run                     : std_logic;
 
   signal varc_rdy                      : std_logic;
   signal sys_status                    : sys_status_t;                                                                                                          -- System status value of sys_status_t
+  signal nvm_ctrl_sync                 : std_logic;
+
 
   signal dbufctl_start                 : std_logic;
   signal dbufctl_tx                    : std_logic_vector(C_NVM_DATA_W - 1 downto 0);
@@ -309,7 +306,6 @@ begin
       ----------------------------------------------------------
       ODV     => odv,
       DCTO    => dcto,
-      RMEMSEL => rmemsel,
       ----------------------------------------------------------
       NEW_FRAME => frame_cmplt,
       -- Intermittent Enhancment Ports -------------------------
@@ -380,7 +376,7 @@ begin
         ADDR => romo1_addr(i),
         CLK  => clk,
 
-        DATAO => romo1_dout(i)
+        DOUT => romo1_dout(i)
       );
 
   end generate G_ROM_ST1;
@@ -410,7 +406,7 @@ begin
         ADDR => romo2_addr(i),
         CLK  => clk,
 
-        DATAO => romo2_dout(i)
+        DOUT => romo2_dout(i)
       );
 
   end generate G_ROM_ST2;

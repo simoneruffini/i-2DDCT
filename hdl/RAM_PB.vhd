@@ -32,13 +32,15 @@ entity RAM_PB is
   port (
     CLK                                : in    std_logic;                                    -- Input clock
     RST                                : in    std_logic;                                    -- Positive reset
-    START                              : in    std_logic;                                    -- Ram process block start
-    READY                              : out   std_logic;                                    -- Proces Block ready signal
+    ----------------------------------------------------------
     SYS_STATUS                         : in    sys_status_t;                                 -- System status from NVM_CTRL
     NVM_CTRL_SYNC                      : in    std_logic;                                    -- Sync signal from NVM_CTRL
+    ----------------------------------------------------------
+    START                              : in    std_logic;                                    -- Ram process block start
     RX                                 : in    std_logic_vector(C_NVM_DATA_W - 1 downto 0);  -- Dadta from NVM_CTRL
     TX                                 : out   std_logic_vector(C_NVM_DATA_W - 1 downto 0);  -- Data to NVM_CTRL
-    -- Ram control Ports
+    READY                              : out   std_logic;                                    -- Proces Block ready signal
+    ----------------------------------------------------------
     RAM1_DIN                           : out   std_logic_vector(C_RAMDATA_W - 1 downto 0);   -- Ram1 data input
     RAM2_DIN                           : out   std_logic_vector(C_RAMDATA_W - 1 downto 0);   -- Ram2 data input
     RAM_WADDR                          : out   std_logic_vector(C_RAMADDR_W - 1 downto 0);   -- Ram1/2 shared write address
