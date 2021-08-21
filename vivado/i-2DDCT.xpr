@@ -46,7 +46,7 @@
     <Option Name="IPStaticSourceDir" Val="$PIPUSERFILESDIR/ipstatic"/>
     <Option Name="EnableBDX" Val="FALSE"/>
     <Option Name="DSABoardId" Val="zed"/>
-    <Option Name="WTXSimLaunchSim" Val="494"/>
+    <Option Name="WTXSimLaunchSim" Val="501"/>
     <Option Name="WTModelSimLaunchSim" Val="0"/>
     <Option Name="WTQuestaLaunchSim" Val="0"/>
     <Option Name="WTIesLaunchSim" Val="0"/>
@@ -349,6 +349,11 @@
       <File Path="$PPRDIR/../sim/COMMON/ramInit10bit.txt"/>
       <File Path="$PPRDIR/../sim/COMMON/lena512.txt"/>
       <File Path="$PPRDIR/../sim/COMMON/ramInit.txt"/>
+      <File Path="$PPRDIR/../sim/TOP_LEVEL/I_2DDCT_TOP_LEVEL_TB_behav.wcfg">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
       <Config>
         <Option Name="DesignMode" Val="RTL"/>
         <Option Name="TopModule" Val="I_2DDCT_TOP_LEVEL_TB"/>
@@ -362,6 +367,7 @@
         <Option Name="PamSignalDriverFile" Val="xil_bypass_driver"/>
         <Option Name="PamPseudoTop" Val="pseudo_tb"/>
         <Option Name="SrcSet" Val="sources_1"/>
+        <Option Name="XSimWcfgFile" Val="$PPRDIR/../sim/TOP_LEVEL/I_2DDCT_TOP_LEVEL_TB_behav.wcfg"/>
       </Config>
     </FileSet>
   </FileSets>
