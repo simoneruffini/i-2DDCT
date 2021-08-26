@@ -117,6 +117,7 @@ architecture BEHAVIORAL of I_DCT2S is
   signal col_cnt                                             : unsigned(ilog2(N) - 1 downto 0);
 
   signal stage1_en                                           : std_logic;
+  signal stage1_direct_start                                 : std_logic;
   signal stage2_start                                        : std_logic;
   signal stage2_cnt                                          : unsigned(C_RAMADDR_W - 1 downto 0);
 
@@ -142,6 +143,7 @@ architecture BEHAVIORAL of I_DCT2S is
 
   signal dbuf_cmplt_d                                        : std_logic_vector((1 + C_PIPELINE_STAGES) - 1 downto 0);                 -- Data Buffer Complete Delay : Once stage2_cnt = N-1 last data of dbuf goes first through ROM then in Pipleline and it's computation completes
   signal last_dbuf_cmplt                                     : std_logic;                                                              -- Last data buffer was computed and pushed out completely from pipeline
+  signal last_dbuf_cmplt_latch                               : std_logic;
 
   signal push_chkpnt_to_ram_en                               : std_logic;                                                              -- Enalbe procedure that pushes current I_DCT2S status as a checkpoint to ram
   signal pull_chkpnt_from_ram_en                             : std_logic;                                                              -- Enable procedure that pulls checkpoint from ram and stores to I_DCT2S
@@ -184,7 +186,7 @@ begin
   VARC_RDY <= varc_rdy_s;
 
   --########################## COBINATORIAL FUNCTIONS ##########################
-  last_dbuf_cmplt <= dbuf_cmplt_d(dbuf_cmplt_d'length - 1);
+  last_dbuf_cmplt <= dbuf_cmplt_d(dbuf_cmplt_d'length - 1) OR last_dbuf_cmplt_latch;
 
   --########################## PROCESSES #######################################
 
@@ -206,12 +208,12 @@ begin
   -- Future state computation for I_DCT Main fsm (combinatorial process)
 
   P_I_DCT_M_FSM_FUT_S : process (
-                          m_pstate, 
-                          SYS_STATUS, 
-                          last_dbuf_cmplt, 
-                          push_chkpnt_ram_cmplt, 
-                          pull_chkpnt_ram_cmplt,
-                          DCT1S_VARC_RDY) is
+                                 m_pstate,
+                                 SYS_STATUS,
+                                 last_dbuf_cmplt,
+                                 push_chkpnt_ram_cmplt,
+                                 pull_chkpnt_ram_cmplt,
+                                 DCT1S_VARC_RDY) is
   begin
 
     -- Default
@@ -230,7 +232,7 @@ begin
           when SYS_VARC_PREP_CHKPNT =>
 
             if (last_dbuf_cmplt='1') then
-              m_fstate <= S_PUSH_CHKPNT_RAM;
+              m_fstate <= S_WAIT_DCT1S_PUSH;
             else
               m_fstate <= S_WAIT_DBUF_CMPLT;
             end if;
@@ -328,6 +330,11 @@ begin
       --no outputs
       when S_HALT =>
         i_dct_halt <= '1';
+
+        if (SYS_STATUS = SYS_RUN) then
+          i_dct_halt <= '0';
+        end if;
+
       when S_PUSH_CHKPNT_RAM =>
 
         if (push_chkpnt_ram_cmplt = '1') then
@@ -391,8 +398,9 @@ begin
       dbuf           <= (others => (others => '0'));
       odv_s          <= '0';
 
-      stage1_en    <= '0';
-      stage2_start <= '0';
+      stage1_direct_start <= '0';
+      stage1_en           <= '0';
+      stage2_start        <= '0';
 
       stage2_cnt <= (others => '1');
       col_cnt    <= (others => '0');
@@ -417,6 +425,7 @@ begin
       ram_row_from_ram    <= '0';
       ram_row_from_ram_d1 <= '0';
 
+      last_dbuf_cmplt_latch <= '0';
     elsif (CLK='1' and CLK'event) then
       -- Global Defaults
       pull_chkpnt_ram_cmplt <= '0';
@@ -472,9 +481,11 @@ begin
             dbuf(dbuf'length - 1 downto 1) <= dbuf(dbuf'length - 2 downto 0);
           end if;
           if (ram_row_from_ram_d1 = '1') then
-            ram_row2 <= resize(unsigned(RAM_DOUT), ram_row'length);
-            ram_row <= resize(unsigned(RAM_DOUT), ram_row'length);
-            stage1_en <= '1';
+            ram_row2            <= resize(unsigned(RAM_DOUT), ram_row'length);
+            ram_row             <= resize(unsigned(RAM_DOUT), ram_row'length);
+            stage1_direct_start <= '1';
+            --stage1_en <= '1';
+            --ram_col <= (0=>'1',others => '0');
             stage2_start <= '1';                                                                                    -- Most important signal: makes I_DCT2S restart from checkpoint
 
             pull_chkpnt_from_ram_en <= '0';
@@ -492,7 +503,7 @@ begin
             dbuf(dbuf'length - 1 downto 1) <= dbuf(dbuf'length - 2 downto 0);
             ram_din_s                      <= std_logic_vector(resize(dbuf(dbuf'length - 1), ram_din_s'length));    -- data is arithmetically adjusted (with 1's in MSbits) since dbuf is signed
           elsif (to_integer(ram_xaddr_drct) >= C_DBUF_RAM_STRT_ADDR + C_DBUF_RAM_OFST and to_integer(ram_xaddr_drct) < C_RAM_ROW_RAM_STRT_ADDR + C_RAM_ROW_RAM_OFST) then
-            ram_din_s <= std_logic_vector(resize(ram_row2, ram_din_s'length)); -- WARNING: ram_row2 is transferred because ram_row is 1 address/clock in advance for ram delay purposes
+            ram_din_s <= std_logic_vector(resize(ram_row2, ram_din_s'length));                                      -- WARNING: ram_row2 is transferred because ram_row is 1 address/clock in advance for ram delay purposes
           end if;
 
           if (to_integer(ram_xaddr_drct)= C_DCT2S_CHKP_IN_RAM_STRT_ADDR + C_DCT2S_CHKP_IN_RAM_OFST) then
@@ -513,8 +524,8 @@ begin
         --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         -- NORMAL EXECUTION
         --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        stage2_start    <= '0';
-        odv_s           <= '0';
+        stage2_start <= '0';
+        odv_s        <= '0';
 
         --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         -- 1st stage
@@ -577,13 +588,22 @@ begin
           stage2_cnt <= (others => '0');
           col_cnt    <= (0=>'1', others => '0');
         end if;
+
+        -- Last dbuf complete latch logic
+        if (last_dbuf_cmplt = '1') then
+          last_dbuf_cmplt_latch <= '1';
+        end if;
+        if (ram_col2 = N - 1) then
+          last_dbuf_cmplt_latch <= '0';
+        end if;
         --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
         --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         -- New Frame available in RAM
         --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        if (NEW_FRAME = '1') then
-          stage1_en <= '1';
+        if (NEW_FRAME = '1' OR stage1_direct_start = '1') then
+          stage1_direct_start <= '0';
+          stage1_en           <= '1';
           -- to account for 1T RAM delay, increment RAM address counter
           ram_col2 <= (others => '0');
           ram_col  <= (0=>'1', others => '0');
@@ -604,7 +624,7 @@ begin
       is_even      <= '0';
       is_even_d    <= (others => '0');
       odv_d        <= (others => '0');
-      dbuf_cmplt_d <= (others => '0');
+      dbuf_cmplt_d <= (others => '1');
     elsif (CLK'event and CLK = '1') then
       if (i_dct_halt = '1') then
       --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -630,7 +650,7 @@ begin
 
         -- If stage2_cnt counted N-1 times then last "pixel" was pushed in pipeline
         -- thus the current dbuf is fully consumed
-        if (stage2_cnt = N - 1) then
+        if (stage2_cnt >= N - 1) then
           dbuf_cmplt_d(0) <= '1';
         else
           dbuf_cmplt_d(0) <= '0';

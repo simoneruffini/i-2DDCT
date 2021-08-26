@@ -65,7 +65,6 @@ architecture RTL of I_2DDCT_TB is
   signal sys_status                    : sys_status_t;                                                                                                          -- System status value of sys_status_t
   signal nvm_ctrl_sync                 : std_logic;
 
-
   signal dbufctl_start                 : std_logic;
   signal dbufctl_tx                    : std_logic_vector(C_NVM_DATA_W - 1 downto 0);
   signal dbufctl_rx                    : std_logic_vector(C_NVM_DATA_W - 1 downto 0);
@@ -130,6 +129,7 @@ architecture RTL of I_2DDCT_TB is
   signal dbufctl_memsel                : std_logic;
 
   signal process_cnt                   : natural;
+  signal input_row_cnt                 : natural;
 
   --########################### ARCHITECTURE BEGIN #############################
 
@@ -304,8 +304,8 @@ begin
       ROME_DOUT => rome2_dout,
       ROMO_DOUT => romo2_dout,
       ----------------------------------------------------------
-      ODV     => odv,
-      DCTO    => dcto,
+      ODV  => odv,
+      DCTO => dcto,
       ----------------------------------------------------------
       NEW_FRAME => frame_cmplt,
       -- Intermittent Enhancment Ports -------------------------
@@ -434,6 +434,21 @@ begin
       RAM2_DOUT     => ram_pb_ram2_dout
     );
 
+  U_I_DBUFCTL : entity  work.i_dbufctl
+    port map (
+      CLK               => clk,
+      RST               => rst,
+      DCT1S_FRAME_CMPLT => frame_cmplt,
+      MEMSEL            => dbufctl_memsel,
+
+      SYS_STATUS    => sys_status,
+      NVM_CTRL_SYNC => nvm_ctrl_sync,
+      PB_READY      => dbufctl_ready,
+      RX            => dbufctl_rx,
+      TX            => dbufctl_tx,
+      PB_START      => dbufctl_start
+    );
+
   --########################## OUTPUT PORTS WIRING #############################
 
   --########################## COBINATORIAL FUNCTIONS ##########################
@@ -442,20 +457,30 @@ begin
   --########################## PROCESSES #######################################
 
   P_DCT_DATA_GEN : process (clk, rst) is
-
+    variable process_cnt_break : integer := 0;
   begin
 
     if (rst = '1') then
       dcti        <= (others => '0');
       idv         <= '0';
-      process_cnt <= 0;
+      process_cnt <= process_cnt_break;
+      input_row_cnt  <= -1;
     elsif (clk'event AND clk = '1') then
-      idv       <= '0';
-      dcti      <= (others => '0');
+      idv  <= '0';
+      dcti <= (others => '0');
       if (sys_status = SYS_RUN) then
         idv         <= '1';
         dcti        <= std_logic_vector(to_unsigned(process_cnt, dcti'length));
         process_cnt <= process_cnt + 1;
+        if(process_cnt mod N = 0) then
+          input_row_cnt <= input_row_cnt + 1;
+        end if;
+      else
+        if(process_cnt mod N /= N-1 ) then
+          process_cnt_break := ((process_cnt / N) * N -1)+1;
+        else
+          process_cnt_break := process_cnt + 1;
+        end if;
       end if;
     end if;
 
@@ -464,49 +489,47 @@ begin
   P_GLOBAL_SIG : process is
   begin
 
-    rst             <= '0';
-    sys_enrg_status <= sys_enrg_ok;
-    first_run <= '1';
-    wait for 10 * C_CLK_PERIOD_NS;
-    rst             <= '1';
-    wait for C_CLK_PERIOD_NS;
-    rst             <= '0';
-    wait for 10 * C_CLK_PERIOD_NS;
-    first_run <= '0';
-    wait for 300 * C_CLK_PERIOD_NS;
-    sys_enrg_status <= sys_enrg_hazard;
-    wait for 400 * C_CLK_PERIOD_NS;
-    rst             <= '1';
-    sys_enrg_status <= sys_enrg_ok;
-    wait for C_CLK_PERIOD_NS;
-    rst             <= '0';
-    --sys_enrg_status <= sys_enrg_ok;
-    wait;
+   rst             <= '0';
+   sys_enrg_status <= sys_enrg_ok;
+   first_run       <= '1';
+   wait for 10 * C_CLK_PERIOD_NS;
+   rst             <= '1';
+   wait for C_CLK_PERIOD_NS;
+   rst             <= '0';
+   wait for 74 * C_CLK_PERIOD_NS;
+   first_run       <= '0';
+   sys_enrg_status <= sys_enrg_hazard;
+   -- ~31 clks for varc push to ram
+   -- ~372 clks for V2NV push
+   wait for 450 * C_CLK_PERIOD_NS;
+   rst             <= '1';
+   sys_enrg_status <= sys_enrg_ok;
+   wait for C_CLK_PERIOD_NS;
+   rst             <= '0';
+   --sys_enrg_status <= sys_enrg_ok;
+   wait;
+   --rst             <= '0';
+   --sys_enrg_status <= sys_enrg_ok;
+   --first_run       <= '1';
+   --wait for 10 * C_CLK_PERIOD_NS;
+   --rst             <= '1';
+   --wait for C_CLK_PERIOD_NS;
+   --rst             <= '0';
+   --wait for 10* C_CLK_PERIOD_NS;
+   --first_run       <= '0';
+   --wait for 250* C_CLK_PERIOD_NS;
+   --sys_enrg_status <= sys_enrg_hazard;
+   ---- ~31 clks for varc push to ram
+   ---- ~372 clks for V2NV push
+   --wait for 450 * C_CLK_PERIOD_NS;
+   --rst             <= '1';
+   --sys_enrg_status <= sys_enrg_ok;
+   --wait for C_CLK_PERIOD_NS;
+   --rst             <= '0';
+   --sys_enrg_status <= sys_enrg_ok;
+   wait;
 
   end process P_GLOBAL_SIG;
-
-  P_DBUFCTL : process (clk, rst) is
-  begin
-
-    if (rst = '1') then
-      dbufctl_memsel <= '0';
-      dbufctl_ready  <= '1';
-    elsif (clk'event AND clk = '1') then
-      if (frame_cmplt = '1') then
-        dbufctl_memsel <= not dbufctl_memsel;
-      end if;
-      if (dbufctl_start = '1') then
-        dbufctl_ready <= '0';
-        dbufctl_tx    <= (0=>dbufctl_memsel, others => '0');
-      end if;
-      if (dbufctl_ready = '0') then
-        if (nvm_ctrl_sync = '0') then
-          dbufctl_ready <= '1';
-        end if;
-      end if;
-    end if;
-
-  end process P_DBUFCTL;
 
 end architecture RTL;
 

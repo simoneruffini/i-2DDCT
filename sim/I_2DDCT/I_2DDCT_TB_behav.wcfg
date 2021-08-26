@@ -12,18 +12,20 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="1037660000fs"></ZoomStartTime>
-      <ZoomEndTime time="1066760001fs"></ZoomEndTime>
-      <Cursor1Time time="1052500000fs"></Cursor1Time>
+      <ZoomStartTime time="927100fs"></ZoomStartTime>
+      <ZoomEndTime time="1121001fs"></ZoomEndTime>
+      <Cursor1Time time="1025000fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="397"></NameColumnWidth>
-      <ValueColumnWidth column_width="237"></ValueColumnWidth>
+      <ValueColumnWidth column_width="221"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="9" />
+   <WVObjectSize size="11" />
    <wave_markers>
       <marker label="" time="331500000" />
       <marker label="" time="1050500000" />
+      <marker label="" time="850000" />
+      <marker label="" time="1165000" />
    </wave_markers>
    <wvobject type="logic" fp_name="/I_2DDCT_TB/clk">
       <obj_property name="ElementShortName">clk</obj_property>
@@ -48,6 +50,10 @@
       <obj_property name="ObjectShortName">sys_status</obj_property>
       <obj_property name="CustomSignalColor">#00FFFF</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
+   <wvobject type="other" fp_name="/I_2DDCT_TB/input_row_cnt">
+      <obj_property name="ElementShortName">input_row_cnt</obj_property>
+      <obj_property name="ObjectShortName">input_row_cnt</obj_property>
    </wvobject>
    <wvobject type="group" fp_name="group80">
       <obj_property name="label">NVM_CTRL</obj_property>
@@ -118,7 +124,6 @@
          <wvobject type="group" fp_name="group67">
             <obj_property name="label">DBUFCTL</obj_property>
             <obj_property name="DisplayName">label</obj_property>
-            <obj_property name="isExpanded"></obj_property>
             <wvobject type="logic" fp_name="/I_2DDCT_TB/U_NVM_CTRL/DBUFCTL_START">
                <obj_property name="ElementShortName">DBUFCTL_START</obj_property>
                <obj_property name="ObjectShortName">DBUFCTL_START</obj_property>
@@ -147,7 +152,6 @@
          <wvobject type="group" fp_name="group71">
             <obj_property name="label">RAM</obj_property>
             <obj_property name="DisplayName">label</obj_property>
-            <obj_property name="isExpanded"></obj_property>
             <wvobject type="logic" fp_name="/I_2DDCT_TB/U_NVM_CTRL/RAM_PB_START">
                <obj_property name="ElementShortName">RAM_PB_START</obj_property>
                <obj_property name="ObjectShortName">RAM_PB_START</obj_property>
@@ -394,6 +398,7 @@
       <wvobject type="group" fp_name="group99">
          <obj_property name="label">fsm</obj_property>
          <obj_property name="DisplayName">label</obj_property>
+         <obj_property name="isExpanded"></obj_property>
          <wvobject type="logic" fp_name="/I_2DDCT_TB/U_NVM_CTRL/CLK">
             <obj_property name="ElementShortName">CLK</obj_property>
             <obj_property name="ObjectShortName">CLK</obj_property>
@@ -405,10 +410,6 @@
             <obj_property name="ObjectShortName">m_pstate</obj_property>
             <obj_property name="CustomSignalColor">#FFFFFF</obj_property>
             <obj_property name="UseCustomSignalColor">true</obj_property>
-         </wvobject>
-         <wvobject type="other" fp_name="/I_2DDCT_TB/U_I_DCT1S/m_fstate">
-            <obj_property name="ElementShortName">m_fstate</obj_property>
-            <obj_property name="ObjectShortName">m_fstate</obj_property>
          </wvobject>
          <wvobject type="other" fp_name="/I_2DDCT_TB/U_I_DCT1S/SYS_STATUS">
             <obj_property name="ElementShortName">SYS_STATUS</obj_property>
@@ -431,6 +432,8 @@
          <wvobject type="logic" fp_name="/I_2DDCT_TB/U_I_DCT1S/last_dbuf_cmplt">
             <obj_property name="ElementShortName">last_dbuf_cmplt</obj_property>
             <obj_property name="ObjectShortName">last_dbuf_cmplt</obj_property>
+            <obj_property name="CustomSignalColor">#FAAFBE</obj_property>
+            <obj_property name="UseCustomSignalColor">true</obj_property>
          </wvobject>
          <wvobject type="logic" fp_name="/I_2DDCT_TB/U_I_DCT1S/push_chkpnt_ram_cmplt">
             <obj_property name="ElementShortName">push_chkpnt_ram_cmplt</obj_property>
@@ -476,13 +479,19 @@
             <obj_property name="ElementShortName">ram_xaddr_drct[6:0]</obj_property>
             <obj_property name="ObjectShortName">ram_xaddr_drct[6:0]</obj_property>
          </wvobject>
+         <wvobject type="logic" fp_name="/I_2DDCT_TB/U_I_DCT1S/push_chkpnt_to_ram_en">
+            <obj_property name="ElementShortName">push_chkpnt_to_ram_en</obj_property>
+            <obj_property name="ObjectShortName">push_chkpnt_to_ram_en</obj_property>
+            <obj_property name="CustomSignalColor">#A52A2A</obj_property>
+            <obj_property name="UseCustomSignalColor">true</obj_property>
+         </wvobject>
          <wvobject type="logic" fp_name="/I_2DDCT_TB/U_I_DCT1S/push_chkpnt_ram_cmplt">
             <obj_property name="ElementShortName">push_chkpnt_ram_cmplt</obj_property>
             <obj_property name="ObjectShortName">push_chkpnt_ram_cmplt</obj_property>
          </wvobject>
-         <wvobject type="logic" fp_name="/I_2DDCT_TB/U_I_DCT1S/push_chkpnt_to_ram_en">
-            <obj_property name="ElementShortName">push_chkpnt_to_ram_en</obj_property>
-            <obj_property name="ObjectShortName">push_chkpnt_to_ram_en</obj_property>
+         <wvobject type="logic" fp_name="/I_2DDCT_TB/U_I_DCT1S/pull_chkpnt_from_ram_en">
+            <obj_property name="ElementShortName">pull_chkpnt_from_ram_en</obj_property>
+            <obj_property name="ObjectShortName">pull_chkpnt_from_ram_en</obj_property>
             <obj_property name="CustomSignalColor">#A52A2A</obj_property>
             <obj_property name="UseCustomSignalColor">true</obj_property>
          </wvobject>
@@ -490,12 +499,6 @@
             <obj_property name="ElementShortName">pull_chkpnt_ram_cmplt</obj_property>
             <obj_property name="ObjectShortName">pull_chkpnt_ram_cmplt</obj_property>
             <obj_property name="CustomSignalColor">#00FF00</obj_property>
-            <obj_property name="UseCustomSignalColor">true</obj_property>
-         </wvobject>
-         <wvobject type="logic" fp_name="/I_2DDCT_TB/U_I_DCT1S/pull_chkpnt_from_ram_en">
-            <obj_property name="ElementShortName">pull_chkpnt_from_ram_en</obj_property>
-            <obj_property name="ObjectShortName">pull_chkpnt_from_ram_en</obj_property>
-            <obj_property name="CustomSignalColor">#A52A2A</obj_property>
             <obj_property name="UseCustomSignalColor">true</obj_property>
          </wvobject>
          <wvobject type="logic" fp_name="/I_2DDCT_TB/U_I_DCT1S/row_col_from_ram">
@@ -517,7 +520,6 @@
          <wvobject type="array" fp_name="/I_2DDCT_TB/U_I_DCT1S/dbuf">
             <obj_property name="ElementShortName">dbuf[7:0][8:0]</obj_property>
             <obj_property name="ObjectShortName">dbuf[7:0][8:0]</obj_property>
-            <obj_property name="isExpanded"></obj_property>
          </wvobject>
          <wvobject type="array" fp_name="/I_2DDCT_TB/U_I_DCT1S/row_cnt">
             <obj_property name="ElementShortName">row_cnt[2:0]</obj_property>
@@ -537,6 +539,7 @@
          <wvobject type="array" fp_name="/I_2DDCT_TB/U_I_DCT1S/DCTI">
             <obj_property name="ElementShortName">DCTI[7:0]</obj_property>
             <obj_property name="ObjectShortName">DCTI[7:0]</obj_property>
+            <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
          </wvobject>
          <wvobject type="logic" fp_name="/I_2DDCT_TB/U_I_DCT1S/IDV">
             <obj_property name="ElementShortName">IDV</obj_property>
@@ -557,6 +560,14 @@
          <wvobject type="logic" fp_name="/I_2DDCT_TB/U_I_DCT1S/stage2_start">
             <obj_property name="ElementShortName">stage2_start</obj_property>
             <obj_property name="ObjectShortName">stage2_start</obj_property>
+         </wvobject>
+         <wvobject type="logic" fp_name="/I_2DDCT_TB/U_I_DCT1S/last_dbuf_cmplt">
+            <obj_property name="ElementShortName">last_dbuf_cmplt</obj_property>
+            <obj_property name="ObjectShortName">last_dbuf_cmplt</obj_property>
+         </wvobject>
+         <wvobject type="logic" fp_name="/I_2DDCT_TB/U_I_DCT1S/last_dbuf_cmplt_latch">
+            <obj_property name="ElementShortName">last_dbuf_cmplt_latch</obj_property>
+            <obj_property name="ObjectShortName">last_dbuf_cmplt_latch</obj_property>
          </wvobject>
          <wvobject type="array" fp_name="/I_2DDCT_TB/U_I_DCT1S/dbuf_cmplt_d">
             <obj_property name="ElementShortName">dbuf_cmplt_d[4:0]</obj_property>
@@ -613,14 +624,6 @@
             <obj_property name="CustomSignalColor">#FFD700</obj_property>
             <obj_property name="UseCustomSignalColor">true</obj_property>
          </wvobject>
-         <wvobject type="logic" fp_name="/I_2DDCT_TB/U_I_DCT2S/DATAREADY">
-            <obj_property name="ElementShortName">DATAREADY</obj_property>
-            <obj_property name="ObjectShortName">DATAREADY</obj_property>
-         </wvobject>
-         <wvobject type="logic" fp_name="/I_2DDCT_TB/U_I_DCT2S/DATAREADYACK">
-            <obj_property name="ElementShortName">DATAREADYACK</obj_property>
-            <obj_property name="ObjectShortName">DATAREADYACK</obj_property>
-         </wvobject>
          <wvobject type="array" fp_name="/I_2DDCT_TB/U_I_DCT2S/DCTO">
             <obj_property name="ElementShortName">DCTO[11:0]</obj_property>
             <obj_property name="ObjectShortName">DCTO[11:0]</obj_property>
@@ -653,10 +656,6 @@
          <wvobject type="array" fp_name="/I_2DDCT_TB/U_I_DCT2S/RAM_DIN">
             <obj_property name="ElementShortName">RAM_DIN[9:0]</obj_property>
             <obj_property name="ObjectShortName">RAM_DIN[9:0]</obj_property>
-         </wvobject>
-         <wvobject type="logic" fp_name="/I_2DDCT_TB/U_I_DCT2S/RMEMSEL">
-            <obj_property name="ElementShortName">RMEMSEL</obj_property>
-            <obj_property name="ObjectShortName">RMEMSEL</obj_property>
          </wvobject>
          <wvobject type="array" fp_name="/I_2DDCT_TB/U_I_DCT2S/ROME_ADDR">
             <obj_property name="ElementShortName">ROME_ADDR[0:10][5:0]</obj_property>
@@ -719,10 +718,6 @@
             <obj_property name="ElementShortName">DCT1S_VARC_RDY</obj_property>
             <obj_property name="ObjectShortName">DCT1S_VARC_RDY</obj_property>
          </wvobject>
-         <wvobject type="logic" fp_name="/I_2DDCT_TB/U_I_DCT2S/last_dbuf_cmplt">
-            <obj_property name="ElementShortName">last_dbuf_cmplt</obj_property>
-            <obj_property name="ObjectShortName">last_dbuf_cmplt</obj_property>
-         </wvobject>
          <wvobject type="group" fp_name="group702">
             <obj_property name="label">bufcmplt</obj_property>
             <obj_property name="DisplayName">label</obj_property>
@@ -734,6 +729,12 @@
                <obj_property name="ElementShortName">dbuf_cmplt_d[5:0]</obj_property>
                <obj_property name="ObjectShortName">dbuf_cmplt_d[5:0]</obj_property>
             </wvobject>
+         </wvobject>
+         <wvobject type="logic" fp_name="/I_2DDCT_TB/U_I_DCT2S/last_dbuf_cmplt">
+            <obj_property name="ElementShortName">last_dbuf_cmplt</obj_property>
+            <obj_property name="ObjectShortName">last_dbuf_cmplt</obj_property>
+            <obj_property name="CustomSignalColor">#FAAFBE</obj_property>
+            <obj_property name="UseCustomSignalColor">true</obj_property>
          </wvobject>
          <wvobject type="logic" fp_name="/I_2DDCT_TB/U_I_DCT2S/push_chkpnt_ram_cmplt">
             <obj_property name="ElementShortName">push_chkpnt_ram_cmplt</obj_property>
@@ -765,6 +766,7 @@
       <wvobject type="group" fp_name="group710">
          <obj_property name="label">dbuf_and_ctrl</obj_property>
          <obj_property name="DisplayName">label</obj_property>
+         <obj_property name="isExpanded"></obj_property>
          <wvobject type="logic" fp_name="/I_2DDCT_TB/U_I_DCT2S/CLK">
             <obj_property name="ElementShortName">CLK</obj_property>
             <obj_property name="ObjectShortName">CLK</obj_property>
@@ -807,13 +809,13 @@
             <obj_property name="ElementShortName">dbuf_from_ram</obj_property>
             <obj_property name="ObjectShortName">dbuf_from_ram</obj_property>
          </wvobject>
-         <wvobject type="array" fp_name="/I_2DDCT_TB/U_I_DCT2S/ram_din_s">
-            <obj_property name="ElementShortName">ram_din_s[9:0]</obj_property>
-            <obj_property name="ObjectShortName">ram_din_s[9:0]</obj_property>
-         </wvobject>
          <wvobject type="array" fp_name="/I_2DDCT_TB/U_I_DCT2S/RAM_DOUT">
             <obj_property name="ElementShortName">RAM_DOUT[9:0]</obj_property>
             <obj_property name="ObjectShortName">RAM_DOUT[9:0]</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/I_2DDCT_TB/U_I_DCT2S/ram_din_s">
+            <obj_property name="ElementShortName">ram_din_s[9:0]</obj_property>
+            <obj_property name="ObjectShortName">ram_din_s[9:0]</obj_property>
          </wvobject>
          <wvobject type="array" fp_name="/I_2DDCT_TB/U_I_DCT2S/dbuf">
             <obj_property name="ElementShortName">dbuf[7:0][10:0]</obj_property>
@@ -850,6 +852,10 @@
             <obj_property name="ElementShortName">stage1_en</obj_property>
             <obj_property name="ObjectShortName">stage1_en</obj_property>
          </wvobject>
+         <wvobject type="array" fp_name="/I_2DDCT_TB/U_I_DCT2S/ram_row2">
+            <obj_property name="ElementShortName">ram_row2[2:0]</obj_property>
+            <obj_property name="ObjectShortName">ram_row2[2:0]</obj_property>
+         </wvobject>
          <wvobject type="array" fp_name="/I_2DDCT_TB/U_I_DCT2S/dcti_shift_reg">
             <obj_property name="ElementShortName">dcti_shift_reg[7:0][10:0]</obj_property>
             <obj_property name="ObjectShortName">dcti_shift_reg[7:0][10:0]</obj_property>
@@ -862,17 +868,20 @@
             <obj_property name="ElementShortName">stage2_start</obj_property>
             <obj_property name="ObjectShortName">stage2_start</obj_property>
          </wvobject>
+         <wvobject type="logic" fp_name="/I_2DDCT_TB/U_I_DCT2S/last_dbuf_cmplt">
+            <obj_property name="ElementShortName">last_dbuf_cmplt</obj_property>
+            <obj_property name="ObjectShortName">last_dbuf_cmplt</obj_property>
+         </wvobject>
+         <wvobject type="logic" fp_name="/I_2DDCT_TB/U_I_DCT2S/last_dbuf_cmplt_latch">
+            <obj_property name="ElementShortName">last_dbuf_cmplt_latch</obj_property>
+            <obj_property name="ObjectShortName">last_dbuf_cmplt_latch</obj_property>
+         </wvobject>
          <wvobject type="group" fp_name="group735">
             <obj_property name="label">counters</obj_property>
             <obj_property name="DisplayName">label</obj_property>
-            <obj_property name="isExpanded"></obj_property>
             <wvobject type="array" fp_name="/I_2DDCT_TB/U_I_DCT2S/ram_row">
                <obj_property name="ElementShortName">ram_row[2:0]</obj_property>
                <obj_property name="ObjectShortName">ram_row[2:0]</obj_property>
-            </wvobject>
-            <wvobject type="array" fp_name="/I_2DDCT_TB/U_I_DCT2S/ram_row2">
-               <obj_property name="ElementShortName">ram_row2[2:0]</obj_property>
-               <obj_property name="ObjectShortName">ram_row2[2:0]</obj_property>
             </wvobject>
             <wvobject type="array" fp_name="/I_2DDCT_TB/U_I_DCT2S/ram_col">
                <obj_property name="ElementShortName">ram_col[2:0]</obj_property>
@@ -938,12 +947,6 @@
          <wvobject type="array" fp_name="/I_2DDCT_TB/U_I_DCT2S/DCTO">
             <obj_property name="ElementShortName">DCTO[11:0]</obj_property>
             <obj_property name="ObjectShortName">DCTO[11:0]</obj_property>
-         </wvobject>
-         <wvobject type="logic" fp_name="/I_2DDCT_TB/U_I_DCT2S/last_dbuf_cmplt">
-            <obj_property name="ElementShortName">last_dbuf_cmplt</obj_property>
-            <obj_property name="ObjectShortName">last_dbuf_cmplt</obj_property>
-            <obj_property name="CustomSignalColor">#808000</obj_property>
-            <obj_property name="UseCustomSignalColor">true</obj_property>
          </wvobject>
       </wvobject>
    </wvobject>
@@ -1110,6 +1113,56 @@
       <wvobject type="other" fp_name="/I_2DDCT_TB/U_RAM_PB/sync_cnt">
          <obj_property name="ElementShortName">sync_cnt</obj_property>
          <obj_property name="ObjectShortName">sync_cnt</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject type="group" fp_name="group241">
+      <obj_property name="label">IDBUFCTL</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject type="logic" fp_name="/I_2DDCT_TB/U_I_DBUFCTL/CLK">
+         <obj_property name="ElementShortName">CLK</obj_property>
+         <obj_property name="ObjectShortName">CLK</obj_property>
+         <obj_property name="CustomSignalColor">#FFD700</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/I_2DDCT_TB/U_I_DBUFCTL/DCT1S_FRAME_CMPLT">
+         <obj_property name="ElementShortName">DCT1S_FRAME_CMPLT</obj_property>
+         <obj_property name="ObjectShortName">DCT1S_FRAME_CMPLT</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/I_2DDCT_TB/U_I_DBUFCTL/MEMSEL">
+         <obj_property name="ElementShortName">MEMSEL</obj_property>
+         <obj_property name="ObjectShortName">MEMSEL</obj_property>
+      </wvobject>
+      <wvobject type="other" fp_name="/I_2DDCT_TB/U_I_DBUFCTL/SYS_STATUS">
+         <obj_property name="ElementShortName">SYS_STATUS</obj_property>
+         <obj_property name="ObjectShortName">SYS_STATUS</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/I_2DDCT_TB/U_I_DBUFCTL/NVM_CTRL_SYNC">
+         <obj_property name="ElementShortName">NVM_CTRL_SYNC</obj_property>
+         <obj_property name="ObjectShortName">NVM_CTRL_SYNC</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/I_2DDCT_TB/U_I_DBUFCTL/PB_START">
+         <obj_property name="ElementShortName">PB_START</obj_property>
+         <obj_property name="ObjectShortName">PB_START</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/I_2DDCT_TB/U_I_DBUFCTL/RX">
+         <obj_property name="ElementShortName">RX[19:0]</obj_property>
+         <obj_property name="ObjectShortName">RX[19:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/I_2DDCT_TB/U_I_DBUFCTL/TX">
+         <obj_property name="ElementShortName">TX[19:0]</obj_property>
+         <obj_property name="ObjectShortName">TX[19:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/I_2DDCT_TB/U_I_DBUFCTL/PB_READY">
+         <obj_property name="ElementShortName">PB_READY</obj_property>
+         <obj_property name="ObjectShortName">PB_READY</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/I_2DDCT_TB/U_I_DBUFCTL/memsel_s">
+         <obj_property name="ElementShortName">memsel_s</obj_property>
+         <obj_property name="ObjectShortName">memsel_s</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/I_2DDCT_TB/U_I_DBUFCTL/pb_ready_s">
+         <obj_property name="ElementShortName">pb_ready_s</obj_property>
+         <obj_property name="ObjectShortName">pb_ready_s</obj_property>
       </wvobject>
    </wvobject>
 </wave_config>

@@ -143,6 +143,7 @@ architecture BEHAVIORAL of I_DCT1S is
 
   signal dbuf_cmplt_d                               : std_logic_vector((1 + C_PIPELINE_STAGES) - 1 downto 0);                 -- Data Buffer Complete Delay : Once stage2_cnt = N-1 last data of dbuf goes first through ROM then in Pipleline and it's computation completes
   signal last_dbuf_cmplt                            : std_logic;                                                              -- LAST data buffer complete/computed and saved to ram
+  signal last_dbuf_cmplt_latch                      : std_logic;                                                              -- LAST data buffer complete/computed and saved to ram
 
   signal push_chkpnt_to_ram_en                      : std_logic;                                                              -- Enalbe procedure that pushes current I_DCT1S status as a checkpoint to ram
   signal pull_chkpnt_from_ram_en                    : std_logic;                                                              -- Enable procedure that pulls checkpoint from ram and stores to I_DCT1S
@@ -190,7 +191,11 @@ begin
 
   --########################## COBINATORIAL FUNCTIONS ##########################
 
-  last_dbuf_cmplt <= dbuf_cmplt_d(dbuf_cmplt_d'length - 1);
+  -- Enables chkpnt push only after the last data buffer was pushed to ram
+  -- preserving RAM/data integrity when restoring chkpnt
+  -- From when the last dbuf is pushed to ram (dbuf_cmplt_d((dbuf_cmplt_d'length - 1) = '1') to 
+  -- when dcti_shift_reg become dbuf (a new dbuf), chekpoints are pushable to ram
+  last_dbuf_cmplt <= dbuf_cmplt_d(dbuf_cmplt_d'length - 1) OR last_dbuf_cmplt_latch; 
 
   --########################## PROCESSES #######################################
 
@@ -401,6 +406,8 @@ begin
       dbuf_from_ram_d1    <= '0';
       row_col_from_ram    <= '0';
       row_col_from_ram_d1 <= '0';
+
+      last_dbuf_cmplt_latch <= '0';
     elsif (CLK = '1' and CLK'event) then
       -- Global Defaults
       pull_chkpnt_ram_cmplt <= '0';
@@ -560,6 +567,14 @@ begin
 
           col_cnt2 <= (others => '0');
         end if;
+
+        -- Last dbuf complete latch logic
+         if(last_dbuf_cmplt = '1') then
+           last_dbuf_cmplt_latch <= '1';
+         end if;
+         if (inpt_cnt = N - 1) then
+           last_dbuf_cmplt_latch <= '0';
+         end if;
         --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
       end if;
     end if;
@@ -578,7 +593,7 @@ begin
       ram_we_d        <= (others => '0');
       ram_waddr_d     <= (others => (others => '0'));
       frame_cmplt_s_d <= (others => '0');
-      dbuf_cmplt_d    <= (others => '0');
+      dbuf_cmplt_d    <= (others => '1');
     elsif (CLK'event and CLK = '1') then
       if (i_dct_halt = '1') then
       --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -609,11 +624,13 @@ begin
 
         -- If stage2_cnt counted N-1 times then last "pixel" was pushed in pipeline
         -- thus the current dbuf is fully consumed
-        if (stage2_cnt = N - 1) then
+        if (stage2_cnt >= N - 1) then
           dbuf_cmplt_d(0) <= '1';
         else
           dbuf_cmplt_d(0) <= '0';
         end if;
+
+
       end if;
     end if;
 
