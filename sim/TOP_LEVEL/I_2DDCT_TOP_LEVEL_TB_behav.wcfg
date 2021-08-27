@@ -37,7 +37,7 @@
       <obj_property name="ElementShortName">rst</obj_property>
       <obj_property name="ObjectShortName">rst</obj_property>
    </wvobject>
-   <wvobject type="other" fp_name="/I_2DDCT_TOP_LEVEL_TB/U_NVM_CTRL/SYS_STATUS">
+   <wvobject type="other" fp_name="/I_2DDCT_TOP_LEVEL_TB/U_SYS_CTRL/SYS_STATUS">
       <obj_property name="ElementShortName">SYS_STATUS</obj_property>
       <obj_property name="ObjectShortName">SYS_STATUS</obj_property>
    </wvobject>
@@ -146,9 +146,9 @@
       <obj_property name="ElementShortName">sys_status</obj_property>
       <obj_property name="ObjectShortName">sys_status</obj_property>
    </wvobject>
-   <wvobject type="logic" fp_name="/I_2DDCT_TOP_LEVEL_TB/nvm_ctrl_sync">
-      <obj_property name="ElementShortName">nvm_ctrl_sync</obj_property>
-      <obj_property name="ObjectShortName">nvm_ctrl_sync</obj_property>
+   <wvobject type="logic" fp_name="/I_2DDCT_TOP_LEVEL_TB/data_sync">
+      <obj_property name="ElementShortName">data_sync</obj_property>
+      <obj_property name="ObjectShortName">data_sync</obj_property>
    </wvobject>
    <wvobject type="other" fp_name="/I_2DDCT_TOP_LEVEL_TB/testend">
       <obj_property name="ElementShortName">testend</obj_property>

@@ -42,7 +42,7 @@ entity I_2DDCT is
     ----------------------------------------------------------------------------
     -- Intermitent enhancement ports
     FIRST_RUN                       : in    std_logic;
-    NVM_CTRL_SYNC                   : in    std_logic;
+    DATA_SYNC                   : in    std_logic;
     SYS_STATUS                      : in    sys_status_t;
     VARC_READY                      : out   std_logic;
 
@@ -356,7 +356,7 @@ begin
       RST => RST,
       ----------------------------------------------------------
       SYS_STATUS    => SYS_STATUS,
-      NVM_CTRL_SYNC => NVM_CTRL_SYNC,
+      DATA_SYNC => DATA_SYNC,
       ----------------------------------------------------------
       START => RAM_PB_START,
       RX    => RAM_PB_RX,
@@ -391,7 +391,7 @@ begin
         DBUFCTL_TX         <= (0=>dbufctl_memsel, others => '0');
       end if;
       if (dbufctl_pb_ready_s = '0') then
-        if (nvm_ctrl_sync = '0') then
+        if (data_sync = '0') then
           dbufctl_pb_ready_s <= '1';
         end if;
       end if;

@@ -84,7 +84,7 @@ architecture BEHAVIORAL of I_2DDCT_TOP_LEVEL_TB is
 
   signal varc_rdy                      : std_logic;
   signal sys_status                    : sys_status_t;                                                                                                          -- System status value of sys_status_t
-  signal nvm_ctrl_sync                 : std_logic;
+  signal data_sync                 : std_logic;
 
   signal testend                       : boolean;
 
@@ -120,7 +120,7 @@ begin
       --------------------------------------------------------------------------
       -- Intermitent enhancement ports
       FIRST_RUN     => first_run,
-      NVM_CTRL_SYNC => nvm_ctrl_sync,
+      DATA_SYNC => data_sync,
       SYS_STATUS    => sys_status,
       VARC_READY    => varc_rdy,
 
@@ -140,9 +140,9 @@ begin
     );
 
   --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  -- |NVM_CTRL|
+  -- |SYS_CTRL|
   --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  U_NVM_CTRL : entity work.nvm_ctrl
+  U_SYS_CTRL : entity work.sys_ctrl
     port map (
       CLK => clk,
       RST => rst,
@@ -161,7 +161,7 @@ begin
 
       VARC_RDY   => varc_rdy,
       SYS_STATUS => sys_status,
-      SYNC       => nvm_ctrl_sync,
+      DATA_SYNC       => data_sync,
 
       DBUFCTL_START => dbufctl_start,
       DBUFCTL_TX    => dbufctl_tx,

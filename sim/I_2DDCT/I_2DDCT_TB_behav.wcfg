@@ -12,13 +12,13 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="927100fs"></ZoomStartTime>
-      <ZoomEndTime time="1121001fs"></ZoomEndTime>
-      <Cursor1Time time="1025000fs"></Cursor1Time>
+      <ZoomStartTime time="982166fs"></ZoomStartTime>
+      <ZoomEndTime time="1243567fs"></ZoomEndTime>
+      <Cursor1Time time="1145000fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="397"></NameColumnWidth>
-      <ValueColumnWidth column_width="221"></ValueColumnWidth>
+      <ValueColumnWidth column_width="205"></ValueColumnWidth>
    </column_width_setting>
    <WVObjectSize size="11" />
    <wave_markers>
@@ -26,6 +26,7 @@
       <marker label="" time="1050500000" />
       <marker label="" time="850000" />
       <marker label="" time="1165000" />
+      <marker label="" time="1115000" />
    </wave_markers>
    <wvobject type="logic" fp_name="/I_2DDCT_TB/clk">
       <obj_property name="ElementShortName">clk</obj_property>
@@ -42,7 +43,7 @@
    <wvobject type="other" fp_name="/I_2DDCT_TB/sys_enrg_status">
       <obj_property name="ElementShortName">sys_enrg_status</obj_property>
       <obj_property name="ObjectShortName">sys_enrg_status</obj_property>
-      <obj_property name="CustomSignalColor">#0000A0</obj_property>
+      <obj_property name="CustomSignalColor">#00FF7F</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
    <wvobject type="other" fp_name="/I_2DDCT_TB/sys_status">
@@ -56,93 +57,93 @@
       <obj_property name="ObjectShortName">input_row_cnt</obj_property>
    </wvobject>
    <wvobject type="group" fp_name="group80">
-      <obj_property name="label">NVM_CTRL</obj_property>
+      <obj_property name="label">SYS_CTRL</obj_property>
       <obj_property name="DisplayName">label</obj_property>
       <obj_property name="isExpanded"></obj_property>
       <wvobject type="group" fp_name="group41">
-         <obj_property name="label">NVM_CTRL_port</obj_property>
+         <obj_property name="label">SYS_CTRL_port</obj_property>
          <obj_property name="DisplayName">label</obj_property>
          <wvobject type="group" fp_name="group55">
             <obj_property name="label">NVM</obj_property>
             <obj_property name="DisplayName">label</obj_property>
-            <wvobject type="logic" fp_name="/I_2DDCT_TB/U_NVM_CTRL/NVM_EN">
+            <wvobject type="logic" fp_name="/I_2DDCT_TB/U_SYS_CTRL/NVM_EN">
                <obj_property name="ElementShortName">NVM_EN</obj_property>
                <obj_property name="ObjectShortName">NVM_EN</obj_property>
             </wvobject>
-            <wvobject type="array" fp_name="/I_2DDCT_TB/U_NVM_CTRL/NVM_DIN">
+            <wvobject type="array" fp_name="/I_2DDCT_TB/U_SYS_CTRL/NVM_DIN">
                <obj_property name="ElementShortName">NVM_DIN[19:0]</obj_property>
                <obj_property name="ObjectShortName">NVM_DIN[19:0]</obj_property>
             </wvobject>
-            <wvobject type="array" fp_name="/I_2DDCT_TB/U_NVM_CTRL/NVM_WADDR">
+            <wvobject type="array" fp_name="/I_2DDCT_TB/U_SYS_CTRL/NVM_WADDR">
                <obj_property name="ElementShortName">NVM_WADDR[6:0]</obj_property>
                <obj_property name="ObjectShortName">NVM_WADDR[6:0]</obj_property>
             </wvobject>
-            <wvobject type="array" fp_name="/I_2DDCT_TB/U_NVM_CTRL/NVM_RADDR">
+            <wvobject type="array" fp_name="/I_2DDCT_TB/U_SYS_CTRL/NVM_RADDR">
                <obj_property name="ElementShortName">NVM_RADDR[6:0]</obj_property>
                <obj_property name="ObjectShortName">NVM_RADDR[6:0]</obj_property>
                <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
             </wvobject>
-            <wvobject type="array" fp_name="/I_2DDCT_TB/U_NVM_CTRL/NVM_DOUT">
+            <wvobject type="array" fp_name="/I_2DDCT_TB/U_SYS_CTRL/NVM_DOUT">
                <obj_property name="ElementShortName">NVM_DOUT[19:0]</obj_property>
                <obj_property name="ObjectShortName">NVM_DOUT[19:0]</obj_property>
             </wvobject>
-            <wvobject type="logic" fp_name="/I_2DDCT_TB/U_NVM_CTRL/NVM_BUSY_SIG">
+            <wvobject type="logic" fp_name="/I_2DDCT_TB/U_SYS_CTRL/NVM_BUSY_SIG">
                <obj_property name="ElementShortName">NVM_BUSY_SIG</obj_property>
                <obj_property name="ObjectShortName">NVM_BUSY_SIG</obj_property>
             </wvobject>
-            <wvobject type="logic" fp_name="/I_2DDCT_TB/U_NVM_CTRL/NVM_BUSY">
+            <wvobject type="logic" fp_name="/I_2DDCT_TB/U_SYS_CTRL/NVM_BUSY">
                <obj_property name="ElementShortName">NVM_BUSY</obj_property>
                <obj_property name="ObjectShortName">NVM_BUSY</obj_property>
             </wvobject>
-            <wvobject type="logic" fp_name="/I_2DDCT_TB/U_NVM_CTRL/NVM_WE">
+            <wvobject type="logic" fp_name="/I_2DDCT_TB/U_SYS_CTRL/NVM_WE">
                <obj_property name="ElementShortName">NVM_WE</obj_property>
                <obj_property name="ObjectShortName">NVM_WE</obj_property>
             </wvobject>
          </wvobject>
-         <wvobject type="other" fp_name="/I_2DDCT_TB/U_NVM_CTRL/SYS_ENRG_STATUS">
+         <wvobject type="other" fp_name="/I_2DDCT_TB/U_SYS_CTRL/SYS_ENRG_STATUS">
             <obj_property name="ElementShortName">SYS_ENRG_STATUS</obj_property>
             <obj_property name="ObjectShortName">SYS_ENRG_STATUS</obj_property>
          </wvobject>
-         <wvobject type="logic" fp_name="/I_2DDCT_TB/U_NVM_CTRL/FIRST_RUN">
+         <wvobject type="logic" fp_name="/I_2DDCT_TB/U_SYS_CTRL/FIRST_RUN">
             <obj_property name="ElementShortName">FIRST_RUN</obj_property>
             <obj_property name="ObjectShortName">FIRST_RUN</obj_property>
          </wvobject>
-         <wvobject type="logic" fp_name="/I_2DDCT_TB/U_NVM_CTRL/VARC_RDY">
+         <wvobject type="logic" fp_name="/I_2DDCT_TB/U_SYS_CTRL/VARC_RDY">
             <obj_property name="ElementShortName">VARC_RDY</obj_property>
             <obj_property name="ObjectShortName">VARC_RDY</obj_property>
          </wvobject>
-         <wvobject type="other" fp_name="/I_2DDCT_TB/U_NVM_CTRL/SYS_STATUS">
+         <wvobject type="other" fp_name="/I_2DDCT_TB/U_SYS_CTRL/SYS_STATUS">
             <obj_property name="ElementShortName">SYS_STATUS</obj_property>
             <obj_property name="ObjectShortName">SYS_STATUS</obj_property>
             <obj_property name="CustomSignalColor">#00FFFF</obj_property>
             <obj_property name="UseCustomSignalColor">true</obj_property>
          </wvobject>
-         <wvobject type="logic" fp_name="/I_2DDCT_TB/U_NVM_CTRL/SYNC">
-            <obj_property name="ElementShortName">SYNC</obj_property>
-            <obj_property name="ObjectShortName">SYNC</obj_property>
+         <wvobject type="logic" fp_name="/I_2DDCT_TB/U_SYS_CTRL/DATA_SYNC">
+            <obj_property name="ElementShortName">DATA_SYNC</obj_property>
+            <obj_property name="ObjectShortName">DATA_SYNC</obj_property>
          </wvobject>
          <wvobject type="group" fp_name="group67">
             <obj_property name="label">DBUFCTL</obj_property>
             <obj_property name="DisplayName">label</obj_property>
-            <wvobject type="logic" fp_name="/I_2DDCT_TB/U_NVM_CTRL/DBUFCTL_START">
+            <wvobject type="logic" fp_name="/I_2DDCT_TB/U_SYS_CTRL/DBUFCTL_START">
                <obj_property name="ElementShortName">DBUFCTL_START</obj_property>
                <obj_property name="ObjectShortName">DBUFCTL_START</obj_property>
                <obj_property name="CustomSignalColor">#FAAFBE</obj_property>
                <obj_property name="UseCustomSignalColor">true</obj_property>
             </wvobject>
-            <wvobject type="array" fp_name="/I_2DDCT_TB/U_NVM_CTRL/DBUFCTL_TX">
+            <wvobject type="array" fp_name="/I_2DDCT_TB/U_SYS_CTRL/DBUFCTL_TX">
                <obj_property name="ElementShortName">DBUFCTL_TX[19:0]</obj_property>
                <obj_property name="ObjectShortName">DBUFCTL_TX[19:0]</obj_property>
                <obj_property name="CustomSignalColor">#FAAFBE</obj_property>
                <obj_property name="UseCustomSignalColor">true</obj_property>
             </wvobject>
-            <wvobject type="array" fp_name="/I_2DDCT_TB/U_NVM_CTRL/DBUFCTL_RX">
+            <wvobject type="array" fp_name="/I_2DDCT_TB/U_SYS_CTRL/DBUFCTL_RX">
                <obj_property name="ElementShortName">DBUFCTL_RX[19:0]</obj_property>
                <obj_property name="ObjectShortName">DBUFCTL_RX[19:0]</obj_property>
                <obj_property name="CustomSignalColor">#FAAFBE</obj_property>
                <obj_property name="UseCustomSignalColor">true</obj_property>
             </wvobject>
-            <wvobject type="logic" fp_name="/I_2DDCT_TB/U_NVM_CTRL/DBUFCTL_READY">
+            <wvobject type="logic" fp_name="/I_2DDCT_TB/U_SYS_CTRL/DBUFCTL_READY">
                <obj_property name="ElementShortName">DBUFCTL_READY</obj_property>
                <obj_property name="ObjectShortName">DBUFCTL_READY</obj_property>
                <obj_property name="CustomSignalColor">#FAAFBE</obj_property>
@@ -152,25 +153,25 @@
          <wvobject type="group" fp_name="group71">
             <obj_property name="label">RAM</obj_property>
             <obj_property name="DisplayName">label</obj_property>
-            <wvobject type="logic" fp_name="/I_2DDCT_TB/U_NVM_CTRL/RAM_PB_START">
+            <wvobject type="logic" fp_name="/I_2DDCT_TB/U_SYS_CTRL/RAM_PB_START">
                <obj_property name="ElementShortName">RAM_PB_START</obj_property>
                <obj_property name="ObjectShortName">RAM_PB_START</obj_property>
                <obj_property name="CustomSignalColor">#FF00FF</obj_property>
                <obj_property name="UseCustomSignalColor">true</obj_property>
             </wvobject>
-            <wvobject type="array" fp_name="/I_2DDCT_TB/U_NVM_CTRL/RAM_PB_TX">
+            <wvobject type="array" fp_name="/I_2DDCT_TB/U_SYS_CTRL/RAM_PB_TX">
                <obj_property name="ElementShortName">RAM_PB_TX[19:0]</obj_property>
                <obj_property name="ObjectShortName">RAM_PB_TX[19:0]</obj_property>
                <obj_property name="CustomSignalColor">#FF00FF</obj_property>
                <obj_property name="UseCustomSignalColor">true</obj_property>
             </wvobject>
-            <wvobject type="array" fp_name="/I_2DDCT_TB/U_NVM_CTRL/RAM_PB_RX">
+            <wvobject type="array" fp_name="/I_2DDCT_TB/U_SYS_CTRL/RAM_PB_RX">
                <obj_property name="ElementShortName">RAM_PB_RX[19:0]</obj_property>
                <obj_property name="ObjectShortName">RAM_PB_RX[19:0]</obj_property>
                <obj_property name="CustomSignalColor">#FF00FF</obj_property>
                <obj_property name="UseCustomSignalColor">true</obj_property>
             </wvobject>
-            <wvobject type="logic" fp_name="/I_2DDCT_TB/U_NVM_CTRL/RAM_PB_READY">
+            <wvobject type="logic" fp_name="/I_2DDCT_TB/U_SYS_CTRL/RAM_PB_READY">
                <obj_property name="ElementShortName">RAM_PB_READY</obj_property>
                <obj_property name="ObjectShortName">RAM_PB_READY</obj_property>
                <obj_property name="CustomSignalColor">#FF00FF</obj_property>
@@ -181,37 +182,38 @@
       <wvobject type="group" fp_name="group122">
          <obj_property name="label">M_FSM</obj_property>
          <obj_property name="DisplayName">label</obj_property>
-         <wvobject type="other" fp_name="/I_2DDCT_TB/U_NVM_CTRL/m_fsm_pstate">
+         <obj_property name="isExpanded"></obj_property>
+         <wvobject type="other" fp_name="/I_2DDCT_TB/U_SYS_CTRL/m_fsm_pstate">
             <obj_property name="ElementShortName">m_fsm_pstate</obj_property>
             <obj_property name="ObjectShortName">m_fsm_pstate</obj_property>
             <obj_property name="CustomSignalColor">#FFFFFF</obj_property>
             <obj_property name="UseCustomSignalColor">true</obj_property>
          </wvobject>
-         <wvobject type="logic" fp_name="/I_2DDCT_TB/U_NVM_CTRL/VARC_RDY">
+         <wvobject type="logic" fp_name="/I_2DDCT_TB/U_SYS_CTRL/VARC_RDY">
             <obj_property name="ElementShortName">VARC_RDY</obj_property>
             <obj_property name="ObjectShortName">VARC_RDY</obj_property>
             <obj_property name="CustomSignalColor">#0000FF</obj_property>
             <obj_property name="UseCustomSignalColor">true</obj_property>
          </wvobject>
-         <wvobject type="logic" fp_name="/I_2DDCT_TB/U_NVM_CTRL/ctm_start">
+         <wvobject type="logic" fp_name="/I_2DDCT_TB/U_SYS_CTRL/ctm_start">
             <obj_property name="ElementShortName">ctm_start</obj_property>
             <obj_property name="ObjectShortName">ctm_start</obj_property>
          </wvobject>
-         <wvobject type="logic" fp_name="/I_2DDCT_TB/U_NVM_CTRL/ctm_end">
+         <wvobject type="logic" fp_name="/I_2DDCT_TB/U_SYS_CTRL/ctm_end">
             <obj_property name="ElementShortName">ctm_end</obj_property>
             <obj_property name="ObjectShortName">ctm_end</obj_property>
          </wvobject>
-         <wvobject type="other" fp_name="/I_2DDCT_TB/U_NVM_CTRL/sys_status_s">
+         <wvobject type="other" fp_name="/I_2DDCT_TB/U_SYS_CTRL/sys_status_s">
             <obj_property name="ElementShortName">sys_status_s</obj_property>
             <obj_property name="ObjectShortName">sys_status_s</obj_property>
             <obj_property name="CustomSignalColor">#00FFFF</obj_property>
             <obj_property name="UseCustomSignalColor">true</obj_property>
          </wvobject>
-         <wvobject type="logic" fp_name="/I_2DDCT_TB/U_NVM_CTRL/halt">
+         <wvobject type="logic" fp_name="/I_2DDCT_TB/U_SYS_CTRL/halt">
             <obj_property name="ElementShortName">halt</obj_property>
             <obj_property name="ObjectShortName">halt</obj_property>
          </wvobject>
-         <wvobject type="logic" fp_name="/I_2DDCT_TB/U_NVM_CTRL/fsm_chkpnt_strt">
+         <wvobject type="logic" fp_name="/I_2DDCT_TB/U_SYS_CTRL/fsm_chkpnt_strt">
             <obj_property name="ElementShortName">fsm_chkpnt_strt</obj_property>
             <obj_property name="ObjectShortName">fsm_chkpnt_strt</obj_property>
          </wvobject>
@@ -219,27 +221,27 @@
       <wvobject type="group" fp_name="group129">
          <obj_property name="label">ctm_fsm</obj_property>
          <obj_property name="DisplayName">label</obj_property>
-         <wvobject type="other" fp_name="/I_2DDCT_TB/U_NVM_CTRL/ctm_fsm_pstate">
+         <wvobject type="other" fp_name="/I_2DDCT_TB/U_SYS_CTRL/ctm_fsm_pstate">
             <obj_property name="ElementShortName">ctm_fsm_pstate</obj_property>
             <obj_property name="ObjectShortName">ctm_fsm_pstate</obj_property>
             <obj_property name="CustomSignalColor">#FFFFFF</obj_property>
             <obj_property name="UseCustomSignalColor">true</obj_property>
          </wvobject>
-         <wvobject type="logic" fp_name="/I_2DDCT_TB/U_NVM_CTRL/ctm_start">
+         <wvobject type="logic" fp_name="/I_2DDCT_TB/U_SYS_CTRL/ctm_start">
             <obj_property name="ElementShortName">ctm_start</obj_property>
             <obj_property name="ObjectShortName">ctm_start</obj_property>
          </wvobject>
-         <wvobject type="logic" fp_name="/I_2DDCT_TB/U_NVM_CTRL/VARC_RDY">
+         <wvobject type="logic" fp_name="/I_2DDCT_TB/U_SYS_CTRL/VARC_RDY">
             <obj_property name="ElementShortName">VARC_RDY</obj_property>
             <obj_property name="ObjectShortName">VARC_RDY</obj_property>
             <obj_property name="CustomSignalColor">#0000FF</obj_property>
             <obj_property name="UseCustomSignalColor">true</obj_property>
          </wvobject>
-         <wvobject type="logic" fp_name="/I_2DDCT_TB/U_NVM_CTRL/pbsm_start">
+         <wvobject type="logic" fp_name="/I_2DDCT_TB/U_SYS_CTRL/pbsm_start">
             <obj_property name="ElementShortName">pbsm_start</obj_property>
             <obj_property name="ObjectShortName">pbsm_start</obj_property>
          </wvobject>
-         <wvobject type="logic" fp_name="/I_2DDCT_TB/U_NVM_CTRL/pbsm_end">
+         <wvobject type="logic" fp_name="/I_2DDCT_TB/U_SYS_CTRL/pbsm_end">
             <obj_property name="ElementShortName">pbsm_end</obj_property>
             <obj_property name="ObjectShortName">pbsm_end</obj_property>
          </wvobject>
@@ -247,7 +249,7 @@
       <wvobject type="group" fp_name="group135">
          <obj_property name="label">pbsm</obj_property>
          <obj_property name="DisplayName">label</obj_property>
-         <wvobject type="other" fp_name="/I_2DDCT_TB/U_NVM_CTRL/\G_PBSM(0)\/GI_U_PBSM/pbsm_pstate">
+         <wvobject type="other" fp_name="/I_2DDCT_TB/U_SYS_CTRL/\G_PBSM(0)\/GI_U_PBSM/pbsm_pstate">
             <obj_property name="DisplayName">label</obj_property>
             <obj_property name="ElementShortName">pbsm_pstate</obj_property>
             <obj_property name="ObjectShortName">pbsm_pstate</obj_property>
@@ -255,7 +257,7 @@
             <obj_property name="CustomSignalColor">#FAAFBE</obj_property>
             <obj_property name="UseCustomSignalColor">true</obj_property>
          </wvobject>
-         <wvobject type="other" fp_name="/I_2DDCT_TB/U_NVM_CTRL/\G_PBSM(1)\/GI_U_PBSM/pbsm_pstate">
+         <wvobject type="other" fp_name="/I_2DDCT_TB/U_SYS_CTRL/\G_PBSM(1)\/GI_U_PBSM/pbsm_pstate">
             <obj_property name="DisplayName">label</obj_property>
             <obj_property name="ElementShortName">pbsm_pstate</obj_property>
             <obj_property name="ObjectShortName">pbsm_pstate</obj_property>
@@ -263,14 +265,14 @@
             <obj_property name="CustomSignalColor">#FF00FF</obj_property>
             <obj_property name="UseCustomSignalColor">true</obj_property>
          </wvobject>
-         <wvobject type="array" fp_name="/I_2DDCT_TB/U_NVM_CTRL/pbsm_start_arr">
+         <wvobject type="array" fp_name="/I_2DDCT_TB/U_SYS_CTRL/pbsm_start_arr">
             <obj_property name="ElementShortName">pbsm_start_arr[2:0]</obj_property>
             <obj_property name="ObjectShortName">pbsm_start_arr[2:0]</obj_property>
             <obj_property name="Radix">BINARYRADIX</obj_property>
             <obj_property name="CustomSignalColor">#F0E68C</obj_property>
             <obj_property name="UseCustomSignalColor">true</obj_property>
          </wvobject>
-         <wvobject type="array" fp_name="/I_2DDCT_TB/U_NVM_CTRL/pbsm_pb_start_arr">
+         <wvobject type="array" fp_name="/I_2DDCT_TB/U_SYS_CTRL/pbsm_pb_start_arr">
             <obj_property name="ElementShortName">pbsm_pb_start_arr[1:0]</obj_property>
             <obj_property name="ObjectShortName">pbsm_pb_start_arr[1:0]</obj_property>
             <obj_property name="Reversed">false</obj_property>
@@ -278,7 +280,7 @@
             <obj_property name="CustomSignalColor">#00FF00</obj_property>
             <obj_property name="UseCustomSignalColor">true</obj_property>
          </wvobject>
-         <wvobject type="array" fp_name="/I_2DDCT_TB/U_NVM_CTRL/pbsm_pb_ready_arr">
+         <wvobject type="array" fp_name="/I_2DDCT_TB/U_SYS_CTRL/pbsm_pb_ready_arr">
             <obj_property name="ElementShortName">pbsm_pb_ready_arr[1:0]</obj_property>
             <obj_property name="ObjectShortName">pbsm_pb_ready_arr[1:0]</obj_property>
             <obj_property name="Reversed">false</obj_property>
@@ -288,23 +290,23 @@
       <wvobject type="group" fp_name="group198">
          <obj_property name="label">transfers</obj_property>
          <obj_property name="DisplayName">label</obj_property>
-         <wvobject type="other" fp_name="/I_2DDCT_TB/U_NVM_CTRL/nvm_active_transfer">
+         <wvobject type="other" fp_name="/I_2DDCT_TB/U_SYS_CTRL/nvm_active_transfer">
             <obj_property name="ElementShortName">nvm_active_transfer</obj_property>
             <obj_property name="ObjectShortName">nvm_active_transfer</obj_property>
          </wvobject>
-         <wvobject type="logic" fp_name="/I_2DDCT_TB/U_NVM_CTRL/transfer_on">
+         <wvobject type="logic" fp_name="/I_2DDCT_TB/U_SYS_CTRL/transfer_on">
             <obj_property name="ElementShortName">transfer_on</obj_property>
             <obj_property name="ObjectShortName">transfer_on</obj_property>
          </wvobject>
-         <wvobject type="array" fp_name="/I_2DDCT_TB/U_NVM_CTRL/nvm_addr_pb">
+         <wvobject type="array" fp_name="/I_2DDCT_TB/U_SYS_CTRL/nvm_addr_pb">
             <obj_property name="ElementShortName">nvm_addr_pb[6:0]</obj_property>
             <obj_property name="ObjectShortName">nvm_addr_pb[6:0]</obj_property>
          </wvobject>
-         <wvobject type="logic" fp_name="/I_2DDCT_TB/U_NVM_CTRL/nvm_en_pb">
+         <wvobject type="logic" fp_name="/I_2DDCT_TB/U_SYS_CTRL/nvm_en_pb">
             <obj_property name="ElementShortName">nvm_en_pb</obj_property>
             <obj_property name="ObjectShortName">nvm_en_pb</obj_property>
          </wvobject>
-         <wvobject type="other" fp_name="/I_2DDCT_TB/U_NVM_CTRL/transfer_cnt">
+         <wvobject type="other" fp_name="/I_2DDCT_TB/U_SYS_CTRL/transfer_cnt">
             <obj_property name="ElementShortName">transfer_cnt</obj_property>
             <obj_property name="ObjectShortName">transfer_cnt</obj_property>
          </wvobject>
@@ -318,7 +320,7 @@
          <obj_property name="label">IDCT1S_port</obj_property>
          <obj_property name="DisplayName">label</obj_property>
          <obj_property name="isExpanded"></obj_property>
-         <wvobject type="logic" fp_name="/I_2DDCT_TB/U_NVM_CTRL/CLK">
+         <wvobject type="logic" fp_name="/I_2DDCT_TB/U_SYS_CTRL/CLK">
             <obj_property name="ElementShortName">CLK</obj_property>
             <obj_property name="ObjectShortName">CLK</obj_property>
             <obj_property name="CustomSignalColor">#FFD700</obj_property>
@@ -399,7 +401,7 @@
          <obj_property name="label">fsm</obj_property>
          <obj_property name="DisplayName">label</obj_property>
          <obj_property name="isExpanded"></obj_property>
-         <wvobject type="logic" fp_name="/I_2DDCT_TB/U_NVM_CTRL/CLK">
+         <wvobject type="logic" fp_name="/I_2DDCT_TB/U_SYS_CTRL/CLK">
             <obj_property name="ElementShortName">CLK</obj_property>
             <obj_property name="ObjectShortName">CLK</obj_property>
             <obj_property name="CustomSignalColor">#FFD700</obj_property>
@@ -465,7 +467,7 @@
       <wvobject type="group" fp_name="group87">
          <obj_property name="label">data_buf_and_ctrl</obj_property>
          <obj_property name="DisplayName">label</obj_property>
-         <wvobject type="logic" fp_name="/I_2DDCT_TB/U_NVM_CTRL/CLK">
+         <wvobject type="logic" fp_name="/I_2DDCT_TB/U_SYS_CTRL/CLK">
             <obj_property name="ElementShortName">CLK</obj_property>
             <obj_property name="ObjectShortName">CLK</obj_property>
             <obj_property name="CustomSignalColor">#FFD700</obj_property>
@@ -530,7 +532,7 @@
          <obj_property name="label">dct</obj_property>
          <obj_property name="DisplayName">label</obj_property>
          <obj_property name="isExpanded"></obj_property>
-         <wvobject type="logic" fp_name="/I_2DDCT_TB/U_NVM_CTRL/CLK">
+         <wvobject type="logic" fp_name="/I_2DDCT_TB/U_SYS_CTRL/CLK">
             <obj_property name="ElementShortName">CLK</obj_property>
             <obj_property name="ObjectShortName">CLK</obj_property>
             <obj_property name="CustomSignalColor">#FFD700</obj_property>
@@ -766,7 +768,6 @@
       <wvobject type="group" fp_name="group710">
          <obj_property name="label">dbuf_and_ctrl</obj_property>
          <obj_property name="DisplayName">label</obj_property>
-         <obj_property name="isExpanded"></obj_property>
          <wvobject type="logic" fp_name="/I_2DDCT_TB/U_I_DCT2S/CLK">
             <obj_property name="ElementShortName">CLK</obj_property>
             <obj_property name="ObjectShortName">CLK</obj_property>
@@ -843,6 +844,7 @@
          <wvobject type="array" fp_name="/I_2DDCT_TB/U_I_DCT2S/RAM_RADDR">
             <obj_property name="ElementShortName">RAM_RADDR[6:0]</obj_property>
             <obj_property name="ObjectShortName">RAM_RADDR[6:0]</obj_property>
+            <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
          </wvobject>
          <wvobject type="array" fp_name="/I_2DDCT_TB/U_I_DCT2S/RAM_DOUT">
             <obj_property name="ElementShortName">RAM_DOUT[9:0]</obj_property>
@@ -871,14 +873,19 @@
          <wvobject type="logic" fp_name="/I_2DDCT_TB/U_I_DCT2S/last_dbuf_cmplt">
             <obj_property name="ElementShortName">last_dbuf_cmplt</obj_property>
             <obj_property name="ObjectShortName">last_dbuf_cmplt</obj_property>
+            <obj_property name="CustomSignalColor">#FAAFBE</obj_property>
+            <obj_property name="UseCustomSignalColor">true</obj_property>
          </wvobject>
          <wvobject type="logic" fp_name="/I_2DDCT_TB/U_I_DCT2S/last_dbuf_cmplt_latch">
             <obj_property name="ElementShortName">last_dbuf_cmplt_latch</obj_property>
             <obj_property name="ObjectShortName">last_dbuf_cmplt_latch</obj_property>
+            <obj_property name="CustomSignalColor">#FAAFBE</obj_property>
+            <obj_property name="UseCustomSignalColor">true</obj_property>
          </wvobject>
          <wvobject type="group" fp_name="group735">
             <obj_property name="label">counters</obj_property>
             <obj_property name="DisplayName">label</obj_property>
+            <obj_property name="isExpanded"></obj_property>
             <wvobject type="array" fp_name="/I_2DDCT_TB/U_I_DCT2S/ram_row">
                <obj_property name="ElementShortName">ram_row[2:0]</obj_property>
                <obj_property name="ObjectShortName">ram_row[2:0]</obj_property>
@@ -939,6 +946,14 @@
          <wvobject type="array" fp_name="/I_2DDCT_TB/U_I_DCT2S/dcto_5">
             <obj_property name="ElementShortName">dcto_5[23:0]</obj_property>
             <obj_property name="ObjectShortName">dcto_5[23:0]</obj_property>
+         </wvobject>
+         <wvobject type="logic" fp_name="/I_2DDCT_TB/U_I_DCT2S/odv_s">
+            <obj_property name="ElementShortName">odv_s</obj_property>
+            <obj_property name="ObjectShortName">odv_s</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/I_2DDCT_TB/U_I_DCT2S/odv_d">
+            <obj_property name="ElementShortName">odv_d[4:0]</obj_property>
+            <obj_property name="ObjectShortName">odv_d[4:0]</obj_property>
          </wvobject>
          <wvobject type="logic" fp_name="/I_2DDCT_TB/U_I_DCT2S/ODV">
             <obj_property name="ElementShortName">ODV</obj_property>
@@ -1027,9 +1042,9 @@
             <obj_property name="ElementShortName">CLK</obj_property>
             <obj_property name="ObjectShortName">CLK</obj_property>
          </wvobject>
-         <wvobject type="logic" fp_name="/I_2DDCT_TB/U_RAM_PB/NVM_CTRL_SYNC">
-            <obj_property name="ElementShortName">NVM_CTRL_SYNC</obj_property>
-            <obj_property name="ObjectShortName">NVM_CTRL_SYNC</obj_property>
+         <wvobject type="logic" fp_name="/I_2DDCT_TB/U_RAM_PB/DATA_SYNC">
+            <obj_property name="ElementShortName">DATA_SYNC</obj_property>
+            <obj_property name="ObjectShortName">DATA_SYNC</obj_property>
          </wvobject>
          <wvobject type="array" fp_name="/I_2DDCT_TB/U_RAM_PB/RAM_RADDR">
             <obj_property name="ElementShortName">RAM_RADDR[6:0]</obj_property>
@@ -1136,9 +1151,9 @@
          <obj_property name="ElementShortName">SYS_STATUS</obj_property>
          <obj_property name="ObjectShortName">SYS_STATUS</obj_property>
       </wvobject>
-      <wvobject type="logic" fp_name="/I_2DDCT_TB/U_I_DBUFCTL/NVM_CTRL_SYNC">
-         <obj_property name="ElementShortName">NVM_CTRL_SYNC</obj_property>
-         <obj_property name="ObjectShortName">NVM_CTRL_SYNC</obj_property>
+      <wvobject type="logic" fp_name="/I_2DDCT_TB/U_I_DBUFCTL/DATA_SYNC">
+         <obj_property name="ElementShortName">DATA_SYNC</obj_property>
+         <obj_property name="ObjectShortName">DATA_SYNC</obj_property>
       </wvobject>
       <wvobject type="logic" fp_name="/I_2DDCT_TB/U_I_DBUFCTL/PB_START">
          <obj_property name="ElementShortName">PB_START</obj_property>

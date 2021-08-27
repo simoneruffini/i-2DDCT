@@ -33,12 +33,12 @@ entity RAM_PB is
     CLK                                : in    std_logic;                                    -- Input clock
     RST                                : in    std_logic;                                    -- Positive reset
     ----------------------------------------------------------
-    SYS_STATUS                         : in    sys_status_t;                                 -- System status from NVM_CTRL
-    NVM_CTRL_SYNC                      : in    std_logic;                                    -- Sync signal from NVM_CTRL
+    SYS_STATUS                         : in    sys_status_t;                                 -- System status from SYS_CTRL
+    DATA_SYNC                      : in    std_logic;                                    -- Sync signal from SYS_CTRL
     ----------------------------------------------------------
     START                              : in    std_logic;                                    -- Ram process block start
-    RX                                 : in    std_logic_vector(C_NVM_DATA_W - 1 downto 0);  -- Dadta from NVM_CTRL
-    TX                                 : out   std_logic_vector(C_NVM_DATA_W - 1 downto 0);  -- Data to NVM_CTRL
+    RX                                 : in    std_logic_vector(C_NVM_DATA_W - 1 downto 0);  -- Dadta from SYS_CTRL
+    TX                                 : out   std_logic_vector(C_NVM_DATA_W - 1 downto 0);  -- Data to SYS_CTRL
     READY                              : out   std_logic;                                    -- Proces Block ready signal
     ----------------------------------------------------------
     RAM1_DIN                           : out   std_logic_vector(C_RAMDATA_W - 1 downto 0);   -- Ram1 data input
@@ -64,7 +64,7 @@ architecture RTL of RAM_PB is
   --########################### CONSTANTS 2 ####################################
 
   --########################### SIGNALS ########################################
-  signal nvm_ctrl_sync_d    : std_logic;                                              -- NVM_CTRL_SYNC delay
+  signal nvm_ctrl_sync_d    : std_logic;                                              -- DATA_SYNC delay
   signal start_d            : std_logic;                                              -- START delay
   --signal pb_task_on         : std_logic;                                      -- process block task[V2NV or NV2V] on
   signal ram_xaddr          : unsigned (C_RAMADDR_W - 1 downto 0);                    -- RAM [R/W]address
@@ -83,8 +83,8 @@ begin
   --########################## OUTPUT PORTS WIRING #############################
 
   READY <= ready_s;
-  --RAM_WE    <= NVM_CTRL_SYNC when pb_task_on = '1' AND SYS_STATUS = SYS_PUSH_CHKPNT_NV2V else
-  RAM_WE    <= NVM_CTRL_SYNC when SYS_STATUS = SYS_PUSH_CHKPNT_NV2V else
+  --RAM_WE    <= DATA_SYNC when pb_task_on = '1' AND SYS_STATUS = SYS_PUSH_CHKPNT_NV2V else
+  RAM_WE    <= DATA_SYNC when SYS_STATUS = SYS_PUSH_CHKPNT_NV2V else
                '0';
   RAM_WADDR <= std_logic_vector(ram_xaddr);
   RAM_RADDR <= std_logic_vector(ram_xaddr);
@@ -126,7 +126,7 @@ begin
       -- if (ram_xaddr = (C_RAM_CONTENT_AMOUNT - 1)) then
       --   -- RAM to NVM
       --   if (SYS_STATUS = SYS_PUSH_CHKPNT_NV2NV) then
-      --     if (NVM_CTRL_SYNC = '1') then
+      --     if (DATA_SYNC = '1') then
       --       ready_s <= '1';
       --     end if;
       --   -- NVM to RAM
@@ -138,7 +138,7 @@ begin
       --   end if;
       -- end if;
 
-      if (NVM_CTRL_SYNC = '1' and ready_s = '0') then
+      if (DATA_SYNC = '1' and ready_s = '0') then
         sync_cnt <= sync_cnt + 1;
         if (sync_cnt = C_RAM_CONTENT_AMOUNT - 1) then
           ready_s  <= '1';
@@ -162,14 +162,14 @@ begin
       case SYS_STATUS is
 
         when SYS_PUSH_CHKPNT_V2NV =>
-          if (START = '1' OR (NVM_CTRL_SYNC = '1' AND ready_s = '0')) then
+          if (START = '1' OR (DATA_SYNC = '1' AND ready_s = '0')) then
             ram_xaddr <= ram_xaddr + 1;
           end if;
           if (ram_xaddr = C_RAM_CONTENT_AMOUNT - 1) then
             ram_xaddr <= ram_xaddr;
           end if;
         when SYS_PUSH_CHKPNT_NV2V =>
-          if (NVM_CTRL_SYNC = '1' and ready_s = '0') then
+          if (DATA_SYNC = '1' and ready_s = '0') then
             ram_xaddr <= ram_xaddr + 1;
           end if;
           if (ram_xaddr = C_RAM_CONTENT_AMOUNT - 1) then
@@ -206,7 +206,7 @@ begin
       nvm_ctrl_sync_d <= '0';
       start_d         <= '0';
     elsif (CLK'event and CLK = '1') then
-      nvm_ctrl_sync_d <= NVM_CTRL_SYNC;
+      nvm_ctrl_sync_d <= DATA_SYNC;
       start_d         <= START;
     end if;
 

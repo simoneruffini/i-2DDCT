@@ -34,7 +34,7 @@ entity I_DBUFCTL is
     MEMSEL                 : out   std_logic;
 
     SYS_STATUS             : in    sys_status_t;
-    NVM_CTRL_SYNC          : in    std_logic;
+    DATA_SYNC          : in    std_logic;
     PB_START               : in    std_logic;
     RX                     : in    std_logic_vector(C_NVM_DATA_W - 1 downto 0);
     TX                     : out   std_logic_vector(C_NVM_DATA_W - 1 downto 0);
@@ -83,7 +83,7 @@ begin
         if (PB_START = '1') then
           pb_ready_s <= '0';
         end if;
-        if (pb_ready_s = '0' AND NVM_CTRL_SYNC = '1') then
+        if (pb_ready_s = '0' AND DATA_SYNC = '1') then
           memsel_s   <= RX(0);
           pb_ready_s <= '1';
         end if;
@@ -93,7 +93,7 @@ begin
         if (PB_START = '1') then
           pb_ready_s <= '0';
         end if;
-        if (pb_ready_s = '0' AND NVM_CTRL_SYNC = '1') then
+        if (pb_ready_s = '0' AND DATA_SYNC = '1') then
           pb_ready_s <= '1';
         end if;
       else  --if (SYS_STATUS = SYS_RUN or others) then

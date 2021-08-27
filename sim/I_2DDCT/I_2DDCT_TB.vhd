@@ -63,7 +63,7 @@ architecture RTL of I_2DDCT_TB is
 
   signal varc_rdy                      : std_logic;
   signal sys_status                    : sys_status_t;                                                                                                          -- System status value of sys_status_t
-  signal nvm_ctrl_sync                 : std_logic;
+  signal data_sync                 : std_logic;
 
   signal dbufctl_start                 : std_logic;
   signal dbufctl_tx                    : std_logic_vector(C_NVM_DATA_W - 1 downto 0);
@@ -151,7 +151,7 @@ begin
   --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   -- |NVM|
   --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  U_NVM : entity work.nv_mem
+  U_NV_MEM : entity work.nv_mem
 
     generic map (
       CLK_FREQ_HZ    => C_CLK_FREQ_HZ,
@@ -175,9 +175,9 @@ begin
     );
 
   --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  -- |NVM_CTRL|
+  -- |SYS_CTRL|
   --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  U_NVM_CTRL : entity work.nvm_ctrl
+  U_SYS_CTRL : entity work.sys_ctrl
     port map (
       CLK => clk,
       RST => rst,
@@ -196,7 +196,7 @@ begin
 
       VARC_RDY   => varc_rdy,
       SYS_STATUS => sys_status,
-      SYNC       => nvm_ctrl_sync,
+      DATA_SYNC       => data_sync,
 
       DBUFCTL_START => dbufctl_start,
       DBUFCTL_TX    => dbufctl_tx,
@@ -422,7 +422,7 @@ begin
       START         => ram_pb_start,
       READY         => ram_pb_ready,
       SYS_STATUS    => sys_status,
-      NVM_CTRL_SYNC => nvm_ctrl_sync,
+      DATA_SYNC => data_sync,
       RX            => ram_pb_rx,
       TX            => ram_pb_tx,
       RAM1_DIN      => ram_pb_ram1_din,
@@ -442,7 +442,7 @@ begin
       MEMSEL            => dbufctl_memsel,
 
       SYS_STATUS    => sys_status,
-      NVM_CTRL_SYNC => nvm_ctrl_sync,
+      DATA_SYNC => data_sync,
       PB_READY      => dbufctl_ready,
       RX            => dbufctl_rx,
       TX            => dbufctl_tx,
@@ -496,7 +496,7 @@ begin
    rst             <= '1';
    wait for C_CLK_PERIOD_NS;
    rst             <= '0';
-   wait for 74 * C_CLK_PERIOD_NS;
+   wait for 101 * C_CLK_PERIOD_NS;
    first_run       <= '0';
    sys_enrg_status <= sys_enrg_hazard;
    -- ~31 clks for varc push to ram

@@ -105,6 +105,7 @@ architecture BEHAVIORAL of I_DCT2S is
 
   signal varc_rdy_s                                          : std_logic;                                                              -- Volatile architecture ready signal
   signal i_dct_halt                                          : std_logic;                                                              -- Halt all idct
+  signal odv_gate                                            : std_logic;                                                              -- Halt all idct delay
   signal i_dct_halt_input                                    : std_logic;                                                              -- Halt only input stage of idct leaving rest working
 
   signal dbuf                                                : input_data2;
@@ -172,7 +173,7 @@ begin
 
   DCTO <= dcto_5(C_PL2_DATA_W - 1 downto 12);
 
-  ODV <= odv_d(odv_d'length - 1); -- Output data valid 5 clock delay
+  ODV <= odv_d(odv_d'length - 1) AND odv_gate; -- Output data valid 5 clock delay
 
   RAM_WADDR <= std_logic_vector(ram_xaddr_drct);                                               -- address drived from push chkpnt procedure
 
@@ -613,6 +614,28 @@ begin
     end if;
 
   end process P_DATA_BUF_AND_CTRL;
+
+  P_ODV_GATE : process (CLK, RST) is
+  begin
+
+    if (RST = '1') then
+      odv_gate <= '1';
+    elsif (CLK'event and CLK = '1') then
+      if (i_dct_halt = '1') then
+        odv_gate <= '0';
+      else
+        odv_gate <= '1';
+        if (i_dct_halt_input ='1' AND last_dbuf_cmplt = '1') then
+          odv_gate <= '0';
+        end if;
+        -- Terrible hack to prevent extra data out of DCT2S
+        if(SYS_STATUS = SYS_HALT AND dbuf_cmplt_d(dbuf_cmplt_d'length-1) = '1') then
+          odv_gate <= '0';
+        end if;
+      end if;
+    end if;
+
+  end process P_ODV_GATE;
 
   --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   -- Delays for internal signals

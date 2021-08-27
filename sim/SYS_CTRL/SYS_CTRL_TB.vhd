@@ -2,8 +2,8 @@
 -- Engineer:  Simone Ruffini [simone.ruffini@tutanota.com]
 --
 -- Create Date:     Tue Aug  3 16:53:35 CEST 2021
--- Design Name:     NVM_CTRL_TB
--- Module Name:     NVM_CTRL_TB.vhd - RTL
+-- Design Name:     SYS_CTRL_TB
+-- Module Name:     SYS_CTRL_TB.vhd - RTL
 -- Project Name:    i-2DDCT
 -- Description:     Intermittent Multidimensional Discrete Cosine Transform test bench
 --
@@ -29,14 +29,14 @@ library WORK;
 
 ----------------------------- ENTITY -------------------------------------------
 
-entity NVM_CTRL_TB is
+entity SYS_CTRL_TB is
   --port (
   --);
-end entity NVM_CTRL_TB;
+end entity SYS_CTRL_TB;
 
 ----------------------------- ARCHITECTURE -------------------------------------
 
-architecture RTL of NVM_CTRL_TB is
+architecture RTL of SYS_CTRL_TB is
 
   --########################### CONSTANTS 1 ####################################
   --constant C_CLK_FREQ_HZ                             : natural := 1000000;                                                                                                    -- 1MHz
@@ -65,7 +65,7 @@ architecture RTL of NVM_CTRL_TB is
 
   signal sys_status                                  : sys_status_t;                                                                                                          -- System status value of sys_status_t
   signal varc_rdy                                    : std_logic;
-  signal nvm_ctrl_sync                               : std_logic;
+  signal data_sync                               : std_logic;
 
   signal dbufctl_start                               : std_logic;
   signal dbufctl_ready                               : std_logic;
@@ -158,9 +158,9 @@ begin
     );
 
   --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  -- |NVM_CTRL|
+  -- |SYS_CTRL|
   --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  U_NVM_CTRL : entity work.nvm_ctrl
+  U_SYS_CTRL : entity work.sys_ctrl
     port map (
       CLK => clk,
       RST => rst,
@@ -178,7 +178,7 @@ begin
 
       VARC_RDY   => varc_rdy,
       SYS_STATUS => sys_status,
-      SYNC       => nvm_ctrl_sync,
+      DATA_SYNC       => data_sync,
 
       DBUFCTL_START => dbufctl_start,
       DBUFCTL_TX    => dbufctl_tx,
@@ -283,7 +283,7 @@ begin
       START         => ram_pb_start,
       READY         => ram_pb_ready,
       SYS_STATUS    => sys_status,
-      NVM_CTRL_SYNC => nvm_ctrl_sync,
+      DATA_SYNC => data_sync,
       RX            => ram_pb_rx,
       TX            => ram_pb_tx,
       RAM1_DIN      => ram_pb_ram1_din,

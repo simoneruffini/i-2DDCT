@@ -46,7 +46,7 @@
     <Option Name="IPStaticSourceDir" Val="$PIPUSERFILESDIR/ipstatic"/>
     <Option Name="EnableBDX" Val="FALSE"/>
     <Option Name="DSABoardId" Val="zed"/>
-    <Option Name="WTXSimLaunchSim" Val="609"/>
+    <Option Name="WTXSimLaunchSim" Val="660"/>
     <Option Name="WTModelSimLaunchSim" Val="0"/>
     <Option Name="WTQuestaLaunchSim" Val="0"/>
     <Option Name="WTIesLaunchSim" Val="0"/>
@@ -164,7 +164,7 @@
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PPRDIR/../hdl/NVM_CTRL.vhd">
+      <File Path="$PPRDIR/../hdl/SYS_CTRL.vhd">
         <FileInfo SFType="VHDL2008">
           <Attr Name="AutoDisabled" Val="1"/>
           <Attr Name="UsedIn" Val="synthesis"/>
@@ -232,7 +232,7 @@
         <Option Name="XSimWcfgFile" Val="$PPRDIR/../sim/I_2DDCT/I_2DDCT_TB_behav.wcfg"/>
       </Config>
     </FileSet>
-    <FileSet Name="NVM_CTRL_sim" Type="SimulationSrcs" RelSrcDir="$PSRCDIR/NVM_CTRL_sim" RelGenDir="$PGENDIR/NVM_CTRL_sim">
+    <FileSet Name="SYS_CTRL_sim" Type="SimulationSrcs" RelSrcDir="$PSRCDIR/SYS_CTRL_sim" RelGenDir="$PGENDIR/SYS_CTRL_sim">
       <Filter Type="Srcs"/>
       <File Path="$PPRDIR/../sim/COMMON/CLKGEN.vhd">
         <FileInfo SFType="VHDL2008">
@@ -264,13 +264,13 @@
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PPRDIR/../sim/NVM_CTRL/NVM_CTRL_TB.vhd">
+      <File Path="$PPRDIR/../sim/SYS_CTRL/SYS_CTRL_TB.vhd">
         <FileInfo SFType="VHDL2008">
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PPRDIR/../sim/NVM_CTRL/NVM_CTRL_TB.wcfg">
+      <File Path="$PPRDIR/../sim/SYS_CTRL/SYS_CTRL_TB.wcfg">
         <FileInfo>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
@@ -279,7 +279,7 @@
       <File Path="$PPRDIR/../sim/COMMON/ramInit10bit.txt"/>
       <Config>
         <Option Name="DesignMode" Val="RTL"/>
-        <Option Name="TopModule" Val="NVM_CTRL_TB"/>
+        <Option Name="TopModule" Val="SYS_CTRL_TB"/>
         <Option Name="TopLib" Val="xil_defaultlib"/>
         <Option Name="TopAutoSet" Val="TRUE"/>
         <Option Name="TransportPathDelay" Val="0"/>

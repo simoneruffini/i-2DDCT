@@ -3,8 +3,8 @@
 --
 --
 -- Create Date:     Wed Jun  26 14:39:11 CEST 2021
--- Design Name:     NVM_CTRL
--- Module Name:     NVM_CTRL.vhd - RTL
+-- Design Name:     SYS_CTRL
+-- Module Name:     SYS_CTRL.vhd - RTL
 -- Project Name:    i-2DDCT
 -- Description:     Non volatile memory controller
 --
@@ -28,7 +28,7 @@ library WORK;
 
 ----------------------------- ENTITY -------------------------------------------
 
-entity NVM_CTRL is
+entity SYS_CTRL is
   port (
     CLK                  : in    std_logic;                                                   -- Input clock
     RST                  : in    std_logic;                                                   -- Positive reset
@@ -47,7 +47,7 @@ entity NVM_CTRL is
 
     VARC_RDY             : in    std_logic;
     SYS_STATUS           : out   sys_status_t;                                                -- System status value of sys_status_t
-    SYNC                 : out   std_logic;                                                   -- Multiple semantics: tells if TX data is valid or if RX data was accepted when 1 otherwise TX/RX lines not captured/able
+    DATA_SYNC                 : out   std_logic;                                                   -- Multiple semantics: tells if TX data is valid or if RX data was accepted when 1 otherwise TX/RX lines not captured/able
 
     DBUFCTL_START        : out   std_logic;                                                   -- Start DBUFCTL process block
     DBUFCTL_RX           : out   std_logic_vector(C_NVM_DATA_W - 1 downto 0);                 -- DBUFCTL process block RX signal
@@ -59,9 +59,9 @@ entity NVM_CTRL is
     RAM_PB_TX            : in    std_logic_vector(C_NVM_DATA_W - 1 downto 0);                 -- RAM proces block TX signal
     RAM_PB_READY         : in    std_logic                                                    -- RAM_PB process block ready signal
   );
-end entity NVM_CTRL;
+end entity SYS_CTRL;
 
-architecture RTL of NVM_CTRL is
+architecture RTL of SYS_CTRL is
 
   --########################### CONSTANTS 1 ####################################
 
@@ -130,8 +130,8 @@ architecture RTL of NVM_CTRL is
 
   signal sys_status_s                                      : sys_status_t;                                                                 -- System status signal
   signal sys_status_s_latch                                : sys_status_t;                                                                 -- System status signal
-  signal sync_gate                                         : std_logic;                                                                    -- And gate to sync signal
-  signal sync_s                                            : std_logic;
+  signal data_sync_gate                                         : std_logic;                                                                    -- And gate to sync signal
+  signal data_sync_s                                            : std_logic;
   signal nvm_en_pb                                         : std_logic;
   signal nvm_addr_pb                                       : unsigned(C_NVM_ADDR_W - 1 downto 0);
 
@@ -171,7 +171,7 @@ begin
   --########################## OUTPUT PORTS WIRING #############################
 
   SYS_STATUS <= sys_status_s;
-  SYNC       <= sync_s;
+  DATA_SYNC       <= data_sync_s;
   --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   -- Each PBSM regulates a process block with the below sibnals.
   -- These process blocks regulate access to and from NVM for checkpopinting operations
@@ -206,7 +206,7 @@ begin
   pbsm_start_arr(0) <= pbsm_start;                              -- start of PBSM chain is piloted by pbsm_start
   pbsm_end          <= pbsm_start_arr(C_STAGES_IN_CHKP_PROC);   -- when last PBSM signals a statrt means that all PBSM completed
   ctm_end           <= pbsm_end;
-  sync_s            <= sync_gate AND not NVM_BUSY;
+  data_sync_s            <= data_sync_gate AND not NVM_BUSY;
 
   --########################## PROCESSES #######################################
 
@@ -391,15 +391,15 @@ begin
       nvm_addr_pb <= (others => '0');
       --NVM_WE              <= '0';
       nvm_en_pb           <= '0';
-      sync_gate           <= '0';
+      data_sync_gate           <= '0';
       nvm_active_transfer <= no_transfer;
       transfer_on         <= '0';
       transfer_cnt        <= 1;
     elsif (CLK'event and CLK = '1') then
-      sync_gate <= '0';
+      data_sync_gate <= '0';
 
       if (transfer_on = '1') then
-        sync_gate <= '1';
+        data_sync_gate <= '1';
 
         -- NOTE: this increases nvm_addr correctly under NV2V. In V2NV, instaed,
         -- it increases one too many times (in theory) but it is correctly by
@@ -408,27 +408,27 @@ begin
           nvm_addr_pb <= nvm_addr_pb + 1;
         end if;
 
-        if (sync_s = '1') then
+        if (data_sync_s = '1') then
           transfer_cnt <= transfer_cnt + 1;
         end if;
 
         case nvm_active_transfer is
 
           when dbufctl_transfer =>
-            if (sync_s = '1' AND transfer_cnt = C_CHKPNT_NVM_DBUFCTL_AMOUNT) then
+            if (data_sync_s = '1' AND transfer_cnt = C_CHKPNT_NVM_DBUFCTL_AMOUNT) then
               transfer_on         <= '0';
-              sync_gate           <= '0';
+              data_sync_gate           <= '0';
               nvm_active_transfer <= no_transfer;
             end if;
           when ram_transfer =>
-            if (sync_s = '1' AND transfer_cnt = C_CHKPNT_NVM_RAM_AMOUNT) then
+            if (data_sync_s = '1' AND transfer_cnt = C_CHKPNT_NVM_RAM_AMOUNT) then
               transfer_on         <= '0';
-              sync_gate           <= '0';
+              data_sync_gate           <= '0';
               nvm_active_transfer <= no_transfer;
             end if;
           when no_transfer =>
             transfer_cnt <= 1;
-            sync_gate    <= '0';
+            data_sync_gate    <= '0';
 
         end case;
 
@@ -439,9 +439,9 @@ begin
           pbsm_pb_start_arr(proc_blk_order_t'pos(ram))='1') then
         transfer_on <= '1';
         nvm_en_pb   <= '1';
-        sync_gate   <= '0';
+        data_sync_gate   <= '0';
         if (sys_status_s= SYS_PUSH_CHKPNT_V2NV) then
-          sync_gate <= '1';
+          data_sync_gate <= '1';
         end if;
       end if;
 
@@ -484,7 +484,7 @@ begin
         nvm_addr_pb         <= (others => '0');
         nvm_en_pb           <= '0';
         transfer_on         <= '0';
-        sync_gate           <= '0';
+        data_sync_gate           <= '0';
         transfer_cnt        <= 1;
       end if;
     end if;
