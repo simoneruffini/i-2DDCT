@@ -1,4 +1,5 @@
 # Intermittent Two-Dimensional Discrete Cosine Transform
+![image](./doc/i-2DDCT.svg)
 
 This core implements a two-dimensional discrete cosine transform accelerator
 with effective response to a transient based envirronment.   
