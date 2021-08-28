@@ -18,7 +18,7 @@
 library IEEE;
   use IEEE.STD_LOGIC_1164.all;
   use IEEE.NUMERIC_STD.all;
-  use IEEE.math_real.all;
+  use IEEE.MATH_REAL.all;
 
 package i_2ddct_pkg is
 
@@ -28,10 +28,14 @@ package i_2ddct_pkg is
 
   -- Input data width
   constant C_INDATA_W : natural := 8;
+
+  constant C_PRECISION : natural := 11;
+  constant C_DYNAMIC_RANGE : natural := C_PRECISION + 1; -- (12) [-2^11,2^11-1]
+
   -- I DCT1S output data width
   constant C_1S_OUTDATA_W : natural := 10;
   -- Output data width
-  constant C_OUTDATA_W : natural := 12;
+  constant C_OUTDATA_W : natural := 12; -- = C_DYNAMIC_RANGE
   -- Input frame base size
   constant N : natural := 8;
 
@@ -52,7 +56,12 @@ package i_2ddct_pkg is
   constant C_CHKPNT_NVM_SYS_AMOUNT : natural := C_CHKPNT_NVM_DBUFCTL_AMOUNT + C_CHKPNT_NVM_RAM_AMOUNT; --(74)
 
   -- ROM data width
-  constant C_ROMDATA_W : natural := C_OUTDATA_W + 2;   --(14)
+  constant C_ROMDATA_W : natural := C_OUTDATA_W + 2;   --(14) 
+  -- +2 meaming:
+  -- In the rom some constants are multiplied by 4, in the worst case scenario
+  -- such constant could be 2^C_DYNAMIC_RANGE, hence if multiplied by 4:
+  -- log2(2^C_DYNAMIC_RANGE*4)=log2(2^C_DYNAMIC_RANGE * 2^2) = C_DYNAMIC_RANGE + 2 
+
   -- ROM address width
   constant C_ROMADDR_W : natural := ilog2(C_ROM_SIZE); --(6)
 
@@ -85,20 +94,35 @@ package i_2ddct_pkg is
   -- 2's complement numbers
   -- xP positive/plus value of x
   -- xM negative/minus value of x
-  constant AP : integer := 1448;   -- round(cos(pi/4)*(2^11))
-  constant BP : integer := 1892;   -- round(cos(pi/8)*(2^11))
-  constant CP : integer := 784;    -- round(sin(pi/8)*(2^11))
-  constant DP : integer := 2009;   -- round(cos(pi/16)*(2^11))
-  constant EP : integer := 1703;   -- round(cos(3*pi/16)*(2^11))
-  constant FP : integer := 1138;   -- round(sin(3*pi/16)*(2^11))
-  constant GP : integer := 400;    -- round(sin(pi/16)*(2^11))
-  constant AM : integer := - 1448; -- -1* round(cos(pi/4)*(2^11))
-  constant BM : integer := - 1892; -- -1* round(cos(pi/8)*(2^11))
-  constant CM : integer := - 784;  -- -1* round(sin(pi/8)*(2^11))
-  constant DM : integer := - 2009; -- -1* round(cos(pi/16)*(2^11))
-  constant EM : integer := - 1703; -- -1* round(cos(3*pi/16)*(2^11))
-  constant FM : integer := - 1138; -- -1* round(sin(3*pi/16)*(2^11))
-  constant GM : integer := - 400;  -- -1* round(sin(pi/16)*(2^11))
+  --constant AP : integer := 1448;   -- round(cos(pi/4)*(2^11))
+  --constant BP : integer := 1892;   -- round(cos(pi/8)*(2^11))
+  --constant CP : integer := 784;    -- round(sin(pi/8)*(2^11))
+  --constant DP : integer := 2009;   -- round(cos(pi/16)*(2^11))
+  --constant EP : integer := 1703;   -- round(cos(3*pi/16)*(2^11))
+  --constant FP : integer := 1138;   -- round(sin(3*pi/16)*(2^11))
+  --constant GP : integer := 400;    -- round(sin(pi/16)*(2^11))
+  --constant AM : integer := - 1448; -- -1* round(cos(pi/4)*(2^11))
+  --constant BM : integer := - 1892; -- -1* round(cos(pi/8)*(2^11))
+  --constant CM : integer := - 784;  -- -1* round(sin(pi/8)*(2^11))
+  --constant DM : integer := - 2009; -- -1* round(cos(pi/16)*(2^11))
+  --constant EM : integer := - 1703; -- -1* round(cos(3*pi/16)*(2^11))
+  --constant FM : integer := - 1138; -- -1* round(sin(3*pi/16)*(2^11))
+  --constant GM : integer := - 400;  -- -1* round(sin(pi/16)*(2^11))
+
+  constant AP : integer := integer(ROUND(COS(MATH_PI / 4.0)     * 2 ** C_PRECISION));  -- (1448)
+  constant BP : integer := integer(ROUND(COS(MATH_PI / 8.0)     * 2 ** C_PRECISION));  -- (1892)
+  constant CP : integer := integer(ROUND(COS(3 * MATH_PI / 8.0) * 2 ** C_PRECISION));  -- (784)
+  constant DP : integer := integer(ROUND(COS(MATH_PI / 16.0)    * 2 ** C_PRECISION));  -- (2009)
+  constant EP : integer := integer(ROUND(COS(3 * MATH_PI / 16.0) * 2 ** C_PRECISION)); -- (1703) 
+  constant FP : integer := integer(ROUND(COS(5 * MATH_PI / 16.0) * 2 ** C_PRECISION)); -- (1138) 
+  constant GP : integer := integer(ROUND(COS(7 * MATH_PI / 16.0) * 2 ** C_PRECISION)); -- (400) 
+  constant AN : integer := -1*AP; -- (-1448)
+  constant BN : integer := -1*BP; -- (-1892)
+  constant CN : integer := -1*CP; -- (-784)
+  constant DN : integer := -1*DP; -- (-2009)
+  constant EN : integer := -1*EP; -- (-1703)
+  constant FN : integer := -1*FP; -- (-1138)
+  constant GN : integer := -1*GP; -- (-400) 
 
   type sys_status_t is (
     SYS_RUN,

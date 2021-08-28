@@ -189,17 +189,17 @@ package I_2DDCTTB_PKG is
     constant Ce : COEM_TYPE :=
                             (
                             (to_signed(AP,C_ROMDATA_W),to_signed(AP,C_ROMDATA_W),to_signed(AP,C_ROMDATA_W),to_signed(AP,C_ROMDATA_W)),
-                            (to_signed(BP,C_ROMDATA_W),to_signed(CP,C_ROMDATA_W),to_signed(CM,C_ROMDATA_W),to_signed(BM,C_ROMDATA_W)),
-                            (to_signed(AP,C_ROMDATA_W),to_signed(AM,C_ROMDATA_W),to_signed(AM,C_ROMDATA_W),to_signed(AP,C_ROMDATA_W)),
-                            (to_signed(CP,C_ROMDATA_W),to_signed(BM,C_ROMDATA_W),to_signed(BP,C_ROMDATA_W),to_signed(CM,C_ROMDATA_W))
+                            (to_signed(BP,C_ROMDATA_W),to_signed(CP,C_ROMDATA_W),to_signed(CN,C_ROMDATA_W),to_signed(BN,C_ROMDATA_W)),
+                            (to_signed(AP,C_ROMDATA_W),to_signed(AN,C_ROMDATA_W),to_signed(AN,C_ROMDATA_W),to_signed(AP,C_ROMDATA_W)),
+                            (to_signed(CP,C_ROMDATA_W),to_signed(BN,C_ROMDATA_W),to_signed(BP,C_ROMDATA_W),to_signed(CN,C_ROMDATA_W))
                             );
                             
     constant Co : COEM_TYPE :=
                             (
                             (to_signed(DP,C_ROMDATA_W),to_signed(EP,C_ROMDATA_W),to_signed(FP,C_ROMDATA_W),to_signed(GP,C_ROMDATA_W)),
-                            (to_signed(EP,C_ROMDATA_W),to_signed(GM,C_ROMDATA_W),to_signed(DM,C_ROMDATA_W),to_signed(FM,C_ROMDATA_W)),
-                            (to_signed(FP,C_ROMDATA_W),to_signed(DM,C_ROMDATA_W),to_signed(GP,C_ROMDATA_W),to_signed(EP,C_ROMDATA_W)),
-                            (to_signed(GP,C_ROMDATA_W),to_signed(FM,C_ROMDATA_W),to_signed(EP,C_ROMDATA_W),to_signed(DM,C_ROMDATA_W))
+                            (to_signed(EP,C_ROMDATA_W),to_signed(GN,C_ROMDATA_W),to_signed(DN,C_ROMDATA_W),to_signed(FN,C_ROMDATA_W)),
+                            (to_signed(FP,C_ROMDATA_W),to_signed(DN,C_ROMDATA_W),to_signed(GP,C_ROMDATA_W),to_signed(EP,C_ROMDATA_W)),
+                            (to_signed(GP,C_ROMDATA_W),to_signed(FN,C_ROMDATA_W),to_signed(EP,C_ROMDATA_W),to_signed(DN,C_ROMDATA_W))
                             );
 end I_2DDCTTB_PKG;
 
