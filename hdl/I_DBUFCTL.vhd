@@ -30,7 +30,7 @@ entity I_DBUFCTL is
   port (
     CLK                    : in    std_logic;
     RST                    : in    std_logic;
-    DCT1S_FRAME_CMPLT      : in    std_logic;
+    DCT1S_BLOCK_CMPLT      : in    std_logic;
     MEMSEL                 : out   std_logic;
 
     SYS_STATUS             : in    sys_status_t;
@@ -97,7 +97,7 @@ begin
           pb_ready_s <= '1';
         end if;
       else  --if (SYS_STATUS = SYS_RUN or others) then
-        if (DCT1S_FRAME_CMPLT = '1') then
+        if (DCT1S_BLOCK_CMPLT = '1') then
           memsel_s <= not memsel_s;
         end if;
       end if;

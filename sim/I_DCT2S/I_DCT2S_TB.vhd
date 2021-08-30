@@ -68,7 +68,7 @@ architecture RTL of I_DCT2S_TB is
 
   signal dataready          : std_logic;
   signal datareadyack       : std_logic;
-  signal new_frame          : std_logic;
+  signal new_block          : std_logic;
 
   signal ram_raddr          : std_logic_vector(C_RAMADDR_W - 1 downto 0);
   signal ram_dout           : std_logic_vector(C_RAMDATA_W - 1 downto 0);
@@ -118,7 +118,7 @@ begin
       RMEMSEL => rmemsel,
       ----------------------------------------------------------
       SYS_STATUS => sys_status,
-      NEW_FRAME => new_frame
+      NEW_BLOCK => new_block
     );
 
   --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -182,22 +182,22 @@ begin
 
   end process P_RESET_GEN;
 
-  P_NEW_FRAME : process (clk, rst) is
+  P_NEW_BLOCK : process (clk, rst) is
 
   begin
 
     if (rst = '1') then
       process_cnt <= 0;
     elsif (clk'event AND clk = '1') then
-      new_frame <= '0';
+      new_block <= '0';
       if (process_cnt =10) then
-        new_frame <= '1';
+        new_block <= '1';
       end if;
 
       process_cnt <= process_cnt + 1;
     end if;
 
-  end process P_NEW_FRAME;
+  end process P_NEW_BLOCK;
 
 end architecture RTL;
 

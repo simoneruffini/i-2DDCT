@@ -82,7 +82,7 @@ architecture RTL of I_2DDCT is
   signal i_dct1s_dout                  : std_logic_vector(C_RAMDATA_W - 1 downto 0);                                                                            -- RAM data out
   signal i_dct1s_we                    : std_logic;                                                                                                             -- RAM write enable
 
-  signal frame_cmplt                   : std_logic;                                                                                                             -- Write memory select signal
+  signal block_cmplt                   : std_logic;                                                                                                             -- Write memory select signal
 
   signal i_dct1s_varc_rdy              : std_logic;
 
@@ -149,7 +149,7 @@ begin
       RAM_DIN     => i_dct1s_din,
       RAM_DOUT    => i_dct1s_dout,
       RAM_WE      => i_dct1s_we,
-      FRAME_CMPLT => frame_cmplt,
+      BLOCK_CMPLT => block_cmplt,
       -- debug -------------------------------------------------
       ODV  => odv1,
       DCTO => dcto1,
@@ -181,7 +181,7 @@ begin
       ODV  => ODV,
       DCTO => DOUT,
       ----------------------------------------------------------
-      NEW_FRAME => frame_cmplt,
+      NEW_BLOCK => block_cmplt,
       -- Intermittent Enhancment Ports -------------------------
       SYS_STATUS     => SYS_STATUS,
       DCT1S_VARC_RDY => i_dct1s_varc_rdy,
@@ -383,7 +383,7 @@ begin
       dbufctl_ready  <= '1';
       dbufctl_ready  <= '1';
     elsif (clk'event AND clk = '1') then
-      if (frame_cmplt = '1') then
+      if (block_cmplt = '1') then
         dbufctl_memsel <= not dbufctl_memsel;
       end if;
       if (DBUFCTL_START = '1') then

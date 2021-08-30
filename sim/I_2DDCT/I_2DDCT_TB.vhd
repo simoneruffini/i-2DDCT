@@ -102,7 +102,7 @@ architecture RTL of I_2DDCT_TB is
   signal ram1_dout,  ram2_dout         : std_logic_vector(C_RAMDATA_W - 1 downto 0);                                                                            -- RAM data out
   signal ram1_we,    ram2_we           : std_logic;                                                                                                             -- RAM write enable
 
-  signal frame_cmplt                   : std_logic;                                                                                                             -- Write memory select signal
+  signal block_cmplt                   : std_logic;                                                                                                             -- Write memory select signal
 
   signal i_dct1s_waddr                 : std_logic_vector(C_RAMADDR_W - 1 downto 0);                                                                            -- RAM write address output
   signal i_dct1s_raddr                 : std_logic_vector(C_RAMADDR_W - 1 downto 0);                                                                            -- RAM read address
@@ -124,7 +124,7 @@ architecture RTL of I_2DDCT_TB is
   signal i_dct2s_we                    : std_logic;                                                                                                             -- RAM write enable
 
   signal rmemsel                       : std_logic;
-  signal newframe                      : std_logic;
+  signal newblock                      : std_logic;
   signal i_dct2s_varc_rdy              : std_logic;
   signal dbufctl_memsel                : std_logic;
 
@@ -275,7 +275,7 @@ begin
       RAM_DIN     => i_dct1s_din,
       RAM_DOUT    => i_dct1s_dout,
       RAM_WE      => i_dct1s_we,
-      FRAME_CMPLT => frame_cmplt,
+      BLOCK_CMPLT => block_cmplt,
       -- debug -------------------------------------------------
       ODV  => odv1,
       DCTO => dcto1,
@@ -307,7 +307,7 @@ begin
       ODV  => odv,
       DCTO => dcto,
       ----------------------------------------------------------
-      NEW_FRAME => frame_cmplt,
+      NEW_BLOCK => block_cmplt,
       -- Intermittent Enhancment Ports -------------------------
       SYS_STATUS     => sys_status,
       DCT1S_VARC_RDY => i_dct1s_varc_rdy,
@@ -438,7 +438,7 @@ begin
     port map (
       CLK               => clk,
       RST               => rst,
-      DCT1S_FRAME_CMPLT => frame_cmplt,
+      DCT1S_BLOCK_CMPLT => block_cmplt,
       MEMSEL            => dbufctl_memsel,
 
       SYS_STATUS    => sys_status,

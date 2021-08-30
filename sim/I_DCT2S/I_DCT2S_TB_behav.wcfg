@@ -94,9 +94,9 @@
             <obj_property name="ElementShortName">RMEMSEL</obj_property>
             <obj_property name="ObjectShortName">RMEMSEL</obj_property>
          </wvobject>
-         <wvobject type="logic" fp_name="/I_DCT2S_TB/U_IDCT2S/NEW_FRAME">
-            <obj_property name="ElementShortName">NEW_FRAME</obj_property>
-            <obj_property name="ObjectShortName">NEW_FRAME</obj_property>
+         <wvobject type="logic" fp_name="/I_DCT2S_TB/U_IDCT2S/NEW_BLOCK">
+            <obj_property name="ElementShortName">NEW_BLOCK</obj_property>
+            <obj_property name="ObjectShortName">NEW_BLOCK</obj_property>
          </wvobject>
       </wvobject>
       <wvobject type="logic" fp_name="/I_DCT2S_TB/U_IDCT2S/stage1_en">

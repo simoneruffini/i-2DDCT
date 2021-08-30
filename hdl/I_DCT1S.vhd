@@ -47,7 +47,7 @@ entity I_DCT1S is
     RAM_DOUT                : in    std_logic_vector(C_RAMDATA_W - 1 downto 0);             -- RAM data input
     RAM_WE                  : out   std_logic;                                              -- RAM write enable
     ----------------------------------------------------------
-    FRAME_CMPLT             : out   std_logic;                                              -- Write memory select signal
+    BLOCK_CMPLT             : out   std_logic;                                              -- Write memory select signal
     -- Debug -------------------------------------------------
     ODV                     : out   std_logic;                                              -- Output data valid
     DCTO                    : out   std_logic_vector(C_1S_OUTDATA_W - 1 downto 0);          -- DCT data output
@@ -90,7 +90,7 @@ architecture BEHAVIORAL of I_DCT1S is
   --########################### FUNCTIONS ######################################
 
   --########################### CONSTANTS 2 ####################################
-  constant C_DCT1S_CHKP_IN_RAM_STRT_ADDR            : natural := (C_FRAME_SIZE - 1) + 1;                                      -- start address in ram where DCT1S state/checkpoint is saved
+  constant C_DCT1S_CHKP_IN_RAM_STRT_ADDR            : natural := (C_BLOCK_SIZE - 1) + 1;                                      -- start address in ram where DCT1S state/checkpoint is saved
   constant C_DCT1S_CHKP_IN_RAM_OFST                 : natural := C_DCT1S_CHKPNT_RAM_SIZE - 1;                                 -- length of data saved in ram for DCT1S state/checkpoint: DBUF(N) + ROW_COL
 
   constant C_RAM_DBUF_STRT_ADDR                     : natural := C_DCT1S_CHKP_IN_RAM_STRT_ADDR;
@@ -118,7 +118,7 @@ architecture BEHAVIORAL of I_DCT1S is
   signal inpt_cnt                                   : unsigned(ilog2(N) - 1 downto 0);                                        -- Counter for received input data
 
   signal ram_we_s                                   : std_logic;
-  signal frame_cmplt_s                              : std_logic;
+  signal block_cmplt_s                              : std_logic;
   signal stage2_start                               : std_logic;
   signal stage2_cnt                                 : unsigned (ilog2(N + 1) - 1 downto 0);                                   -- Counter for stage2, needs to count N+1 values for init purposes
   signal col_cnt2                                   : unsigned(ilog2(N) - 1 downto 0);
@@ -128,7 +128,7 @@ architecture BEHAVIORAL of I_DCT1S is
   signal is_even_d                                  : std_logic_vector((C_PIPELINE_STAGES - 1) - 1 downto 0);
   signal ram_we_d                                   : std_logic_vector(C_PIPELINE_STAGES - 1 downto 0);
   signal ram_waddr_d                                : ram_waddr_delay_t (C_PIPELINE_STAGES - 1 downto 0);
-  signal frame_cmplt_s_d                            : std_logic_vector(C_PIPELINE_STAGES - 1 downto 0);
+  signal block_cmplt_s_d                            : std_logic_vector(C_PIPELINE_STAGES - 1 downto 0);
 
   signal rome_dout_d1                               : rom1_data_t;
   signal romo_dout_d1                               : rom1_data_t;
@@ -186,7 +186,7 @@ begin
 
   ODV         <= ram_we_d(ram_we_d'length - 1);                       -- 4 clock dealy
   DCTO        <= std_logic_vector(resize(signed(dcto_4(C_PL1_DATA_W - 1 downto 12)), C_1S_OUTDATA_W));
-  FRAME_CMPLT <= frame_cmplt_s_d(frame_cmplt_s_d'length - 1);         -- 4 clock delay
+  BLOCK_CMPLT <= block_cmplt_s_d(block_cmplt_s_d'length - 1);         -- 4 clock delay
   VARC_RDY    <= varc_rdy_s;
 
   --########################## COBINATORIAL FUNCTIONS ##########################
@@ -387,7 +387,7 @@ begin
       col_cnt2   <= (others => '0');
       row_cnt    <= (others => '0');
 
-      frame_cmplt_s <= '0';
+      block_cmplt_s <= '0';
       ram_we_s      <= '0';
       ram_waddr_s   <= (others => '0');
 
@@ -503,7 +503,7 @@ begin
 
         stage2_start  <= '0';
         ram_we_s      <= '0';
-        frame_cmplt_s <= '0';
+        block_cmplt_s <= '0';
 
         --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         -- 1st stage
@@ -551,9 +551,9 @@ begin
           if (col_cnt = 0) then
             row_cnt <= row_cnt + 1;                                                                                 -- 0->N-1 (7)
 
-            -- Signal a complete frame to DBUFCTL (resultin in switch to 2nd memory)
+            -- Signal a complete block to DBUFCTL (resultin in switch to 2nd memory)
             if (row_cnt = N - 1) then
-              frame_cmplt_s <= '1';
+              block_cmplt_s <= '1';
               col_cnt       <= (others => '0');
             end if;
           end if;
@@ -592,7 +592,7 @@ begin
       is_even_d       <= (others => '0');
       ram_we_d        <= (others => '0');
       ram_waddr_d     <= (others => (others => '0'));
-      frame_cmplt_s_d <= (others => '0');
+      block_cmplt_s_d <= (others => '0');
       dbuf_cmplt_d    <= (others => '1');
     elsif (CLK'event and CLK = '1') then
       if (i_dct_halt = '1') then
@@ -617,8 +617,8 @@ begin
         ram_waddr_d(ram_waddr_d'length - 1 downto 1) <= ram_waddr_d(ram_waddr_d'length - 2 downto 0);
         ram_waddr_d(0)                               <= ram_waddr_s;
 
-        frame_cmplt_s_d (frame_cmplt_s_d'length - 1 downto 1) <= frame_cmplt_s_d(frame_cmplt_s_d'length - 2 downto 0);
-        frame_cmplt_s_d(0)                                    <= frame_cmplt_s;
+        block_cmplt_s_d (block_cmplt_s_d'length - 1 downto 1) <= block_cmplt_s_d(block_cmplt_s_d'length - 2 downto 0);
+        block_cmplt_s_d(0)                                    <= block_cmplt_s;
 
         dbuf_cmplt_d(dbuf_cmplt_d'length - 1 downto 1) <= dbuf_cmplt_d(dbuf_cmplt_d'length - 2 downto 0);
 
@@ -736,13 +736,13 @@ begin
         -- read precomputed MAC results from LUT
         for i in 0 to 8 loop
           -- even
-          ROME_ADDR(i) <= std_logic_vector(col_cnt(ilog2(C_FRAME_SIZE) / 2 - 1 downto 1)) &
+          ROME_ADDR(i) <= std_logic_vector(col_cnt(ilog2(C_BLOCK_SIZE) / 2 - 1 downto 1)) &
                           dbuf(0)(i) &
                           dbuf(1)(i) &
                           dbuf(2)(i) &
                           dbuf(3)(i);
           -- odd
-          ROMO_ADDR(i) <= std_logic_vector(col_cnt(ilog2(C_FRAME_SIZE) / 2 - 1 downto 1)) &
+          ROMO_ADDR(i) <= std_logic_vector(col_cnt(ilog2(C_BLOCK_SIZE) / 2 - 1 downto 1)) &
                           dbuf(4)(i) &
                           dbuf(5)(i) &
                           dbuf(6)(i) &

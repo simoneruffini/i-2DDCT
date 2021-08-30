@@ -34,7 +34,7 @@ entity RAM_PB is
     RST                                : in    std_logic;                                    -- Positive reset
     ----------------------------------------------------------
     SYS_STATUS                         : in    sys_status_t;                                 -- System status from SYS_CTRL
-    DATA_SYNC                      : in    std_logic;                                    -- Sync signal from SYS_CTRL
+    DATA_SYNC                          : in    std_logic;                                    -- Sync signal from SYS_CTRL
     ----------------------------------------------------------
     START                              : in    std_logic;                                    -- Ram process block start
     RX                                 : in    std_logic_vector(C_NVM_DATA_W - 1 downto 0);  -- Dadta from SYS_CTRL
@@ -64,7 +64,7 @@ architecture RTL of RAM_PB is
   --########################### CONSTANTS 2 ####################################
 
   --########################### SIGNALS ########################################
-  signal nvm_ctrl_sync_d    : std_logic;                                              -- DATA_SYNC delay
+  signal data_sync_d        : std_logic;                                              -- DATA_SYNC delay
   signal start_d            : std_logic;                                              -- START delay
   --signal pb_task_on         : std_logic;                                      -- process block task[V2NV or NV2V] on
   signal ram_xaddr          : unsigned (C_RAMADDR_W - 1 downto 0);                    -- RAM [R/W]address
@@ -97,7 +97,7 @@ begin
 
   --########################## COBINATORIAL FUNCTIONS ##########################
 
-  ram_incr_en <= nvm_ctrl_sync_d OR start_d;
+  ram_incr_en <= data_sync_d OR start_d;
 
   --########################## PROCESSES #######################################
 
@@ -131,7 +131,7 @@ begin
       --     end if;
       --   -- NVM to RAM
       --   elsif (SYS_STATUS = SYS_PUSH_CHKPNT_V2NV) then
-      --     if (nvm_ctrl_sync_d = '1') then
+      --     if (data_sync_d = '1') then
       --       ready_s <= '1';
       --     end if;
 
@@ -203,11 +203,11 @@ begin
   begin
 
     if (RST = '1') then
-      nvm_ctrl_sync_d <= '0';
-      start_d         <= '0';
+      data_sync_d <= '0';
+      start_d     <= '0';
     elsif (CLK'event and CLK = '1') then
-      nvm_ctrl_sync_d <= DATA_SYNC;
-      start_d         <= START;
+      data_sync_d <= DATA_SYNC;
+      start_d     <= START;
     end if;
 
   end process P_DELAYS;

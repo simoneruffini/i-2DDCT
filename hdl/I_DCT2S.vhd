@@ -47,7 +47,7 @@ entity I_DCT2S is
     ODV            : out   std_logic;                                              -- Output Data Valid signal
     DCTO           : out   std_logic_vector(C_OUTDATA_W - 1 downto 0);             -- DCT output
     ----------------------------------------------------------
-    NEW_FRAME      : in    std_logic;                                              -- New frame available il ram
+    NEW_BLOCK      : in    std_logic;                                              -- New block available il ram
     -- Intermittent Enhancment Ports -------------------------
     SYS_STATUS     : in    sys_status_t;                                           -- System status
     DCT1S_VARC_RDY : in    std_logic;
@@ -87,7 +87,7 @@ architecture BEHAVIORAL of I_DCT2S is
   --########################### FUNCTIONS ######################################
 
   --########################### CONSTANTS 2 ####################################
-  constant C_DCT2S_CHKP_IN_RAM_STRT_ADDR                     : natural := (C_FRAME_SIZE - 1) + 1;                                      -- start address in ram where DCT2S state/checkpoint is saved
+  constant C_DCT2S_CHKP_IN_RAM_STRT_ADDR                     : natural := (C_BLOCK_SIZE - 1) + 1;                                      -- start address in ram where DCT2S state/checkpoint is saved
   constant C_DCT2S_CHKP_IN_RAM_OFST                          : natural := C_DCT1S_CHKPNT_RAM_SIZE - 1;                                 -- length of data saved in ram for DCT2S state/checkpoint: DBUF(N) + RAM_ROW (same as in DCT1S)
 
   constant C_DBUF_RAM_STRT_ADDR                              : natural := C_DCT2S_CHKP_IN_RAM_STRT_ADDR;
@@ -600,9 +600,9 @@ begin
         --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
         --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        -- New Frame available in RAM
+        -- New block available in RAM
         --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        if (NEW_FRAME = '1' OR stage1_direct_start = '1') then
+        if (NEW_BLOCK = '1' OR stage1_direct_start = '1') then
           stage1_direct_start <= '0';
           stage1_en           <= '1';
           -- to account for 1T RAM delay, increment RAM address counter
@@ -629,7 +629,7 @@ begin
           odv_gate <= '0';
         end if;
         -- Terrible hack to prevent extra data out of DCT2S
-        if(SYS_STATUS = SYS_HALT AND dbuf_cmplt_d(dbuf_cmplt_d'length-1) = '1') then
+        if (SYS_STATUS = SYS_HALT AND dbuf_cmplt_d(dbuf_cmplt_d'length - 1) = '1') then
           odv_gate <= '0';
         end if;
       end if;
@@ -799,13 +799,13 @@ begin
         -- read precomputed MAC results from LUT
         for i in 0 to 10 loop
           -- even
-          ROME_ADDR(i) <= std_logic_vector(col_cnt(ilog2(C_FRAME_SIZE) / 2 - 1 downto 1)) &
+          ROME_ADDR(i) <= std_logic_vector(col_cnt(ilog2(C_BLOCK_SIZE) / 2 - 1 downto 1)) &
                           dbuf(0)(i) &
                           dbuf(1)(i) &
                           dbuf(2)(i) &
                           dbuf(3)(i);
           -- odd
-          ROMO_ADDR(i) <= std_logic_vector(col_cnt(ilog2(C_FRAME_SIZE) / 2 - 1 downto 1)) &
+          ROMO_ADDR(i) <= std_logic_vector(col_cnt(ilog2(C_BLOCK_SIZE) / 2 - 1 downto 1)) &
                           dbuf(4)(i) &
                           dbuf(5)(i) &
                           dbuf(6)(i) &
