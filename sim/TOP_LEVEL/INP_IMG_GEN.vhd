@@ -35,10 +35,12 @@ library WORK;
 entity INP_IMG_GEN is
   port (
     CLK               : in    std_logic;
+    RST_EMU           : in    std_logic;
     ODV1              : in    std_logic;
     DCTO1             : in    std_logic_vector(C_1S_OUTDATA_W - 1 downto 0);
     ODV               : in    std_logic;
     DCTO              : in    std_logic_vector(C_OUTDATA_W - 1 downto 0);
+    SYS_STATUS        : in    sys_status_t;
 
     RST               : out   std_logic;
     IMAGEO            : out   std_logic_vector(C_INDATA_W - 1 downto 0);
@@ -76,11 +78,11 @@ begin
   --------------------------
   INP_IMG_GEN_PROC : process is
 
-    variable i             : integer   := 0;
-    variable j             : integer   := 0;
+    variable i             : integer := 0;
+    variable j             : integer := 0;
     variable insert_delays : boolean := FALSE;
     variable unf           : integer := 2; --Uniform  := InitUniform(7, 0.0, 2.0);
-    variable rnd           : real     := 0.0;
+    variable rnd           : real    := 0.0;
     variable xi            : integer := 0;
 
     -------------------------------------
@@ -101,6 +103,22 @@ begin
       wait until clk='1' and clk'event;
     end waitposedge;
 
+    
+    --------------------------------------
+    -- wait system run
+    --------------------------------------
+    -- return true if during the time the system was not in run, a reset occured
+    procedure waitsysrun (reset_occured : inout boolean) is
+    begin
+      reset_occured := false;
+      while SYS_STATUS /= SYS_RUN loop
+        if(RST_EMU = '1') then
+            reset_occured := true;
+        end if;
+        waitposedge;
+      end loop;
+    end waitsysrun;
+
     --------------------------------------
     -- read text image data
     --------------------------------------
@@ -120,6 +138,7 @@ begin
       variable pix_n       : integer := 0;
       variable x_n         : integer := 0;
       variable y_n         : integer := 0;
+      variable reset_occured : boolean := false;
     begin
       READLINE(infile, inline);
       READ(inline, y_size);
@@ -164,12 +183,14 @@ begin
           end loop;
 
           for i in 0 to N - 1 loop
-            for j in 0 to N - 1 loop
+            j:=0;
+            while (j<N) loop
+            --for j in 0 to N - 1 loop
               dv_s      <= '1';
               imageo_s  <= STD_LOGIC_VECTOR(
                                             TO_UNSIGNED(INTEGER(matrix(i, j)), C_INDATA_W));
-              xcon_s <= x_blk_cnt * N + j;
-              ycon_s <= y_blk_cnt * N + i;
+              xcon_s <= x_blk_cnt * N + j; --not used
+              ycon_s <= y_blk_cnt * N + i; --not used
               waitposedge;
 
               if (insert_delays = TRUE) then
@@ -177,6 +198,22 @@ begin
                 waitposedge(40);
               end if;
 
+              j:= j+1;
+
+              dv_s      <= '0';
+              waitsysrun(reset_occured);
+              if(reset_occured) then
+                -- during the time system was not in run a reset occured
+                -- restore computation to a good state
+                if((j-1) mod N = 0) then
+                  -- the current row was pushed succesfully to i-2ddct
+                  next; -- skip
+                else
+                  -- restart from beginning of the row
+                  j :=0;
+                end if;
+
+              end if;
             end loop;
           end loop;
 
@@ -952,6 +989,7 @@ begin
           error_dct_matrix_s <= error_dct_matrix_v;
 
         end loop;
+        report "y block " & integer'image(y_blocks8) & " x block " & integer'image(x_blocks8);
       end loop;
 
       -- PSNR

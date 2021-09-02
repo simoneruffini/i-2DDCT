@@ -42,7 +42,7 @@ entity I_2DDCT is
     ----------------------------------------------------------------------------
     -- Intermitent enhancement ports
     FIRST_RUN                       : in    std_logic;
-    DATA_SYNC                   : in    std_logic;
+    DATA_SYNC                       : in    std_logic;
     SYS_STATUS                      : in    sys_status_t;
     VARC_READY                      : out   std_logic;
 
@@ -240,6 +240,46 @@ begin
   --    MEMSWITCHRD => memswitchrd_s,
   --    DATAREADY   => dataready_s
   --  );
+  --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  -- |DBUFCTL|
+  --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  U_I_DBUFCTL : entity  work.i_dbufctl
+    port map (
+      CLK               => CLK,
+      RST               => RST,
+      DCT1S_BLOCK_CMPLT => block_cmplt,
+      MEMSEL            => dbufctl_memsel,
+
+      SYS_STATUS    => sys_status,
+      DATA_SYNC => data_sync,
+      PB_READY      => DBUFCTL_READY,
+      RX            => DBUFCTL_RX,
+      TX            => DBUFCTL_TX,
+      PB_START      => DBUFCTL_START
+    );
+ -- P_DBUFCTL : process (clk, rst) is
+ -- begin
+
+ --   if (rst = '1') then
+ --     dbufctl_memsel <= '0';
+ --     dbufctl_ready  <= '1';
+ --     dbufctl_ready  <= '1';
+ --   elsif (clk'event AND clk = '1') then
+ --     if (block_cmplt = '1') then
+ --       dbufctl_memsel <= not dbufctl_memsel;
+ --     end if;
+ --     if (DBUFCTL_START = '1') then
+ --       dbufctl_pb_ready_s <= '0';
+ --       DBUFCTL_TX         <= (0=>dbufctl_memsel, others => '0');
+ --     end if;
+ --     if (dbufctl_pb_ready_s = '0') then
+ --       if (data_sync = '0') then
+ --         dbufctl_pb_ready_s <= '1';
+ --       end if;
+ --     end if;
+ --   end if;
+
+ -- end process P_DBUFCTL;
 
   --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   -- |First stage ROMs|
@@ -372,36 +412,10 @@ begin
       RAM2_DOUT => ram_pb_ram2_dout
     );
 
-  --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  -- |DBUFCTL_PB|
-  --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  P_DBUFCTL : process (clk, rst) is
-  begin
-
-    if (rst = '1') then
-      dbufctl_memsel <= '0';
-      dbufctl_ready  <= '1';
-      dbufctl_ready  <= '1';
-    elsif (clk'event AND clk = '1') then
-      if (block_cmplt = '1') then
-        dbufctl_memsel <= not dbufctl_memsel;
-      end if;
-      if (DBUFCTL_START = '1') then
-        dbufctl_pb_ready_s <= '0';
-        DBUFCTL_TX         <= (0=>dbufctl_memsel, others => '0');
-      end if;
-      if (dbufctl_pb_ready_s = '0') then
-        if (data_sync = '0') then
-          dbufctl_pb_ready_s <= '1';
-        end if;
-      end if;
-    end if;
-
-  end process P_DBUFCTL;
 
   --########################## OUTPUT PORTS WIRING #############################
   VARC_READY    <= i_dct1s_varc_rdy AND i_dct2s_varc_rdy;
-  DBUFCTL_READY <= dbufctl_pb_ready_s;
+ -- DBUFCTL_READY <= dbufctl_pb_ready_s;
 
   --########################## COBINATORIAL FUNCTIONS ##########################
 

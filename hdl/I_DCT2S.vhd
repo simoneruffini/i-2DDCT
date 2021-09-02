@@ -120,6 +120,7 @@ architecture BEHAVIORAL of I_DCT2S is
   signal stage1_en                                           : std_logic;
   signal stage1_direct_start                                 : std_logic;
   signal stage2_start                                        : std_logic;
+  signal stage2_direct_start                                 : std_logic;
   signal stage2_cnt                                          : unsigned(C_RAMADDR_W - 1 downto 0);
 
   signal is_even                                             : std_logic;
@@ -401,6 +402,7 @@ begin
 
       stage1_direct_start <= '0';
       stage1_en           <= '0';
+      stage2_direct_start <= '0';                                                                                    -- Most important signal: makes I_DCT2S restart from checkpoint
       stage2_start        <= '0';
 
       stage2_cnt <= (others => '1');
@@ -487,7 +489,8 @@ begin
             stage1_direct_start <= '1';
             --stage1_en <= '1';
             --ram_col <= (0=>'1',others => '0');
-            stage2_start <= '1';                                                                                    -- Most important signal: makes I_DCT2S restart from checkpoint
+            stage2_direct_start <= '1';                                                                                    -- Most important signal: makes I_DCT2S restart from checkpoint
+            --stage2_start <= '1';                                                                                    -- Most important signal: makes I_DCT2S restart from checkpoint
 
             pull_chkpnt_from_ram_en <= '0';
           end if;
@@ -583,6 +586,12 @@ begin
 
           -- increment column counter
           col_cnt <= col_cnt + 1;
+        end if;
+
+        -- Direct start after checkpoint init
+        if(stage2_direct_start = '1') then
+          stage2_start <= '1';
+          stage2_direct_start <= '0';
         end if;
 
         if (stage2_start = '1') then

@@ -120,6 +120,7 @@ architecture BEHAVIORAL of I_DCT1S is
   signal ram_we_s                                   : std_logic;
   signal block_cmplt_s                              : std_logic;
   signal stage2_start                               : std_logic;
+  signal stage2_direct_start                               : std_logic;
   signal stage2_cnt                                 : unsigned (ilog2(N + 1) - 1 downto 0);                                   -- Counter for stage2, needs to count N+1 values for init purposes
   signal col_cnt2                                   : unsigned(ilog2(N) - 1 downto 0);
   signal ram_waddr_s                                : std_logic_vector(C_RAMADDR_W - 1 downto 0);
@@ -129,6 +130,7 @@ architecture BEHAVIORAL of I_DCT1S is
   signal ram_we_d                                   : std_logic_vector(C_PIPELINE_STAGES - 1 downto 0);
   signal ram_waddr_d                                : ram_waddr_delay_t (C_PIPELINE_STAGES - 1 downto 0);
   signal block_cmplt_s_d                            : std_logic_vector(C_PIPELINE_STAGES - 1 downto 0);
+  signal odv_gate                                            : std_logic;                                                              -- Halt all idct delay
 
   signal rome_dout_d1                               : rom1_data_t;
   signal romo_dout_d1                               : rom1_data_t;
@@ -184,7 +186,7 @@ begin
   RAM_RADDR <= (others => '0') when pull_chkpnt_from_ram_en = '0' else
                std_logic_vector(ram_xaddr_drct);                                         -- address drived from pull chkpnt procedure
 
-  ODV         <= ram_we_d(ram_we_d'length - 1);                       -- 4 clock dealy
+  ODV         <= ram_we_d(ram_we_d'length - 1) AND odv_gate;                       -- 4 clock dealy
   DCTO        <= std_logic_vector(resize(signed(dcto_4(C_PL1_DATA_W - 1 downto 12)), C_1S_OUTDATA_W));
   BLOCK_CMPLT <= block_cmplt_s_d(block_cmplt_s_d'length - 1);         -- 4 clock delay
   VARC_RDY    <= varc_rdy_s;
@@ -381,6 +383,7 @@ begin
       dcti_shift_reg <= (others => (others => '0'));
       dbuf           <= (others => (others => '0'));
       stage2_start   <= '0';
+      stage2_direct_start   <= '0';
 
       stage2_cnt <= (others => '1');                                                                                -- NOTE: stage2_cnt starts from a number greater then N-1, if it started from 0 it triggers 2stage prematurely
       col_cnt    <= (others => '0');
@@ -465,6 +468,7 @@ begin
           if (row_col_from_ram_d1 = '1') then
             row_cnt <= resize(unsigned(RAM_DOUT), row_cnt'length);
 
+            --stage2_direct_start <= '1';                                                                                    -- Most important signal: makes I_DCT1S restart from checkpoint
             stage2_start <= '1';                                                                                    -- Most important signal: makes I_DCT1S restart from checkpoint
 
             pull_chkpnt_from_ram_en <= '0';
@@ -558,6 +562,13 @@ begin
             end if;
           end if;
         end if;
+
+        -- Direct start after checkpoint init
+       -- if(stage2_direct_start = '1') then
+       --   stage2_start <= '1';
+       --   stage2_direct_start <= '0';
+       -- end if;
+
         if (stage2_start = '1') then
           stage2_cnt <= (others => '0');
 
@@ -580,6 +591,28 @@ begin
     end if;
 
   end process P_DATA_BUF_AND_CTRL;
+
+  P_ODV_GATE : process (CLK, RST) is
+  begin
+
+    if (RST = '1') then
+      odv_gate <= '1';
+    elsif (CLK'event and CLK = '1') then
+      if (i_dct_halt = '1') then
+        odv_gate <= '0';
+      else
+        odv_gate <= '1';
+       -- if (i_dct_halt_input ='1' AND last_dbuf_cmplt = '1') then
+       --   odv_gate <= '0';
+       -- end if;
+       -- -- Terrible hack to prevent extra data out of DCT2S
+       -- if (SYS_STATUS = SYS_HALT AND dbuf_cmplt_d(dbuf_cmplt_d'length - 1) = '1') then
+       --   odv_gate <= '0';
+       -- end if;
+      end if;
+    end if;
+
+  end process P_ODV_GATE;
 
   --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   -- Delays for internal signals

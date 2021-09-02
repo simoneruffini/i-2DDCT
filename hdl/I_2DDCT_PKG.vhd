@@ -92,23 +92,8 @@ package i_2ddct_pkg is
   constant C_NV_MEM_ACCESS_TIME_NS : positive := 50; --130;
 
   -- 2's complement numbers
-  -- xP positive/plus value of x
-  -- xM negative/minus value of x
-  --constant AP : integer := 1448;   -- round(cos(pi/4)*(2^11))
-  --constant BP : integer := 1892;   -- round(cos(pi/8)*(2^11))
-  --constant CP : integer := 784;    -- round(sin(pi/8)*(2^11))
-  --constant DP : integer := 2009;   -- round(cos(pi/16)*(2^11))
-  --constant EP : integer := 1703;   -- round(cos(3*pi/16)*(2^11))
-  --constant FP : integer := 1138;   -- round(sin(3*pi/16)*(2^11))
-  --constant GP : integer := 400;    -- round(sin(pi/16)*(2^11))
-  --constant AM : integer := - 1448; -- -1* round(cos(pi/4)*(2^11))
-  --constant BM : integer := - 1892; -- -1* round(cos(pi/8)*(2^11))
-  --constant CM : integer := - 784;  -- -1* round(sin(pi/8)*(2^11))
-  --constant DM : integer := - 2009; -- -1* round(cos(pi/16)*(2^11))
-  --constant EM : integer := - 1703; -- -1* round(cos(3*pi/16)*(2^11))
-  --constant FM : integer := - 1138; -- -1* round(sin(3*pi/16)*(2^11))
-  --constant GM : integer := - 400;  -- -1* round(sin(pi/16)*(2^11))
-
+  -- xP positive value of x
+  -- xN negative value of x
   constant AP : integer := integer(ROUND(COS(MATH_PI / 4.0)     * 2 ** C_PRECISION));  -- (1448)
   constant BP : integer := integer(ROUND(COS(MATH_PI / 8.0)     * 2 ** C_PRECISION));  -- (1892)
   constant CP : integer := integer(ROUND(COS(3 * MATH_PI / 8.0) * 2 ** C_PRECISION));  -- (784)

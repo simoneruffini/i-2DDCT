@@ -12,15 +12,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="332810fs"></ZoomStartTime>
-      <ZoomEndTime time="1060311fs"></ZoomEndTime>
-      <Cursor1Time time="1000000fs"></Cursor1Time>
+      <ZoomStartTime time="2049600fs"></ZoomStartTime>
+      <ZoomEndTime time="2435801fs"></ZoomEndTime>
+      <Cursor1Time time="2115000fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="397"></NameColumnWidth>
-      <ValueColumnWidth column_width="237"></ValueColumnWidth>
+      <ValueColumnWidth column_width="229"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="33" />
+   <WVObjectSize size="36" />
    <wvobject type="logic" fp_name="/I_2DDCT_TOP_LEVEL_TB/clk">
       <obj_property name="ElementShortName">clk</obj_property>
       <obj_property name="ObjectShortName">clk</obj_property>
@@ -37,18 +37,33 @@
       <obj_property name="ElementShortName">rst</obj_property>
       <obj_property name="ObjectShortName">rst</obj_property>
    </wvobject>
+   <wvobject type="logic" fp_name="/I_2DDCT_TOP_LEVEL_TB/rst_s">
+      <obj_property name="ElementShortName">rst_s</obj_property>
+      <obj_property name="ObjectShortName">rst_s</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/I_2DDCT_TOP_LEVEL_TB/rst_emu">
+      <obj_property name="ElementShortName">rst_emu</obj_property>
+      <obj_property name="ObjectShortName">rst_emu</obj_property>
+   </wvobject>
+   <wvobject type="other" fp_name="/I_2DDCT_TOP_LEVEL_TB/sys_enrg_status">
+      <obj_property name="ElementShortName">sys_enrg_status</obj_property>
+      <obj_property name="ObjectShortName">sys_enrg_status</obj_property>
+   </wvobject>
    <wvobject type="other" fp_name="/I_2DDCT_TOP_LEVEL_TB/U_SYS_CTRL/SYS_STATUS">
       <obj_property name="ElementShortName">SYS_STATUS</obj_property>
       <obj_property name="ObjectShortName">SYS_STATUS</obj_property>
    </wvobject>
-   <wvobject type="array" fp_name="/I_2DDCT_TOP_LEVEL_TB/din">
-      <obj_property name="ElementShortName">din[7:0]</obj_property>
-      <obj_property name="ObjectShortName">din[7:0]</obj_property>
-      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   <wvobject type="other" fp_name="/I_2DDCT_TOP_LEVEL_TB/counter">
+      <obj_property name="ElementShortName">counter</obj_property>
+      <obj_property name="ObjectShortName">counter</obj_property>
    </wvobject>
    <wvobject type="logic" fp_name="/I_2DDCT_TOP_LEVEL_TB/idv">
       <obj_property name="ElementShortName">idv</obj_property>
       <obj_property name="ObjectShortName">idv</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/I_2DDCT_TOP_LEVEL_TB/din">
+      <obj_property name="ElementShortName">din[7:0]</obj_property>
+      <obj_property name="ObjectShortName">din[7:0]</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/I_2DDCT_TOP_LEVEL_TB/dout">
       <obj_property name="ElementShortName">dout[11:0]</obj_property>
@@ -129,10 +144,6 @@
    <wvobject type="array" fp_name="/I_2DDCT_TOP_LEVEL_TB/nvm_dout">
       <obj_property name="ElementShortName">nvm_dout[19:0]</obj_property>
       <obj_property name="ObjectShortName">nvm_dout[19:0]</obj_property>
-   </wvobject>
-   <wvobject type="other" fp_name="/I_2DDCT_TOP_LEVEL_TB/sys_enrg_status">
-      <obj_property name="ElementShortName">sys_enrg_status</obj_property>
-      <obj_property name="ObjectShortName">sys_enrg_status</obj_property>
    </wvobject>
    <wvobject type="logic" fp_name="/I_2DDCT_TOP_LEVEL_TB/first_run">
       <obj_property name="ElementShortName">first_run</obj_property>
