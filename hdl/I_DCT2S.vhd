@@ -30,28 +30,30 @@ library WORK;
 
 entity I_DCT2S is
   port (
-    CLK            : in    std_logic;                                              -- Input Clock
-    RST            : in    std_logic;                                              -- Reset signal (active high)
+    CLK             : in    std_logic;                                              -- Input Clock
+    RST             : in    std_logic;                                              -- Reset signal (active high)
     ----------------------------------------------------------
-    RAM_WADDR      : out   std_logic_vector(C_RAMADDR_W - 1 downto 0);             -- RAM write address output
-    RAM_RADDR      : out   std_logic_vector(C_RAMADDR_W - 1 downto 0);             -- RAM write address output
-    RAM_DIN        : out   std_logic_vector(C_RAMDATA_W - 1 downto 0);             -- RAM data input
-    RAM_DOUT       : in    std_logic_vector(C_RAMDATA_W - 1 downto 0);             -- RAM data input
-    RAM_WE         : out   std_logic;                                              -- RAM write enable
+    RAM_WADDR       : out   std_logic_vector(C_RAMADDR_W - 1 downto 0);             -- RAM write address output
+    RAM_RADDR       : out   std_logic_vector(C_RAMADDR_W - 1 downto 0);             -- RAM write address output
+    RAM_DIN         : out   std_logic_vector(C_RAMDATA_W - 1 downto 0);             -- RAM data input
+    RAM_DOUT        : in    std_logic_vector(C_RAMDATA_W - 1 downto 0);             -- RAM data input
+    RAM_WE          : out   std_logic;                                              -- RAM write enable
     ----------------------------------------------------------
-    ROME_ADDR      : out   rom2_addr_t;                                            -- ROME address output
-    ROMO_ADDR      : out   rom2_addr_t;                                            -- ROMO address output
-    ROME_DOUT      : in    rom2_data_t;                                            -- ROME data output
-    ROMO_DOUT      : in    rom2_data_t;                                            -- ROMO data output
+    ROME_ADDR       : out   rom2_addr_t;                                            -- ROME address output
+    ROMO_ADDR       : out   rom2_addr_t;                                            -- ROMO address output
+    ROME_DOUT       : in    rom2_data_t;                                            -- ROME data output
+    ROMO_DOUT       : in    rom2_data_t;                                            -- ROMO data output
     ----------------------------------------------------------
-    ODV            : out   std_logic;                                              -- Output Data Valid signal
-    DCTO           : out   std_logic_vector(C_OUTDATA_W - 1 downto 0);             -- DCT output
+    ODV             : out   std_logic;                                              -- Output Data Valid signal
+    DCTO            : out   std_logic_vector(C_OUTDATA_W - 1 downto 0);             -- DCT output
     ----------------------------------------------------------
-    NEW_BLOCK      : in    std_logic;                                              -- New block available il ram
+    DATA_READY      : in    std_logic;                                              -- New block available in ram
+    DATA_READY_ACK  : out   std_logic;                                              -- New block available in ram acknowledgment
+    BLOCK_CMPLT     : out   std_logic;
     -- Intermittent Enhancment Ports -------------------------
-    SYS_STATUS     : in    sys_status_t;                                           -- System status
-    DCT1S_VARC_RDY : in    std_logic;
-    VARC_RDY       : out   std_logic                                               -- Volatile Architecture Ready
+    SYS_STATUS      : in    sys_status_t;                                           -- System status
+    DCT1S_VARC_RDY  : in    std_logic;
+    VARC_RDY        : out   std_logic                                               -- Volatile Architecture Ready
     ----------------------------------------------------------
   );
 end entity I_DCT2S;
@@ -402,7 +404,7 @@ begin
 
       stage1_direct_start <= '0';
       stage1_en           <= '0';
-      stage2_direct_start <= '0';                                                                                    -- Most important signal: makes I_DCT2S restart from checkpoint
+      stage2_direct_start <= '0';                                                                                          -- Most important signal: makes I_DCT2S restart from checkpoint
       stage2_start        <= '0';
 
       stage2_cnt <= (others => '1');
@@ -429,6 +431,7 @@ begin
       ram_row_from_ram_d1 <= '0';
 
       last_dbuf_cmplt_latch <= '0';
+      DATA_READY_ACK <= '0';
     elsif (CLK='1' and CLK'event) then
       -- Global Defaults
       pull_chkpnt_ram_cmplt <= '0';
@@ -473,7 +476,7 @@ begin
 
           if (to_integer(ram_xaddr_drct) = C_RAM_ROW_RAM_STRT_ADDR + C_RAM_ROW_RAM_OFST) then
             ram_xaddr_incr_en     <= '0';
-            pull_chkpnt_ram_cmplt <= '1';                                                                           -- Pulse to let know I_DCT2S_fsm that pull prcedure completed succesfully
+            pull_chkpnt_ram_cmplt <= '1';                                                                                  -- Pulse to let know I_DCT2S_fsm that pull prcedure completed succesfully
           end if;
 
           dbuf_from_ram_d1    <= dbuf_from_ram;
@@ -505,16 +508,16 @@ begin
           if (to_integer(ram_xaddr_drct) >= C_DBUF_RAM_STRT_ADDR and to_integer(ram_xaddr_drct) < C_DBUF_RAM_STRT_ADDR + C_DBUF_RAM_OFST) then
             dbuf(0)                        <= dbuf(dbuf'length - 1);
             dbuf(dbuf'length - 1 downto 1) <= dbuf(dbuf'length - 2 downto 0);
-            ram_din_s                      <= std_logic_vector(resize(dbuf(dbuf'length - 1), ram_din_s'length));    -- data is arithmetically adjusted (with 1's in MSbits) since dbuf is signed
+            ram_din_s                      <= std_logic_vector(resize(dbuf(dbuf'length - 1), ram_din_s'length));           -- data is arithmetically adjusted (with 1's in MSbits) since dbuf is signed
           elsif (to_integer(ram_xaddr_drct) >= C_DBUF_RAM_STRT_ADDR + C_DBUF_RAM_OFST and to_integer(ram_xaddr_drct) < C_RAM_ROW_RAM_STRT_ADDR + C_RAM_ROW_RAM_OFST) then
-            ram_din_s <= std_logic_vector(resize(ram_row2, ram_din_s'length));                                      -- WARNING: ram_row2 is transferred because ram_row is 1 address/clock in advance for ram delay purposes
+            ram_din_s <= std_logic_vector(resize(ram_row2, ram_din_s'length));                                             -- WARNING: ram_row2 is transferred because ram_row is 1 address/clock in advance for ram delay purposes
           end if;
 
           if (to_integer(ram_xaddr_drct)= C_DCT2S_CHKP_IN_RAM_STRT_ADDR + C_DCT2S_CHKP_IN_RAM_OFST) then
-            ram_we_s              <= '0';                                                                           -- disable write enable
-            ram_xaddr_incr_en     <= '0';                                                                           -- disabe ram_Xaddr increase procedure
-            push_chkpnt_to_ram_en <= '0';                                                                           -- disable push checkpoint to ram procedure
-            push_chkpnt_ram_cmplt <= '1';                                                                           -- Signal successfull push checkpoint to m_fsm
+            ram_we_s              <= '0';                                                                                  -- disable write enable
+            ram_xaddr_incr_en     <= '0';                                                                                  -- disabe ram_Xaddr increase procedure
+            push_chkpnt_to_ram_en <= '0';                                                                                  -- disable push checkpoint to ram procedure
+            push_chkpnt_ram_cmplt <= '1';                                                                                  -- Signal successfull push checkpoint to m_fsm
           end if;
         --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         -- Push/Pull both disabled
@@ -528,8 +531,10 @@ begin
         --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         -- NORMAL EXECUTION
         --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        stage2_start <= '0';
-        odv_s        <= '0';
+        stage2_start   <= '0';
+        odv_s          <= '0';
+        BLOCK_CMPLT    <= '0';
+        DATA_READY_ACK <= '0';
 
         --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         -- 1st stage
@@ -539,8 +544,8 @@ begin
           dcti_shift_reg(dcti_shift_reg'length - 2 downto 0) <= dcti_shift_reg(dcti_shift_reg'length  - 1 downto 1);
           dcti_shift_reg(dcti_shift_reg'length - 1)          <= resize(signed(RAM_DOUT), C_RAMDATA_W + 1);
 
-          ram_col2 <= ram_col2 + 1;                                                                                 -- 0->N-1 (7)
-          ram_col  <= ram_col + 1;                                                                                  -- 0->N-1 (7) (starts from 1)
+          ram_col2 <= ram_col2 + 1;                                                                                        -- 0->N-1 (7)
+          ram_col  <= ram_col + 1;                                                                                         -- 0->N-1 (7) (starts from 1)
 
           -- Last column is requested right now
           -- ram_col2 == 6-> 7
@@ -548,15 +553,20 @@ begin
           -- Increase row
           if (ram_col2 = N - 2) then
             ram_row <= ram_row + 1;
+
+            if(ram_row2 = N - 1) then
+              BLOCK_CMPLT <= '1';
+            end if;
           end if;
+
 
           -- A line was read now it goes into the pipeline
           if (ram_col2 = N - 1) then
             ram_row2 <= ram_row2 + 1;
 
             if (ram_row2 = N - 1) then
-              stage1_en <= '0';
-              ram_col   <= (others => '0');
+              stage1_en   <= '0';
+              ram_col     <= (others => '0');
             end if;
 
             -- after this sum dbuf is in range of -256 to 254 (min to max)
@@ -589,8 +599,8 @@ begin
         end if;
 
         -- Direct start after checkpoint init
-        if(stage2_direct_start = '1') then
-          stage2_start <= '1';
+        if (stage2_direct_start = '1') then
+          stage2_start        <= '1';
           stage2_direct_start <= '0';
         end if;
 
@@ -611,12 +621,17 @@ begin
         --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         -- New block available in RAM
         --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        if (NEW_BLOCK = '1' OR stage1_direct_start = '1') then
+        if ((DATA_READY = '1'  AND ram_col = 0 AND ram_row=0) OR stage1_direct_start = '1') then
           stage1_direct_start <= '0';
           stage1_en           <= '1';
           -- to account for 1T RAM delay, increment RAM address counter
           ram_col2 <= (others => '0');
           ram_col  <= (0=>'1', others => '0');
+          -- Reply acknowledgemnt data ready
+          if (stage1_direct_start = '0') then
+            -- If not triggered by direct start
+            DATA_READY_ACK <= '1';
+          end if;
         end if;
         --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
       end if;

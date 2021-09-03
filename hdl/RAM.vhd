@@ -83,7 +83,7 @@ architecture RTL of RAM is
 
   --########################### SIGNALS ########################################
 
-  signal mem                    : mem_type := initramfromfile("ramInit10bit.txt");
+  signal mem                    : mem_type; --:= initramfromfile("ramInit10bit.txt");
   signal read_addr              : std_logic_vector(ADDR_W - 1 downto 0);
 
   --########################### ARCHITECTURE BEGIN #############################

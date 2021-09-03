@@ -34,7 +34,8 @@ entity RAM_MUX is
     SYS_STATUS                                  : in    sys_status_t;                                           -- System status value of sys_status_t
     I_DCT1S_VARC_READY                          : in    std_logic;
     I_DCT2S_VARC_READY                          : in    std_logic;
-    DBUFCTL_MEMSEL                              : in    std_logic;
+    I_DBUFCTL_WMEMSEL                           : in    std_logic;
+    I_DBUFCTL_RMEMSEL                           : in    std_logic;
     -- TO/FROM RAM 1
     R1_DIN                                      : out   std_logic_vector(C_RAMDATA_W - 1 downto 0);
     R1_WADDR                                    : out   std_logic_vector(C_RAMADDR_W - 1 downto 0);
@@ -139,12 +140,12 @@ begin
                I_DCT2S_RADDR when SYS_STATUS = SYS_VARC_INIT_CHKPNT AND I_DCT1S_VARC_READY = '1' AND I_DCT2S_VARC_READY = '0' else
                I_DCT1S_RADDR when SYS_STATUS = SYS_VARC_INIT_CHKPNT AND I_DCT1S_VARC_READY = '0' AND I_DCT2S_VARC_READY = '0' else
                RAM_PB_RAM_RADDR when SYS_STATUS = SYS_PUSH_CHKPNT_V2NV else
-               (others => '1');
+               I_DCT2S_RADDR;
   -- DOUT mux
-  dct2s_mux_dout <= R2_DOUT when DBUFCTL_MEMSEL = '0' else
-                    R1_DOUT;
-  dct1s_mux_dout <= R2_DOUT when DBUFCTL_MEMSEL = '1' else
-                    R1_DOUT;
+  dct2s_mux_dout <= R1_DOUT when I_DBUFCTL_RMEMSEL = '0' else
+                    R2_DOUT;
+  dct1s_mux_dout <= R1_DOUT when I_DBUFCTL_RMEMSEL = '1' else
+                    R2_DOUT;
 
   -- WADDR mux
   mux_waddr <= I_DCT1S_WADDR when SYS_STATUS = SYS_RUN else
@@ -164,21 +165,21 @@ begin
                 mux_din;
 
   -- WE mux during RUN (DCT1S controls we)
-  run_mux_r1_we <= I_DCT1S_WE when DBUFCTL_MEMSEL = '0' else
+  run_mux_r1_we <= I_DCT1S_WE when I_DBUFCTL_WMEMSEL = '0' else
                    '0';
-  run_mux_r2_we <= I_DCT1S_WE when DBUFCTL_MEMSEL = '1' else
+  run_mux_r2_we <= I_DCT1S_WE when I_DBUFCTL_WMEMSEL = '1' else
                    '0';
 
   -- WE mux during DCT1S ram push
-  dct1s_push_mux_r1_we <= I_DCT1S_WE when DBUFCTL_MEMSEL = '0' else
+  dct1s_push_mux_r1_we <= I_DCT1S_WE when I_DBUFCTL_WMEMSEL = '0' else
                           '0';
-  dct1s_push_mux_r2_we <= I_DCT1S_WE when DBUFCTL_MEMSEL = '1' else
+  dct1s_push_mux_r2_we <= I_DCT1S_WE when I_DBUFCTL_WMEMSEL = '1' else
                           '0';
 
   -- WE mux during DCT2S ram push
-  dct2s_push_mux_r1_we <= I_DCT2S_WE when DBUFCTL_MEMSEL = '1' else
+  dct2s_push_mux_r1_we <= I_DCT2S_WE when I_DBUFCTL_WMEMSEL = '1' else
                           '0';
-  dct2s_push_mux_r2_we <= I_DCT2S_WE when DBUFCTL_MEMSEL = '0' else
+  dct2s_push_mux_r2_we <= I_DCT2S_WE when I_DBUFCTL_WMEMSEL = '0' else
                           '0';
   -- R1_WE mux
   mux_r1_we <= run_mux_r1_we when SYS_STATUS = SYS_RUN else

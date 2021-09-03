@@ -308,7 +308,7 @@ begin
   --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   -- Output generator for I_DCT Main fsm (mealy machine)
 
-  P_I_DCT_M_FSM_OUTPUTS : process (m_pstate, SYS_STATUS, push_chkpnt_ram_cmplt, pull_chkpnt_ram_cmplt) is
+  P_I_DCT_M_FSM_OUTPUTS : process (m_pstate, SYS_STATUS, push_chkpnt_ram_cmplt, pull_chkpnt_ram_cmplt,last_dbuf_cmplt) is
   begin
 
     -- defaults
@@ -354,6 +354,9 @@ begin
       when S_WAIT_DBUF_CMPLT =>
         i_dct_halt       <= '0';
         i_dct_halt_input <= '1';
+        if (last_dbuf_cmplt='1') then
+          i_dct_halt       <= '1';
+        end if;
       when S_WAIT_SYS_CHNG =>
         varc_rdy_s <= '1';
 
