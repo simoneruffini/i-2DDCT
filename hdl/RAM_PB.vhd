@@ -33,12 +33,12 @@ entity RAM_PB is
     CLK                                : in    std_logic;                                    -- Input clock
     RST                                : in    std_logic;                                    -- Positive reset
     ----------------------------------------------------------
-    SYS_STATUS                         : in    sys_status_t;                                 -- System status from SYS_CTRL
-    DATA_SYNC                          : in    std_logic;                                    -- Sync signal from SYS_CTRL
+    SYS_STATUS                         : in    sys_status_t;                                 -- System status from I_2DDCT_CTRL
+    DATA_SYNC                          : in    std_logic;                                    -- Sync signal from I_2DDCT_CTRL
     ----------------------------------------------------------
     START                              : in    std_logic;                                    -- Ram process block start
-    RX                                 : in    std_logic_vector(C_NVM_DATA_W - 1 downto 0);  -- Dadta from SYS_CTRL
-    TX                                 : out   std_logic_vector(C_NVM_DATA_W - 1 downto 0);  -- Data to SYS_CTRL
+    RX                                 : in    std_logic_vector(C_NVM_DATA_W - 1 downto 0);  -- Dadta from I_2DDCT_CTRL
+    TX                                 : out   std_logic_vector(C_NVM_DATA_W - 1 downto 0);  -- Data to I_2DDCT_CTRL
     READY                              : out   std_logic;                                    -- Proces Block ready signal
     ----------------------------------------------------------
     RAM1_DIN                           : out   std_logic_vector(C_RAMDATA_W - 1 downto 0);   -- Ram1 data input

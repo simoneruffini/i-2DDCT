@@ -3,10 +3,10 @@
 --
 --
 -- Create Date:     Wed Jun  26 14:39:11 CEST 2021
--- Design Name:     SYS_CTRL
--- Module Name:     SYS_CTRL.vhd - RTL
+-- Design Name:     I_2DDCT_CTRL
+-- Module Name:     I_2DDCT_CTRL.vhd - RTL
 -- Project Name:    i-2DDCT
--- Description:     Non volatile memory controller
+-- Description:     I-2DDCT controller
 --
 -- Revision:
 -- Revision 00 - Simone Ruffini
@@ -28,7 +28,7 @@ library WORK;
 
 ----------------------------- ENTITY -------------------------------------------
 
-entity SYS_CTRL is
+entity I_2DDCT_CTRL is
   port (
     CLK                       : in    std_logic;                                                   -- Input clock
     RST                       : in    std_logic;                                                   -- Positive reset
@@ -59,9 +59,9 @@ entity SYS_CTRL is
     RAM_PB_TX                 : in    std_logic_vector(C_NVM_DATA_W - 1 downto 0);                 -- RAM proces block TX signal
     RAM_PB_READY              : in    std_logic                                                    -- RAM_PB process block ready signal
   );
-end entity SYS_CTRL;
+end entity I_2DDCT_CTRL;
 
-architecture RTL of SYS_CTRL is
+architecture RTL of I_2DDCT_CTRL is
 
   --########################### CONSTANTS 1 ####################################
 

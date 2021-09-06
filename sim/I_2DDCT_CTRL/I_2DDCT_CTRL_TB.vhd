@@ -2,8 +2,8 @@
 -- Engineer:  Simone Ruffini [simone.ruffini@tutanota.com]
 --
 -- Create Date:     Tue Aug  3 16:53:35 CEST 2021
--- Design Name:     SYS_CTRL_TB
--- Module Name:     SYS_CTRL_TB.vhd - RTL
+-- Design Name:     I_2DDCT_CTRL_TB
+-- Module Name:     I_2DDCT_CTRL_TB.vhd - RTL
 -- Project Name:    i-2DDCT
 -- Description:     Intermittent Multidimensional Discrete Cosine Transform test bench
 --
@@ -29,14 +29,14 @@ library WORK;
 
 ----------------------------- ENTITY -------------------------------------------
 
-entity SYS_CTRL_TB is
+entity I_2DDCT_CTRL_TB is
   --port (
   --);
-end entity SYS_CTRL_TB;
+end entity I_2DDCT_CTRL_TB;
 
 ----------------------------- ARCHITECTURE -------------------------------------
 
-architecture RTL of SYS_CTRL_TB is
+architecture RTL of I_2DDCT_CTRL_TB is
 
   --########################### CONSTANTS 1 ####################################
   --constant C_CLK_FREQ_HZ                             : natural := 1000000;                                                                                                    -- 1MHz
@@ -158,9 +158,9 @@ begin
     );
 
   --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  -- |SYS_CTRL|
+  -- |I_2DDCT_CTRL|
   --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  U_SYS_CTRL : entity work.sys_ctrl
+  U_I_2DDCT_CTRL : entity work.i_2ddct_ctrl
     port map (
       CLK => clk,
       RST => rst,

@@ -189,9 +189,9 @@ begin
     );
 
   --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  -- |SYS_CTRL|
+  -- |I_2DDCT_CTRL|
   --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  U_SYS_CTRL : entity work.sys_ctrl
+  U_I_2DDCT_CTRL : entity work.i_2ddct_ctrl
     port map (
       CLK => clk,
       RST => rst,
@@ -484,8 +484,8 @@ begin
     end if;
   end process;
 
-  P_DCT_DATA_GEN : process (clk, rst) is
-
+  P_DCT_DATA_GEN : process (clk, rst_s) is
+    variable already_computed : boolean ;
   begin
 
     if (rst_s = '1') then
@@ -498,6 +498,7 @@ begin
       dcti <= (others => '0');
 
       if (sys_status = SYS_RUN) then
+        already_computed := false;
         idv <= '1';
         if (process_cnt < input_data01'length) then
           dcti        <= std_logic_vector(to_unsigned(input_data01(process_cnt), dcti'length));
@@ -509,12 +510,14 @@ begin
           idv <= '0';
         end if;
       else
-        if (rst = '1') then
-          if (process_cnt mod N /= N - 1) then
+        if(rst = '1' and already_computed = false) then
+          if (process_cnt mod N /= 0) then
+          --if (process_cnt mod N /= N-1) then
             process_cnt <= ((process_cnt / N) * N - 1) + 1;
           else
             process_cnt <= process_cnt + 1;
           end if;
+          already_computed := true;
         end if;
       end if;
     end if;
@@ -553,7 +556,8 @@ begin
     first_run       <= '1';
     rst             <= '0';
     rst_s           <= '0';
-    wait for 100 * C_CLK_PERIOD_NS;
+    --wait for 100 * C_CLK_PERIOD_NS;
+    wait for 108 * C_CLK_PERIOD_NS;
     first_run       <= '0';
     rst             <= '0';
     sys_enrg_status <= sys_enrg_hazard;
