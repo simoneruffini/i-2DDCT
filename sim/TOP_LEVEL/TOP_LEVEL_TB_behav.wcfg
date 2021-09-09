@@ -3,9 +3,9 @@
    <wave_state>
    </wave_state>
    <db_ref_list>
-      <db_ref path="I_2DDCT_TB_behav.wdb" id="1">
+      <db_ref path="TOP_LEVEL_TB_behav.wdb" id="1">
          <top_modules>
-            <top_module name="I_2DDCT_TB" />
+            <top_module name="TOP_LEVEL_TB" />
             <top_module name="i_2ddct_pkg" />
             <top_module name="i_2ddcttb_pkg" />
             <top_module name="norm_pkg" />
@@ -13,62 +13,50 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="11777500fs"></ZoomStartTime>
-      <ZoomEndTime time="12044501fs"></ZoomEndTime>
-      <Cursor1Time time="12000000fs"></Cursor1Time>
+      <ZoomStartTime time="0fs"></ZoomStartTime>
+      <ZoomEndTime time="22820001fs"></ZoomEndTime>
+      <Cursor1Time time="3135000fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="394"></NameColumnWidth>
-      <ValueColumnWidth column_width="128"></ValueColumnWidth>
+      <ValueColumnWidth column_width="104"></ValueColumnWidth>
    </column_width_setting>
    <WVObjectSize size="12" />
    <wave_markers>
-      <marker label="" time="331500000" />
-      <marker label="" time="1050500000" />
-      <marker label="" time="850000" />
-      <marker label="" time="1165000" />
-      <marker label="" time="1115000" />
-      <marker label="" time="2615000" />
-      <marker label="" time="9925000" />
-      <marker label="" time="7975000" />
+      <marker label="" time="2655000" />
+      <marker label="" time="3075000" />
    </wave_markers>
-   <wvobject type="logic" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/clk">
-      <obj_property name="ElementShortName">clk</obj_property>
-      <obj_property name="ObjectShortName">clk</obj_property>
+   <wvobject type="logic" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/CLK">
+      <obj_property name="ElementShortName">CLK</obj_property>
+      <obj_property name="ObjectShortName">CLK</obj_property>
       <obj_property name="CustomSignalColor">#FFD700</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
-   <wvobject type="logic" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/rst">
-      <obj_property name="ElementShortName">rst</obj_property>
-      <obj_property name="ObjectShortName">rst</obj_property>
+   <wvobject type="logic" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/RST">
+      <obj_property name="ElementShortName">RST</obj_property>
+      <obj_property name="ObjectShortName">RST</obj_property>
       <obj_property name="CustomSignalColor">#FF0000</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
-   <wvobject type="other" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/sys_enrg_status">
-      <obj_property name="ElementShortName">sys_enrg_status</obj_property>
-      <obj_property name="ObjectShortName">sys_enrg_status</obj_property>
+   <wvobject type="other" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/SYS_ENRG_STATUS">
+      <obj_property name="ElementShortName">SYS_ENRG_STATUS</obj_property>
+      <obj_property name="ObjectShortName">SYS_ENRG_STATUS</obj_property>
       <obj_property name="CustomSignalColor">#00FF7F</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
-   <wvobject type="other" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/sys_status">
-      <obj_property name="ElementShortName">sys_status</obj_property>
-      <obj_property name="ObjectShortName">sys_status</obj_property>
+   <wvobject type="other" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/SYS_STATUS">
+      <obj_property name="ElementShortName">SYS_STATUS</obj_property>
+      <obj_property name="ObjectShortName">SYS_STATUS</obj_property>
       <obj_property name="CustomSignalColor">#00FFFF</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
-   <wvobject type="other" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/input_row_cnt">
+   <wvobject type="other" fp_name="/TOP_LEVEL_TB/input_row_cnt">
       <obj_property name="ElementShortName">input_row_cnt</obj_property>
       <obj_property name="ObjectShortName">input_row_cnt</obj_property>
-   </wvobject>
-   <wvobject type="other" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/process_cnt">
-      <obj_property name="ElementShortName">process_cnt</obj_property>
-      <obj_property name="ObjectShortName">process_cnt</obj_property>
-      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
    </wvobject>
    <wvobject type="group" fp_name="group80">
       <obj_property name="label">I_2DDCT_CTRL</obj_property>
       <obj_property name="DisplayName">label</obj_property>
-      <obj_property name="isExpanded"></obj_property>
       <wvobject type="group" fp_name="group41">
          <obj_property name="label">I_2DDCT_CTRL_port</obj_property>
          <obj_property name="DisplayName">label</obj_property>
@@ -340,6 +328,10 @@
             <obj_property name="ObjectShortName">DCTI[7:0]</obj_property>
             <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
          </wvobject>
+         <wvobject type="other" fp_name="/TOP_LEVEL_TB/process_cnt">
+            <obj_property name="ElementShortName">process_cnt</obj_property>
+            <obj_property name="ObjectShortName">process_cnt</obj_property>
+         </wvobject>
          <wvobject type="logic" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/U_I_DCT1S/IDV">
             <obj_property name="ElementShortName">IDV</obj_property>
             <obj_property name="ObjectShortName">IDV</obj_property>
@@ -394,11 +386,6 @@
             <obj_property name="ElementShortName">DCTO[9:0]</obj_property>
             <obj_property name="ObjectShortName">DCTO[9:0]</obj_property>
             <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
-         </wvobject>
-         <wvobject type="other" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/dct1d_cnt">
-            <obj_property name="ElementShortName">dct1d_cnt</obj_property>
-            <obj_property name="ObjectShortName">dct1d_cnt</obj_property>
-            <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
          </wvobject>
          <wvobject type="other" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/U_I_DCT1S/SYS_STATUS">
             <obj_property name="ElementShortName">SYS_STATUS</obj_property>
@@ -483,7 +470,6 @@
       <wvobject type="group" fp_name="group87">
          <obj_property name="label">data_buf_and_ctrl</obj_property>
          <obj_property name="DisplayName">label</obj_property>
-         <obj_property name="isExpanded"></obj_property>
          <wvobject type="logic" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/U_I_2DDCT_CTRL/CLK">
             <obj_property name="ElementShortName">CLK</obj_property>
             <obj_property name="ObjectShortName">CLK</obj_property>
@@ -620,6 +606,27 @@
             <obj_property name="ElementShortName">row_cnt[2:0]</obj_property>
             <obj_property name="ObjectShortName">row_cnt[2:0]</obj_property>
          </wvobject>
+         <wvobject type="group" fp_name="group295">
+            <obj_property name="label">rom</obj_property>
+            <obj_property name="DisplayName">label</obj_property>
+            <obj_property name="isExpanded"></obj_property>
+            <wvobject type="array" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/U_I_DCT1S/ROME_ADDR">
+               <obj_property name="ElementShortName">ROME_ADDR[0:8][5:0]</obj_property>
+               <obj_property name="ObjectShortName">ROME_ADDR[0:8][5:0]</obj_property>
+            </wvobject>
+            <wvobject type="array" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/U_I_DCT1S/ROME_DOUT">
+               <obj_property name="ElementShortName">ROME_DOUT[0:8][13:0]</obj_property>
+               <obj_property name="ObjectShortName">ROME_DOUT[0:8][13:0]</obj_property>
+            </wvobject>
+            <wvobject type="array" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/U_I_DCT1S/ROMO_ADDR">
+               <obj_property name="ElementShortName">ROMO_ADDR[0:8][5:0]</obj_property>
+               <obj_property name="ObjectShortName">ROMO_ADDR[0:8][5:0]</obj_property>
+            </wvobject>
+            <wvobject type="array" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/U_I_DCT1S/ROMO_DOUT">
+               <obj_property name="ElementShortName">ROMO_DOUT[0:8][13:0]</obj_property>
+               <obj_property name="ObjectShortName">ROMO_DOUT[0:8][13:0]</obj_property>
+            </wvobject>
+         </wvobject>
          <wvobject type="array" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/U_I_DCT1S/dcto_1">
             <obj_property name="ElementShortName">dcto_1[21:0]</obj_property>
             <obj_property name="ObjectShortName">dcto_1[21:0]</obj_property>
@@ -635,6 +642,20 @@
          <wvobject type="array" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/U_I_DCT1S/dcto_4">
             <obj_property name="ElementShortName">dcto_4[21:0]</obj_property>
             <obj_property name="ObjectShortName">dcto_4[21:0]</obj_property>
+         </wvobject>
+         <wvobject type="logic" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/U_I_DCT1S/ODV">
+            <obj_property name="ElementShortName">ODV</obj_property>
+            <obj_property name="ObjectShortName">ODV</obj_property>
+         </wvobject>
+         <wvobject type="array" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/U_I_DCT1S/DCTO">
+            <obj_property name="ElementShortName">DCTO[9:0]</obj_property>
+            <obj_property name="ObjectShortName">DCTO[9:0]</obj_property>
+            <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
+         </wvobject>
+         <wvobject type="other" fp_name="/TOP_LEVEL_TB/dct1d_cnt">
+            <obj_property name="ElementShortName">dct1d_cnt</obj_property>
+            <obj_property name="ObjectShortName">dct1d_cnt</obj_property>
+            <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
          </wvobject>
       </wvobject>
    </wvobject>
@@ -725,7 +746,7 @@
             <obj_property name="ObjectShortName">DCTO[11:0]</obj_property>
             <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
          </wvobject>
-         <wvobject type="other" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/dct2d_cnt">
+         <wvobject type="other" fp_name="/TOP_LEVEL_TB/dct2d_cnt">
             <obj_property name="ElementShortName">dct2d_cnt</obj_property>
             <obj_property name="ObjectShortName">dct2d_cnt</obj_property>
          </wvobject>
@@ -804,7 +825,6 @@
       <wvobject type="group" fp_name="group710">
          <obj_property name="label">dbuf_and_ctrl</obj_property>
          <obj_property name="DisplayName">label</obj_property>
-         <obj_property name="isExpanded"></obj_property>
          <wvobject type="logic" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/U_I_DCT2S/CLK">
             <obj_property name="ElementShortName">CLK</obj_property>
             <obj_property name="ObjectShortName">CLK</obj_property>
@@ -915,6 +935,46 @@
          <wvobject type="array" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/U_I_DCT2S/dbuf">
             <obj_property name="ElementShortName">dbuf[7:0][10:0]</obj_property>
             <obj_property name="ObjectShortName">dbuf[7:0][10:0]</obj_property>
+            <wvobject type="array" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/U_I_DCT2S/dbuf[7]">
+               <obj_property name="ElementShortName">[7][10:0]</obj_property>
+               <obj_property name="ObjectShortName">[7][10:0]</obj_property>
+               <obj_property name="Radix">BINARYRADIX</obj_property>
+            </wvobject>
+            <wvobject type="array" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/U_I_DCT2S/dbuf[6]">
+               <obj_property name="ElementShortName">[6][10:0]</obj_property>
+               <obj_property name="ObjectShortName">[6][10:0]</obj_property>
+               <obj_property name="Radix">BINARYRADIX</obj_property>
+            </wvobject>
+            <wvobject type="array" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/U_I_DCT2S/dbuf[5]">
+               <obj_property name="ElementShortName">[5][10:0]</obj_property>
+               <obj_property name="ObjectShortName">[5][10:0]</obj_property>
+               <obj_property name="Radix">BINARYRADIX</obj_property>
+            </wvobject>
+            <wvobject type="array" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/U_I_DCT2S/dbuf[4]">
+               <obj_property name="ElementShortName">[4][10:0]</obj_property>
+               <obj_property name="ObjectShortName">[4][10:0]</obj_property>
+               <obj_property name="Radix">BINARYRADIX</obj_property>
+            </wvobject>
+            <wvobject type="array" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/U_I_DCT2S/dbuf[3]">
+               <obj_property name="ElementShortName">[3][10:0]</obj_property>
+               <obj_property name="ObjectShortName">[3][10:0]</obj_property>
+               <obj_property name="Radix">BINARYRADIX</obj_property>
+            </wvobject>
+            <wvobject type="array" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/U_I_DCT2S/dbuf[2]">
+               <obj_property name="ElementShortName">[2][10:0]</obj_property>
+               <obj_property name="ObjectShortName">[2][10:0]</obj_property>
+               <obj_property name="Radix">BINARYRADIX</obj_property>
+            </wvobject>
+            <wvobject type="array" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/U_I_DCT2S/dbuf[1]">
+               <obj_property name="ElementShortName">[1][10:0]</obj_property>
+               <obj_property name="ObjectShortName">[1][10:0]</obj_property>
+               <obj_property name="Radix">BINARYRADIX</obj_property>
+            </wvobject>
+            <wvobject type="array" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/U_I_DCT2S/dbuf[0]">
+               <obj_property name="ElementShortName">[0][10:0]</obj_property>
+               <obj_property name="ObjectShortName">[0][10:0]</obj_property>
+               <obj_property name="Radix">BINARYRADIX</obj_property>
+            </wvobject>
          </wvobject>
          <wvobject type="logic" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/U_I_DCT2S/stage2_start">
             <obj_property name="ElementShortName">stage2_start</obj_property>
@@ -960,6 +1020,7 @@
          <wvobject type="group" fp_name="group323">
             <obj_property name="label">rom</obj_property>
             <obj_property name="DisplayName">label</obj_property>
+            <obj_property name="isExpanded"></obj_property>
             <wvobject type="array" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/U_I_DCT2S/ROME_ADDR">
                <obj_property name="ElementShortName">ROME_ADDR[0:10][5:0]</obj_property>
                <obj_property name="ObjectShortName">ROME_ADDR[0:10][5:0]</obj_property>
@@ -976,6 +1037,30 @@
                <obj_property name="ElementShortName">ROMO_DOUT[0:10][13:0]</obj_property>
                <obj_property name="ObjectShortName">ROMO_DOUT[0:10][13:0]</obj_property>
             </wvobject>
+            <wvobject type="group" fp_name="group303">
+               <obj_property name="label">ROM_DOUT_LATCH</obj_property>
+               <obj_property name="DisplayName">label</obj_property>
+               <wvobject type="logic" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/U_I_DCT2S/romx_dout_latch_en_n">
+                  <obj_property name="ElementShortName">romx_dout_latch_en_n</obj_property>
+                  <obj_property name="ObjectShortName">romx_dout_latch_en_n</obj_property>
+               </wvobject>
+               <wvobject type="array" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/U_I_DCT2S/rome_dout_latch">
+                  <obj_property name="ElementShortName">rome_dout_latch[0:10][13:0]</obj_property>
+                  <obj_property name="ObjectShortName">rome_dout_latch[0:10][13:0]</obj_property>
+                  <obj_property name="CustomSignalColor">#A0A0A4</obj_property>
+                  <obj_property name="UseCustomSignalColor">true</obj_property>
+               </wvobject>
+               <wvobject type="array" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/U_I_DCT2S/romo_dout_latch">
+                  <obj_property name="ElementShortName">romo_dout_latch[0:10][13:0]</obj_property>
+                  <obj_property name="ObjectShortName">romo_dout_latch[0:10][13:0]</obj_property>
+                  <obj_property name="CustomSignalColor">#A0A0A4</obj_property>
+                  <obj_property name="UseCustomSignalColor">true</obj_property>
+               </wvobject>
+            </wvobject>
+         </wvobject>
+         <wvobject type="logic" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/U_I_DCT2S/is_even">
+            <obj_property name="ElementShortName">is_even</obj_property>
+            <obj_property name="ObjectShortName">is_even</obj_property>
          </wvobject>
          <wvobject type="array" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/U_I_DCT2S/dcto_1">
             <obj_property name="ElementShortName">dcto_1[23:0]</obj_property>
@@ -1259,6 +1344,92 @@
       <wvobject type="logic" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/U_I_DBUFCTL/pb_ready_s">
          <obj_property name="ElementShortName">pb_ready_s</obj_property>
          <obj_property name="ObjectShortName">pb_ready_s</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject type="group" fp_name="group269">
+      <obj_property name="label">INT_EMU</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject type="logic" fp_name="/TOP_LEVEL_TB/U_INT_EMU/CLK">
+         <obj_property name="ElementShortName">CLK</obj_property>
+         <obj_property name="ObjectShortName">CLK</obj_property>
+         <obj_property name="CustomSignalColor">#FFD700</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/TOP_LEVEL_TB/U_INT_EMU/RST">
+         <obj_property name="ElementShortName">RST</obj_property>
+         <obj_property name="ObjectShortName">RST</obj_property>
+         <obj_property name="CustomSignalColor">#FF00FF</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/TOP_LEVEL_TB/U_INT_EMU/EN">
+         <obj_property name="ElementShortName">EN</obj_property>
+         <obj_property name="ObjectShortName">EN</obj_property>
+         <obj_property name="CustomSignalColor">#FFA500</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/TOP_LEVEL_TB/U_INT_EMU/INIT">
+         <obj_property name="ElementShortName">INIT</obj_property>
+         <obj_property name="ObjectShortName">INIT</obj_property>
+         <obj_property name="CustomSignalColor">#E0FFFF</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/TOP_LEVEL_TB/U_INT_EMU/RST_EMU">
+         <obj_property name="ElementShortName">RST_EMU</obj_property>
+         <obj_property name="ObjectShortName">RST_EMU</obj_property>
+         <obj_property name="CustomSignalColor">#FF0000</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/TOP_LEVEL_TB/U_INT_EMU/THRESH_STATS">
+         <obj_property name="ElementShortName">THRESH_STATS[1:0]</obj_property>
+         <obj_property name="ObjectShortName">THRESH_STATS[1:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/TOP_LEVEL_TB/U_INT_EMU/THRESH_VALUES">
+         <obj_property name="ElementShortName">THRESH_VALUES[1:0]</obj_property>
+         <obj_property name="ObjectShortName">THRESH_VALUES[1:0]</obj_property>
+      </wvobject>
+      <wvobject type="other" fp_name="/TOP_LEVEL_TB/U_INT_EMU/RST_EMU_THRESH_INDX">
+         <obj_property name="ElementShortName">RST_EMU_THRESH_INDX</obj_property>
+         <obj_property name="ObjectShortName">RST_EMU_THRESH_INDX</obj_property>
+      </wvobject>
+      <wvobject type="other" fp_name="/TOP_LEVEL_TB/U_INT_EMU/VTRACE_ROM_START_INDX">
+         <obj_property name="ElementShortName">VTRACE_ROM_START_INDX</obj_property>
+         <obj_property name="ObjectShortName">VTRACE_ROM_START_INDX</obj_property>
+      </wvobject>
+      <wvobject type="other" fp_name="/TOP_LEVEL_TB/U_INT_EMU/VTRACE_ROM_SAMPLES">
+         <obj_property name="ElementShortName">VTRACE_ROM_SAMPLES</obj_property>
+         <obj_property name="ObjectShortName">VTRACE_ROM_SAMPLES</obj_property>
+      </wvobject>
+      <wvobject type="other" fp_name="/TOP_LEVEL_TB/U_INT_EMU/VTRACE_ROM_RADDR">
+         <obj_property name="ElementShortName">VTRACE_ROM_RADDR</obj_property>
+         <obj_property name="ObjectShortName">VTRACE_ROM_RADDR</obj_property>
+      </wvobject>
+      <wvobject type="other" fp_name="/TOP_LEVEL_TB/U_INT_EMU/VTRACE_ROM_DOUT">
+         <obj_property name="ElementShortName">VTRACE_ROM_DOUT</obj_property>
+         <obj_property name="ObjectShortName">VTRACE_ROM_DOUT</obj_property>
+      </wvobject>
+      <wvobject type="other" fp_name="/TOP_LEVEL_TB/U_INT_EMU/rom_start_addr_samp">
+         <obj_property name="ElementShortName">rom_start_addr_samp</obj_property>
+         <obj_property name="ObjectShortName">rom_start_addr_samp</obj_property>
+      </wvobject>
+      <wvobject type="other" fp_name="/TOP_LEVEL_TB/U_INT_EMU/rom_offset_samp">
+         <obj_property name="ElementShortName">rom_offset_samp</obj_property>
+         <obj_property name="ObjectShortName">rom_offset_samp</obj_property>
+      </wvobject>
+      <wvobject type="other" fp_name="/TOP_LEVEL_TB/U_INT_EMU/rom_raddr_s">
+         <obj_property name="ElementShortName">rom_raddr_s</obj_property>
+         <obj_property name="ObjectShortName">rom_raddr_s</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/TOP_LEVEL_TB/U_INT_EMU/output_comparator">
+         <obj_property name="ElementShortName">output_comparator[1:0]</obj_property>
+         <obj_property name="ObjectShortName">output_comparator[1:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/TOP_LEVEL_TB/U_INT_EMU/prescaler_cnt_tc">
+         <obj_property name="ElementShortName">prescaler_cnt_tc</obj_property>
+         <obj_property name="ObjectShortName">prescaler_cnt_tc</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/TOP_LEVEL_TB/U_INT_EMU/prescaler_cnt_init">
+         <obj_property name="ElementShortName">prescaler_cnt_init</obj_property>
+         <obj_property name="ObjectShortName">prescaler_cnt_init</obj_property>
       </wvobject>
    </wvobject>
 </wave_config>

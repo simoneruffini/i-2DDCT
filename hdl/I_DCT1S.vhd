@@ -132,6 +132,9 @@ architecture BEHAVIORAL of I_DCT1S is
   signal block_cmplt_s_d                            : std_logic_vector(C_PIPELINE_STAGES - 1 downto 0);
   signal odv_gate                                            : std_logic;                                                              -- Halt all idct delay
 
+  signal romx_dout_latch_en_n                       : std_logic;
+  signal rome_dout_latch                            : rom1_data_t;
+  signal romo_dout_latch                            : rom1_data_t;
   signal rome_dout_d1                               : rom1_data_t;
   signal romo_dout_d1                               : rom1_data_t;
   signal rome_dout_d2                               : rom1_data_t;
@@ -595,6 +598,11 @@ begin
 
   end process P_DATA_BUF_AND_CTRL;
 
+  --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  -- Output Data Valid gate
+  --
+  -- Used to corectly send data (enable ODV) to the user space (debug)
+
   P_ODV_GATE : process (CLK, RST) is
   begin
 
@@ -673,6 +681,43 @@ begin
   end process P_DELAYS;
 
   --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  -- ROMx_DOUT latch
+  -- 
+  -- This latch is used when the system halts. In this period the expected
+  -- behavior is that ROMx_DOUT doesn't change, this does not happen because 
+  -- ROMx_ADDR did, hence this latch is used to keep the value stable when system 
+  -- restarts.
+  -- Processes that read ROMx_DOUT need to use the latched value when the system
+  -- restarts and a new value was written (romx_dout_latch_en_n = '1')
+
+  P_ROMX_DOUT_LATCH: process(CLK,RST) is
+  begin
+    if(RST = '1') then
+      romx_dout_latch_en_n <= '0';
+    elsif(rising_edge(CLK)) then
+      if (i_dct_halt = '1') then
+      --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      -- HALTED EXECUTION
+      --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        if(romx_dout_latch_en_n = '0') then
+          rome_dout_latch<= ROME_DOUT;
+          romo_dout_latch<= ROMO_DOUT;
+          romx_dout_latch_en_n <= '1';
+        end if;
+      else
+        --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        -- NORMAL EXECUTION
+        --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        -- Disable latch after the system is no more halted
+        if(romx_dout_latch_en_n = '1') then
+          romx_dout_latch_en_n <= '0';
+        end if;
+
+      end if;
+    end if;
+  end process P_ROMX_DOUT_LATCH;
+
+  --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   -- Data Pipeline
 
   P_DATA_OUT_PIPE : process (CLK, RST) is
@@ -706,6 +751,23 @@ begin
                                        (resize(signed(ROMO_DOUT(2)), C_PL1_DATA_W - 2) & "00"),
                                        C_PL1_DATA_W));
         end if;
+
+        if (romx_dout_latch_en_n = '1') then
+          if (is_even = '1') then
+            dcto_1 <= std_logic_vector(resize
+                                       (resize(signed(rome_dout_latch(0)), C_PL1_DATA_W) +
+                                         (resize(signed(rome_dout_latch(1)), C_PL1_DATA_W - 1) & '0') +
+                                         (resize(signed(rome_dout_latch(2)), C_PL1_DATA_W - 2) & "00"),
+                                         C_PL1_DATA_W));
+          else
+            dcto_1 <= std_logic_vector(resize
+                                       (resize(signed(romo_dout_latch(0)), C_PL1_DATA_W) +
+                                         (resize(signed(romo_dout_latch(1)), C_PL1_DATA_W - 1) & '0') +
+                                         (resize(signed(romo_dout_latch(2)), C_PL1_DATA_W - 2) & "00"),
+                                         C_PL1_DATA_W));
+          end if;
+        end if;
+
         if (is_even_d(1 - 1) = '1') then      -- is even 1 clk delay
           dcto_2 <= std_logic_vector(resize
                                      (signed(dcto_1) +
@@ -814,6 +876,10 @@ begin
 
         rome_dout_d1 <= ROME_DOUT;
         romo_dout_d1 <= ROMO_DOUT;
+        if (romx_dout_latch_en_n = '1') then
+          rome_dout_d1 <= rome_dout_latch;
+          romo_dout_d1 <= romo_dout_latch;
+        end if;
         rome_dout_d2 <= rome_dout_d1;
         romo_dout_d2 <= romo_dout_d1;
         rome_dout_d3 <= rome_dout_d2;
