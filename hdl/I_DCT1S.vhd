@@ -64,11 +64,11 @@ end entity I_DCT1S;
 architecture BEHAVIORAL of I_DCT1S is
 
   --########################### CONSTANTS 1 ####################################
-  constant C_PIPELINE_STAGES                        : natural := 4;
+  constant C_PIPELINE_STAGES                                 : natural := 4;
 
   --########################### TYPES ##########################################
 
-  type input_data is array (N - 1 downto 0) of signed(C_INDATA_W downto 0);                                                   -- One extra bit                                               -- NOTE: C_INDATA_W not C_INDATA_W-1, one bit extra
+  type input_data is array (N - 1 downto 0) of signed(C_INDATA_W downto 0);                                                            -- One extra bit                                               -- NOTE: C_INDATA_W not C_INDATA_W-1, one bit extra
 
   type ram_waddr_delay_t is array (natural range <>) of std_logic_vector(C_RAMADDR_W - 1 downto 0);
 
@@ -90,78 +90,78 @@ architecture BEHAVIORAL of I_DCT1S is
   --########################### FUNCTIONS ######################################
 
   --########################### CONSTANTS 2 ####################################
-  constant C_DCT1S_CHKP_IN_RAM_STRT_ADDR            : natural := (C_BLOCK_SIZE - 1) + 1;                                      -- start address in ram where DCT1S state/checkpoint is saved
-  constant C_DCT1S_CHKP_IN_RAM_OFST                 : natural := C_DCT1S_CHKPNT_RAM_SIZE - 1;                                 -- length of data saved in ram for DCT1S state/checkpoint: DBUF(N) + ROW_COL
+  constant C_DCT1S_CHKP_IN_RAM_STRT_ADDR                     : natural := (C_BLOCK_SIZE - 1) + 1;                                      -- start address in ram where DCT1S state/checkpoint is saved
+  constant C_DCT1S_CHKP_IN_RAM_OFST                          : natural := C_DCT1S_CHKPNT_RAM_SIZE - 1;                                 -- length of data saved in ram for DCT1S state/checkpoint: DBUF(N) + ROW_COL
 
-  constant C_RAM_DBUF_STRT_ADDR                     : natural := C_DCT1S_CHKP_IN_RAM_STRT_ADDR;
-  constant C_RAM_DBUF_OFST                          : natural := N - 1;
-  constant C_RAM_ROW_COL_STRT_ADDR                  : natural := C_RAM_DBUF_STRT_ADDR + C_RAM_DBUF_OFST + 1;
-  constant C_RAM_ROW_COL_OFST                       : natural := 0;
+  constant C_RAM_DBUF_STRT_ADDR                              : natural := C_DCT1S_CHKP_IN_RAM_STRT_ADDR;
+  constant C_RAM_DBUF_OFST                                   : natural := N - 1;
+  constant C_RAM_ROW_COL_STRT_ADDR                           : natural := C_RAM_DBUF_STRT_ADDR + C_RAM_DBUF_OFST + 1;
+  constant C_RAM_ROW_COL_OFST                                : natural := 0;
 
   --########################### SIGNALS ########################################
 
-  signal m_pstate                                   : i_dct1s_m_fsm_t;                                                        -- I_DCT1S main fsm present state
-  signal m_fstate                                   : i_dct1s_m_fsm_t;                                                        -- I_DCT1S main fsm future state
+  signal m_pstate                                            : i_dct1s_m_fsm_t;                                                        -- I_DCT1S main fsm present state
+  signal m_fstate                                            : i_dct1s_m_fsm_t;                                                        -- I_DCT1S main fsm future state
 
-  signal push_chkpnt_ram_cmplt                      : std_logic;                                                              -- Push checkpoint data to RAM complete signal
-  signal pull_chkpnt_ram_cmplt                      : std_logic;                                                              -- Pull checkpoint data from RAM complete signal
+  signal push_chkpnt_ram_cmplt                               : std_logic;                                                              -- Push checkpoint data to RAM complete signal
+  signal pull_chkpnt_ram_cmplt                               : std_logic;                                                              -- Pull checkpoint data from RAM complete signal
 
-  signal varc_rdy_s                                 : std_logic;                                                              -- Volatile architecture ready signal
-  signal i_dct_halt                                 : std_logic;                                                              -- Halt all idct
-  signal i_dct_halt_input                           : std_logic;                                                              -- Halt only input stage of idct leaving rest working
+  signal varc_rdy_s                                          : std_logic;                                                              -- Volatile architecture ready signal
+  signal i_dct_halt                                          : std_logic;                                                              -- Halt all idct
+  signal i_dct_halt_input                                    : std_logic;                                                              -- Halt only input stage of idct leaving rest working
 
-  signal dbuf                                       : input_data;
-  signal dcti_shift_reg                             : input_data;
+  signal dbuf                                                : input_data;
+  signal dcti_shift_reg                                      : input_data;
 
-  signal col_cnt                                    : unsigned(ilog2(N) - 1 downto 0);                                        -- Counter for column positioning inside RAM
-  signal row_cnt                                    : unsigned(ilog2(N) - 1 downto 0);                                        -- Counter for row position inside RAM (transposition)
-  signal inpt_cnt                                   : unsigned(ilog2(N) - 1 downto 0);                                        -- Counter for received input data
+  signal col_cnt                                             : unsigned(ilog2(N) - 1 downto 0);                                        -- Counter for column positioning inside RAM
+  signal row_cnt                                             : unsigned(ilog2(N) - 1 downto 0);                                        -- Counter for row position inside RAM (transposition)
+  signal inpt_cnt                                            : unsigned(ilog2(N) - 1 downto 0);                                        -- Counter for received input data
 
-  signal ram_we_s                                   : std_logic;
-  signal block_cmplt_s                              : std_logic;
-  signal stage2_start                               : std_logic;
-  signal stage2_direct_start                               : std_logic;
-  signal stage2_cnt                                 : unsigned (ilog2(N + 1) - 1 downto 0);                                   -- Counter for stage2, needs to count N+1 values for init purposes
-  signal col_cnt2                                   : unsigned(ilog2(N) - 1 downto 0);
-  signal ram_waddr_s                                : std_logic_vector(C_RAMADDR_W - 1 downto 0);
+  signal ram_we_s                                            : std_logic;
+  signal block_cmplt_s                                       : std_logic;
+  signal stage2_start                                        : std_logic;
+  signal stage2_direct_start                                 : std_logic;
+  signal stage2_cnt                                          : unsigned (ilog2(N + 1) - 1 downto 0);                                   -- Counter for stage2, needs to count N+1 values for init purposes
+  signal col_cnt2                                            : unsigned(ilog2(N) - 1 downto 0);
+  signal ram_waddr_s                                         : std_logic_vector(C_RAMADDR_W - 1 downto 0);
 
-  signal is_even                                    : std_logic;                                                              -- if is_even = '1' then this stage in the pipeline is computing an even row, else, if '0' an odd one.
-  signal is_even_d                                  : std_logic_vector((C_PIPELINE_STAGES - 1) - 1 downto 0);
-  signal ram_we_d                                   : std_logic_vector(C_PIPELINE_STAGES - 1 downto 0);
-  signal ram_waddr_d                                : ram_waddr_delay_t (C_PIPELINE_STAGES - 1 downto 0);
-  signal block_cmplt_s_d                            : std_logic_vector(C_PIPELINE_STAGES - 1 downto 0);
+  signal is_even                                             : std_logic;                                                              -- if is_even = '1' then this stage in the pipeline is computing an even row, else, if '0' an odd one.
+  signal is_even_d                                           : std_logic_vector((C_PIPELINE_STAGES - 1) - 1 downto 0);
+  signal ram_we_d                                            : std_logic_vector(C_PIPELINE_STAGES - 1 downto 0);
+  signal ram_waddr_d                                         : ram_waddr_delay_t (C_PIPELINE_STAGES - 1 downto 0);
+  signal block_cmplt_s_d                                     : std_logic_vector(C_PIPELINE_STAGES - 1 downto 0);
   signal odv_gate                                            : std_logic;                                                              -- Halt all idct delay
 
-  signal romx_dout_latch_en_n                       : std_logic;
-  signal rome_dout_latch                            : rom1_data_t;
-  signal romo_dout_latch                            : rom1_data_t;
-  signal rome_dout_d1                               : rom1_data_t;
-  signal romo_dout_d1                               : rom1_data_t;
-  signal rome_dout_d2                               : rom1_data_t;
-  signal romo_dout_d2                               : rom1_data_t;
-  signal rome_dout_d3                               : rom1_data_t;
-  signal romo_dout_d3                               : rom1_data_t;
-  signal dcto_1                                     : std_logic_vector(C_PL1_DATA_W - 1 downto 0);
-  signal dcto_2                                     : std_logic_vector(C_PL1_DATA_W - 1 downto 0);
-  signal dcto_3                                     : std_logic_vector(C_PL1_DATA_W - 1 downto 0);
-  signal dcto_4                                     : std_logic_vector(C_PL1_DATA_W - 1 downto 0);
+  signal romx_dout_latch_en_n                                : std_logic;
+  signal rome_dout_latch                                     : rom1_data_t;
+  signal romo_dout_latch                                     : rom1_data_t;
+  signal rome_dout_d1                                        : rom1_data_t;
+  signal romo_dout_d1                                        : rom1_data_t;
+  signal rome_dout_d2                                        : rom1_data_t;
+  signal romo_dout_d2                                        : rom1_data_t;
+  signal rome_dout_d3                                        : rom1_data_t;
+  signal romo_dout_d3                                        : rom1_data_t;
+  signal dcto_1                                              : std_logic_vector(C_PL1_DATA_W - 1 downto 0);
+  signal dcto_2                                              : std_logic_vector(C_PL1_DATA_W - 1 downto 0);
+  signal dcto_3                                              : std_logic_vector(C_PL1_DATA_W - 1 downto 0);
+  signal dcto_4                                              : std_logic_vector(C_PL1_DATA_W - 1 downto 0);
 
-  signal dbuf_cmplt_d                               : std_logic_vector((1 + C_PIPELINE_STAGES) - 1 downto 0);                 -- Data Buffer Complete Delay : Once stage2_cnt = N-1 last data of dbuf goes first through ROM then in Pipleline and it's computation completes
-  signal last_dbuf_cmplt                            : std_logic;                                                              -- LAST data buffer complete/computed and saved to ram
-  signal last_dbuf_cmplt_latch                      : std_logic;                                                              -- LAST data buffer complete/computed and saved to ram
+  signal dbuf_cmplt_d                                        : std_logic_vector((1 + C_PIPELINE_STAGES) - 1 downto 0);                 -- Data Buffer Complete Delay : Once stage2_cnt = N-1 last data of dbuf goes first through ROM then in Pipleline and it's computation completes
+  signal last_dbuf_cmplt                                     : std_logic;                                                              -- LAST data buffer complete/computed and saved to ram
+  signal last_dbuf_cmplt_latch                               : std_logic;                                                              -- LAST data buffer complete/computed and saved to ram
 
-  signal push_chkpnt_to_ram_en                      : std_logic;                                                              -- Enalbe procedure that pushes current I_DCT1S status as a checkpoint to ram
-  signal pull_chkpnt_from_ram_en                    : std_logic;                                                              -- Enable procedure that pulls checkpoint from ram and stores to I_DCT1S
-  signal ram_xaddr_incr_en                          : std_logic;                                                              -- Enable increase of ram_Xaddr
+  signal push_chkpnt_to_ram_en                               : std_logic;                                                              -- Enalbe procedure that pushes current I_DCT1S status as a checkpoint to ram
+  signal pull_chkpnt_from_ram_en                             : std_logic;                                                              -- Enable procedure that pulls checkpoint from ram and stores to I_DCT1S
+  signal ram_xaddr_incr_en                                   : std_logic;                                                              -- Enable increase of ram_Xaddr
 
-  signal ram_xaddr_drct                             : unsigned (C_RAMADDR_W - 1 downto 0);                                    -- When in direct mode (no I_DCT1S pipeline) either raddr or wadddr are drived not both, this signal is then mapped to the correct one
-  signal ram_din_drct                               : std_logic_vector(C_RAMDATA_W - 1 downto 0);                             -- Direct signal from ram din
-  signal ram_we_drct                                : std_logic;                                                              -- Direct signal to ram wirte enable, goes over I_DCT1S pipeline
+  signal ram_xaddr_drct                                      : unsigned (C_RAMADDR_W - 1 downto 0);                                    -- When in direct mode (no I_DCT1S pipeline) either raddr or wadddr are drived not both, this signal is then mapped to the correct one
+  signal ram_din_drct                                        : std_logic_vector(C_RAMDATA_W - 1 downto 0);                             -- Direct signal from ram din
+  signal ram_we_drct                                         : std_logic;                                                              -- Direct signal to ram wirte enable, goes over I_DCT1S pipeline
 
-  signal dbuf_from_ram                              : std_logic;                                                              -- Current data reqeuested from ram is dbuf
-  signal dbuf_from_ram_d1                           : std_logic;                                                              -- Delay of above (used to compensate ram output delay)
-  signal row_col_from_ram                           : std_logic;                                                              -- Current data requested from ram is row_col
-  signal row_col_from_ram_d1                        : std_logic;                                                              -- Delay of above (used to compensate ram output delay)
+  signal dbuf_from_ram                                       : std_logic;                                                              -- Current data reqeuested from ram is dbuf
+  signal dbuf_from_ram_d1                                    : std_logic;                                                              -- Delay of above (used to compensate ram output delay)
+  signal row_col_from_ram                                    : std_logic;                                                              -- Current data requested from ram is row_col
+  signal row_col_from_ram_d1                                 : std_logic;                                                              -- Delay of above (used to compensate ram output delay)
 
   --########################### ARCHITECTURE BEGIN #############################
 
@@ -191,16 +191,16 @@ begin
 
   ODV         <= ram_we_d(ram_we_d'length - 1) AND odv_gate;                       -- 4 clock dealy
   DCTO        <= std_logic_vector(resize(signed(dcto_4(C_PL1_DATA_W - 1 downto 12)), C_1S_OUTDATA_W));
-  BLOCK_CMPLT <= block_cmplt_s_d(block_cmplt_s_d'length - 1);         -- 4 clock delay
+  BLOCK_CMPLT <= block_cmplt_s_d(block_cmplt_s_d'length - 1);                      -- 4 clock delay
   VARC_RDY    <= varc_rdy_s;
 
   --########################## COBINATORIAL FUNCTIONS ##########################
 
   -- Enables chkpnt push only after the last data buffer was pushed to ram
   -- preserving RAM/data integrity when restoring chkpnt
-  -- From when the last dbuf is pushed to ram (dbuf_cmplt_d((dbuf_cmplt_d'length - 1) = '1') to 
+  -- From when the last dbuf is pushed to ram (dbuf_cmplt_d((dbuf_cmplt_d'length - 1) = '1') to
   -- when dcti_shift_reg become dbuf (a new dbuf), chekpoints are pushable to ram
-  last_dbuf_cmplt <= dbuf_cmplt_d(dbuf_cmplt_d'length - 1) OR last_dbuf_cmplt_latch; 
+  last_dbuf_cmplt <= dbuf_cmplt_d(dbuf_cmplt_d'length - 1) OR last_dbuf_cmplt_latch;
 
   --########################## PROCESSES #######################################
 
@@ -311,7 +311,7 @@ begin
   --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   -- Output generator for I_DCT Main fsm (mealy machine)
 
-  P_I_DCT_M_FSM_OUTPUTS : process (m_pstate, SYS_STATUS, push_chkpnt_ram_cmplt, pull_chkpnt_ram_cmplt,last_dbuf_cmplt) is
+  P_I_DCT_M_FSM_OUTPUTS : process (m_pstate, SYS_STATUS, push_chkpnt_ram_cmplt, pull_chkpnt_ram_cmplt, last_dbuf_cmplt) is
   begin
 
     -- defaults
@@ -357,9 +357,11 @@ begin
       when S_WAIT_DBUF_CMPLT =>
         i_dct_halt       <= '0';
         i_dct_halt_input <= '1';
+
         if (last_dbuf_cmplt='1') then
-          i_dct_halt       <= '1';
+          i_dct_halt <= '1';
         end if;
+
       when S_WAIT_SYS_CHNG =>
         varc_rdy_s <= '1';
 
@@ -385,11 +387,11 @@ begin
   begin
 
     if (RST = '1') then
-      inpt_cnt       <= (others => '0');
-      dcti_shift_reg <= (others => (others => '0'));
-      dbuf           <= (others => (others => '0'));
-      stage2_start   <= '0';
-      stage2_direct_start   <= '0';
+      inpt_cnt            <= (others => '0');
+      dcti_shift_reg      <= (others => (others => '0'));
+      dbuf                <= (others => (others => '0'));
+      stage2_start        <= '0';
+      stage2_direct_start <= '0';
 
       stage2_cnt <= (others => '1');                                                                                -- NOTE: stage2_cnt starts from a number greater then N-1, if it started from 0 it triggers 2stage prematurely
       col_cnt    <= (others => '0');
@@ -570,10 +572,10 @@ begin
         end if;
 
         -- Direct start after checkpoint init
-       -- if(stage2_direct_start = '1') then
-       --   stage2_start <= '1';
-       --   stage2_direct_start <= '0';
-       -- end if;
+        -- if(stage2_direct_start = '1') then
+        --   stage2_start <= '1';
+        --   stage2_direct_start <= '0';
+        -- end if;
 
         if (stage2_start = '1') then
           stage2_cnt <= (others => '0');
@@ -586,12 +588,12 @@ begin
         end if;
 
         -- Last dbuf complete latch logic
-         if(last_dbuf_cmplt = '1') then
-           last_dbuf_cmplt_latch <= '1';
-         end if;
-         if (inpt_cnt = N - 1) then
-           last_dbuf_cmplt_latch <= '0';
-         end if;
+        if (last_dbuf_cmplt = '1') then
+          last_dbuf_cmplt_latch <= '1';
+        end if;
+        if (col_cnt = N - 1) then
+          last_dbuf_cmplt_latch <= '0';
+        end if;
         --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
       end if;
     end if;
@@ -613,13 +615,13 @@ begin
         odv_gate <= '0';
       else
         odv_gate <= '1';
-       -- if (i_dct_halt_input ='1' AND last_dbuf_cmplt = '1') then
-       --   odv_gate <= '0';
-       -- end if;
-       -- -- Terrible hack to prevent extra data out of DCT2S
-       -- if (SYS_STATUS = SYS_HALT AND dbuf_cmplt_d(dbuf_cmplt_d'length - 1) = '1') then
-       --   odv_gate <= '0';
-       -- end if;
+        -- if (i_dct_halt_input ='1' AND last_dbuf_cmplt = '1') then
+        --   odv_gate <= '0';
+        -- end if;
+        -- -- Terrible hack to prevent extra data out of DCT2S
+        -- if (SYS_STATUS = SYS_HALT AND dbuf_cmplt_d(dbuf_cmplt_d'length - 1) = '1') then
+        --   odv_gate <= '0';
+        -- end if;
       end if;
     end if;
 
@@ -637,7 +639,8 @@ begin
       ram_we_d        <= (others => '0');
       ram_waddr_d     <= (others => (others => '0'));
       block_cmplt_s_d <= (others => '0');
-      dbuf_cmplt_d    <= (others => '1');
+      --dbuf_cmplt_d    <= (others => '0'); --this is part of TODO[1] issue
+      dbuf_cmplt_d    <= (others => '1');  
     elsif (CLK'event and CLK = '1') then
       if (i_dct_halt = '1') then
       --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -666,6 +669,12 @@ begin
 
         dbuf_cmplt_d(dbuf_cmplt_d'length - 1 downto 1) <= dbuf_cmplt_d(dbuf_cmplt_d'length - 2 downto 0);
 
+        -- TODO[1]: check if it is ok having only equal to N-1
+        -- affects how the core can backup even if no dbuffer was written.
+        -- with >= N-1 last_dbuf is on even at the start
+        -- Ideally last_dbuf_cmplt should be at 1 from the first stage2_en
+        --if (stage2_cnt = N - 1) then
+
         -- If stage2_cnt counted N-1 times then last "pixel" was pushed in pipeline
         -- thus the current dbuf is fully consumed
         if (stage2_cnt >= N - 1) then
@@ -673,8 +682,6 @@ begin
         else
           dbuf_cmplt_d(0) <= '0';
         end if;
-
-
       end if;
     end if;
 
@@ -682,26 +689,27 @@ begin
 
   --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   -- ROMx_DOUT latch
-  -- 
+  --
   -- This latch is used when the system halts. In this period the expected
-  -- behavior is that ROMx_DOUT doesn't change, this does not happen because 
-  -- ROMx_ADDR did, hence this latch is used to keep the value stable when system 
+  -- behavior is that ROMx_DOUT doesn't change, this does not happen because
+  -- ROMx_ADDR did, hence this latch is used to keep the value stable when system
   -- restarts.
   -- Processes that read ROMx_DOUT need to use the latched value when the system
   -- restarts and a new value was written (romx_dout_latch_en_n = '1')
 
-  P_ROMX_DOUT_LATCH: process(CLK,RST) is
+  P_ROMX_DOUT_LATCH : process (CLK, RST) is
   begin
-    if(RST = '1') then
+
+    if (RST = '1') then
       romx_dout_latch_en_n <= '0';
-    elsif(rising_edge(CLK)) then
+    elsif (CLK'event and CLK = '1') then
       if (i_dct_halt = '1') then
-      --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-      -- HALTED EXECUTION
-      --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        if(romx_dout_latch_en_n = '0') then
-          rome_dout_latch<= ROME_DOUT;
-          romo_dout_latch<= ROMO_DOUT;
+        --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        -- HALTED EXECUTION
+        --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        if (romx_dout_latch_en_n = '0') then
+          rome_dout_latch      <= ROME_DOUT;
+          romo_dout_latch      <= ROMO_DOUT;
           romx_dout_latch_en_n <= '1';
         end if;
       else
@@ -709,12 +717,12 @@ begin
         -- NORMAL EXECUTION
         --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         -- Disable latch after the system is no more halted
-        if(romx_dout_latch_en_n = '1') then
+        if (romx_dout_latch_en_n = '1') then
           romx_dout_latch_en_n <= '0';
         end if;
-
       end if;
     end if;
+
   end process P_ROMX_DOUT_LATCH;
 
   --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

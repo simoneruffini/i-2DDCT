@@ -615,7 +615,7 @@ begin
         if (last_dbuf_cmplt = '1') then
           last_dbuf_cmplt_latch <= '1';
         end if;
-        if (ram_col2 = N - 1) then
+        if (col_cnt = N - 1) then
           last_dbuf_cmplt_latch <= '0';
         end if;
         --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -675,9 +675,10 @@ begin
   begin
 
     if (RST='1') then
-      is_even      <= '0';
-      is_even_d    <= (others => '0');
-      odv_d        <= (others => '0');
+      is_even   <= '0';
+      is_even_d <= (others => '0');
+      odv_d     <= (others => '0');
+      --dbuf_cmplt_d    <= (others => '0'); --this is part of TODO[1] issue
       dbuf_cmplt_d <= (others => '1');
     elsif (CLK'event and CLK = '1') then
       if (i_dct_halt = '1') then
@@ -701,6 +702,12 @@ begin
         odv_d(0)                         <= odv_s;
 
         dbuf_cmplt_d(dbuf_cmplt_d'length - 1 downto 1) <= dbuf_cmplt_d(dbuf_cmplt_d'length - 2 downto 0);
+
+        -- TODO[1]: check if it is ok having only equal to N-1
+        -- affects how the core can backup even if no dbuffer was written.
+        -- with >= N-1 last_dbuf is on even at the start
+        -- Ideally last_dbuf_cmplt should be at 1 from the first stage2_en
+        --if (stage2_cnt = N - 1) then
 
         -- If stage2_cnt counted N-1 times then last "pixel" was pushed in pipeline
         -- thus the current dbuf is fully consumed
