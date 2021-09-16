@@ -58,9 +58,11 @@ architecture BEHAVIORAL of I_DBUFCTL is
   --########################### CONSTANTS 2 ####################################
 
   --########################### SIGNALS ########################################
-  signal wmemsel_s   : std_logic;
-  signal rmemsel_s   : std_logic;
-  signal pb_ready_s  : std_logic;
+  signal i_dct1s_block_cmplt_d : std_logic;
+  signal i_dct2s_block_cmplt_d : std_logic;
+  signal wmemsel_s             : std_logic;
+  signal rmemsel_s             : std_logic;
+  signal pb_ready_s            : std_logic;
 
   --########################### ARCHITECTURE BEGIN #############################
 
@@ -81,11 +83,13 @@ begin
   begin
 
     if (RST = '1') then
-      wmemsel_s  <= '0'; -- initially mem 1 is selected
-      rmemsel_s  <= '0'; -- initially mem 1 is selected
-      pb_ready_s <= '1';
-      TX         <= (others => '0');
-      DATA_READY <= '0';
+      wmemsel_s             <= '0'; -- initially mem 1 is selected
+      rmemsel_s             <= '0'; -- initially mem 1 is selected
+      pb_ready_s            <= '1';
+      TX                    <= (others => '0');
+      DATA_READY            <= '0';
+      i_dct1s_block_cmplt_d <= I_DCT1S_BLOCK_CMPLT;
+      i_dct2s_block_cmplt_d <= I_DCT2S_BLOCK_CMPLT;
     elsif (CLK = '1' and clk'event) then
       if (SYS_STATUS = SYS_PUSH_CHKPNT_NV2V) then
         if (PB_START = '1') then
@@ -105,17 +109,21 @@ begin
         if (pb_ready_s = '0' AND DATA_SYNC = '1') then
           pb_ready_s <= '1';
         end if;
-      else               --if (SYS_STATUS = SYS_RUN or others) then
-        if (I_DCT1S_BLOCK_CMPLT = '1') then
+      else                          --if (SYS_STATUS = SYS_RUN or others) then
+        if (I_DCT1S_BLOCK_CMPLT = '1' and i_dct1s_block_cmplt_d = '0') then
           wmemsel_s  <= not wmemsel_s;
           DATA_READY <= '1';
         end if;
-        if (I_DCT2S_BLOCK_CMPLT = '1') then
+        if (I_DCT2S_BLOCK_CMPLT = '1' and i_dct2s_block_cmplt_d = '0') then
           rmemsel_s <= not rmemsel_s;
         end if;
         if (DATA_READY_ACK = '1') then
           DATA_READY <= '0';
         end if;
+
+        --Delays
+        i_dct1s_block_cmplt_d <= I_DCT1S_BLOCK_CMPLT;
+        i_dct2s_block_cmplt_d <= I_DCT2S_BLOCK_CMPLT;
       end if;
     end if;
 

@@ -90,13 +90,15 @@ architecture BEHAVIORAL of I_DCT1S is
   --########################### FUNCTIONS ######################################
 
   --########################### CONSTANTS 2 ####################################
-  constant C_DCT1S_CHKP_IN_RAM_STRT_ADDR                     : natural := (C_BLOCK_SIZE - 1) + 1;                                      -- start address in ram where DCT1S state/checkpoint is saved
-  constant C_DCT1S_CHKP_IN_RAM_OFST                          : natural := C_DCT1S_CHKPNT_RAM_SIZE - 1;                                 -- length of data saved in ram for DCT1S state/checkpoint: DBUF(N) + ROW_COL
+  constant C_DCT1S_CHKP_IN_RAM_STRT_ADDR                     : natural := 0;                                                           -- start address in ram where DCT1S state/checkpoint is saved
+  constant C_DCT1S_CHKP_IN_RAM_OFST                          : natural := C_DCTxS_CHKPNT_RAM_SIZE - 1;                                 -- length of data saved in ram for DCT1S state/checkpoint: DBUF(N) + ROW_COL
 
   constant C_RAM_DBUF_STRT_ADDR                              : natural := C_DCT1S_CHKP_IN_RAM_STRT_ADDR;
   constant C_RAM_DBUF_OFST                                   : natural := N - 1;
   constant C_RAM_ROW_COL_STRT_ADDR                           : natural := C_RAM_DBUF_STRT_ADDR + C_RAM_DBUF_OFST + 1;
   constant C_RAM_ROW_COL_OFST                                : natural := 0;
+
+  constant C_DCT1S_DATA_IN_RAM_STRT_ADDR                     : natural := C_DCT1S_CHKP_IN_RAM_STRT_ADDR + C_DCT1S_CHKP_IN_RAM_OFST + 1; -- start address in ram where DCT1S data is written
 
   --########################### SIGNALS ########################################
 
@@ -554,7 +556,8 @@ begin
           -- write RAM
           ram_we_s <= '1';
           -- reverse col/row order for transposition purpose
-          ram_waddr_s <= std_logic_vector(resize(unsigned(col_cnt2 & row_cnt), ram_waddr_s'length));
+          ram_waddr_s <= std_logic_vector(to_unsigned(C_DCT1S_DATA_IN_RAM_STRT_ADDR,ram_waddr_s'length)
+                                          + resize(unsigned(col_cnt2 & row_cnt), ram_waddr_s'length));
           -- increment column counter
           col_cnt  <= col_cnt + 1;                                                                                  -- 0->N-1 (7)
           col_cnt2 <= col_cnt2 + 1;                                                                                 -- 0->N-1 (7)
@@ -640,7 +643,7 @@ begin
       ram_waddr_d     <= (others => (others => '0'));
       block_cmplt_s_d <= (others => '0');
       --dbuf_cmplt_d    <= (others => '0'); --this is part of TODO[1] issue
-      dbuf_cmplt_d    <= (others => '1');  
+      dbuf_cmplt_d <= (others => '1');
     elsif (CLK'event and CLK = '1') then
       if (i_dct_halt = '1') then
       --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -14,18 +14,14 @@
    </db_ref_list>
    <zoom_setting>
       <ZoomStartTime time="0fs"></ZoomStartTime>
-      <ZoomEndTime time="22820001fs"></ZoomEndTime>
-      <Cursor1Time time="3135000fs"></Cursor1Time>
+      <ZoomEndTime time="61650001fs"></ZoomEndTime>
+      <Cursor1Time time="2425000fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="394"></NameColumnWidth>
-      <ValueColumnWidth column_width="104"></ValueColumnWidth>
+      <ValueColumnWidth column_width="96"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="12" />
-   <wave_markers>
-      <marker label="" time="2655000" />
-      <marker label="" time="3075000" />
-   </wave_markers>
+   <WVObjectSize size="14" />
    <wvobject type="logic" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/CLK">
       <obj_property name="ElementShortName">CLK</obj_property>
       <obj_property name="ObjectShortName">CLK</obj_property>
@@ -50,16 +46,26 @@
       <obj_property name="CustomSignalColor">#00FFFF</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
+   <wvobject type="other" fp_name="/TOP_LEVEL_TB/inpt_cnt">
+      <obj_property name="ElementShortName">inpt_cnt</obj_property>
+      <obj_property name="ObjectShortName">inpt_cnt</obj_property>
+   </wvobject>
    <wvobject type="other" fp_name="/TOP_LEVEL_TB/input_row_cnt">
       <obj_property name="ElementShortName">input_row_cnt</obj_property>
       <obj_property name="ObjectShortName">input_row_cnt</obj_property>
    </wvobject>
+   <wvobject type="other" fp_name="/TOP_LEVEL_TB/halt_time">
+      <obj_property name="ElementShortName">halt_time</obj_property>
+      <obj_property name="ObjectShortName">halt_time</obj_property>
+   </wvobject>
    <wvobject type="group" fp_name="group80">
       <obj_property name="label">I_2DDCT_CTRL</obj_property>
       <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="isExpanded"></obj_property>
       <wvobject type="group" fp_name="group41">
          <obj_property name="label">I_2DDCT_CTRL_port</obj_property>
          <obj_property name="DisplayName">label</obj_property>
+         <obj_property name="isExpanded"></obj_property>
          <wvobject type="group" fp_name="group55">
             <obj_property name="label">NVM</obj_property>
             <obj_property name="DisplayName">label</obj_property>
@@ -328,10 +334,6 @@
             <obj_property name="ObjectShortName">DCTI[7:0]</obj_property>
             <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
          </wvobject>
-         <wvobject type="other" fp_name="/TOP_LEVEL_TB/process_cnt">
-            <obj_property name="ElementShortName">process_cnt</obj_property>
-            <obj_property name="ObjectShortName">process_cnt</obj_property>
-         </wvobject>
          <wvobject type="logic" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/U_I_DCT1S/IDV">
             <obj_property name="ElementShortName">IDV</obj_property>
             <obj_property name="ObjectShortName">IDV</obj_property>
@@ -561,6 +563,39 @@
          <wvobject type="array" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/U_I_DCT1S/dbuf">
             <obj_property name="ElementShortName">dbuf[7:0][8:0]</obj_property>
             <obj_property name="ObjectShortName">dbuf[7:0][8:0]</obj_property>
+            <obj_property name="isExpanded"></obj_property>
+            <wvobject type="array" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/U_I_DCT1S/dbuf[7]">
+               <obj_property name="ElementShortName">[7][8:0]</obj_property>
+               <obj_property name="ObjectShortName">[7][8:0]</obj_property>
+            </wvobject>
+            <wvobject type="array" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/U_I_DCT1S/dbuf[6]">
+               <obj_property name="ElementShortName">[6][8:0]</obj_property>
+               <obj_property name="ObjectShortName">[6][8:0]</obj_property>
+            </wvobject>
+            <wvobject type="array" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/U_I_DCT1S/dbuf[5]">
+               <obj_property name="ElementShortName">[5][8:0]</obj_property>
+               <obj_property name="ObjectShortName">[5][8:0]</obj_property>
+            </wvobject>
+            <wvobject type="array" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/U_I_DCT1S/dbuf[4]">
+               <obj_property name="ElementShortName">[4][8:0]</obj_property>
+               <obj_property name="ObjectShortName">[4][8:0]</obj_property>
+            </wvobject>
+            <wvobject type="array" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/U_I_DCT1S/dbuf[3]">
+               <obj_property name="ElementShortName">[3][8:0]</obj_property>
+               <obj_property name="ObjectShortName">[3][8:0]</obj_property>
+            </wvobject>
+            <wvobject type="array" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/U_I_DCT1S/dbuf[2]">
+               <obj_property name="ElementShortName">[2][8:0]</obj_property>
+               <obj_property name="ObjectShortName">[2][8:0]</obj_property>
+            </wvobject>
+            <wvobject type="array" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/U_I_DCT1S/dbuf[1]">
+               <obj_property name="ElementShortName">[1][8:0]</obj_property>
+               <obj_property name="ObjectShortName">[1][8:0]</obj_property>
+            </wvobject>
+            <wvobject type="array" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/U_I_DCT1S/dbuf[0]">
+               <obj_property name="ElementShortName">[0][8:0]</obj_property>
+               <obj_property name="ObjectShortName">[0][8:0]</obj_property>
+            </wvobject>
          </wvobject>
          <wvobject type="logic" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/U_I_DCT1S/stage2_direct_start">
             <obj_property name="ElementShortName">stage2_direct_start</obj_property>
@@ -935,46 +970,6 @@
          <wvobject type="array" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/U_I_DCT2S/dbuf">
             <obj_property name="ElementShortName">dbuf[7:0][10:0]</obj_property>
             <obj_property name="ObjectShortName">dbuf[7:0][10:0]</obj_property>
-            <wvobject type="array" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/U_I_DCT2S/dbuf[7]">
-               <obj_property name="ElementShortName">[7][10:0]</obj_property>
-               <obj_property name="ObjectShortName">[7][10:0]</obj_property>
-               <obj_property name="Radix">BINARYRADIX</obj_property>
-            </wvobject>
-            <wvobject type="array" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/U_I_DCT2S/dbuf[6]">
-               <obj_property name="ElementShortName">[6][10:0]</obj_property>
-               <obj_property name="ObjectShortName">[6][10:0]</obj_property>
-               <obj_property name="Radix">BINARYRADIX</obj_property>
-            </wvobject>
-            <wvobject type="array" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/U_I_DCT2S/dbuf[5]">
-               <obj_property name="ElementShortName">[5][10:0]</obj_property>
-               <obj_property name="ObjectShortName">[5][10:0]</obj_property>
-               <obj_property name="Radix">BINARYRADIX</obj_property>
-            </wvobject>
-            <wvobject type="array" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/U_I_DCT2S/dbuf[4]">
-               <obj_property name="ElementShortName">[4][10:0]</obj_property>
-               <obj_property name="ObjectShortName">[4][10:0]</obj_property>
-               <obj_property name="Radix">BINARYRADIX</obj_property>
-            </wvobject>
-            <wvobject type="array" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/U_I_DCT2S/dbuf[3]">
-               <obj_property name="ElementShortName">[3][10:0]</obj_property>
-               <obj_property name="ObjectShortName">[3][10:0]</obj_property>
-               <obj_property name="Radix">BINARYRADIX</obj_property>
-            </wvobject>
-            <wvobject type="array" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/U_I_DCT2S/dbuf[2]">
-               <obj_property name="ElementShortName">[2][10:0]</obj_property>
-               <obj_property name="ObjectShortName">[2][10:0]</obj_property>
-               <obj_property name="Radix">BINARYRADIX</obj_property>
-            </wvobject>
-            <wvobject type="array" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/U_I_DCT2S/dbuf[1]">
-               <obj_property name="ElementShortName">[1][10:0]</obj_property>
-               <obj_property name="ObjectShortName">[1][10:0]</obj_property>
-               <obj_property name="Radix">BINARYRADIX</obj_property>
-            </wvobject>
-            <wvobject type="array" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/U_I_DCT2S/dbuf[0]">
-               <obj_property name="ElementShortName">[0][10:0]</obj_property>
-               <obj_property name="ObjectShortName">[0][10:0]</obj_property>
-               <obj_property name="Radix">BINARYRADIX</obj_property>
-            </wvobject>
          </wvobject>
          <wvobject type="logic" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/U_I_DCT2S/stage2_start">
             <obj_property name="ElementShortName">stage2_start</obj_property>
@@ -1104,6 +1099,7 @@
    <wvobject type="group" fp_name="group681">
       <obj_property name="label">RAM_MUX</obj_property>
       <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="isExpanded"></obj_property>
       <wvobject type="other" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/U_RAM_MUX/SYS_STATUS">
          <obj_property name="ElementShortName">SYS_STATUS</obj_property>
          <obj_property name="ObjectShortName">SYS_STATUS</obj_property>
@@ -1349,6 +1345,7 @@
    <wvobject type="group" fp_name="group269">
       <obj_property name="label">INT_EMU</obj_property>
       <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="isExpanded"></obj_property>
       <wvobject type="logic" fp_name="/TOP_LEVEL_TB/U_INT_EMU/CLK">
          <obj_property name="ElementShortName">CLK</obj_property>
          <obj_property name="ObjectShortName">CLK</obj_property>

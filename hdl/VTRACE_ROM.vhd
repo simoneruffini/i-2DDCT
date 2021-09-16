@@ -40,7 +40,7 @@ architecture BEHAVIORAL of VTRACE_ROM is
 
   --########################### CONSTANTS 1 ####################################
   constant C_MAX_VOLTAGE     : real := 3.3;
-  constant C_START_DISCHARGE : real := 0.2;
+  constant C_START_DISCHARGE : real := 0.05;
 
   constant C_TRACE_DURATION  : natural := 5;
 

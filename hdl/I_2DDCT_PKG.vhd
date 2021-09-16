@@ -44,10 +44,10 @@ package i_2ddct_pkg is
 
   -- Size of a full block of data
   constant C_BLOCK_SIZE : natural := N * N;                                                            --(64)
-  -- Size of DCT1S checkpoint in RAM: DBUF + ROW_COL
-  constant C_DCT1S_CHKPNT_RAM_SIZE : natural := N + 1;                                                 --(9)
+  -- Size of DCT1S/2S checkpoint in RAM: DBUF + ROW_COL
+  constant C_DCTxS_CHKPNT_RAM_SIZE : natural := N + 1;                                                 --(9)
   -- Amount of content inside RAM (number of words)
-  constant C_RAM_CONTENT_AMOUNT : natural := C_BLOCK_SIZE + C_DCT1S_CHKPNT_RAM_SIZE;                   --(73)
+  constant C_RAM_CONTENT_AMOUNT : natural := C_BLOCK_SIZE + C_DCTxS_CHKPNT_RAM_SIZE;                   --(73)
   -- Amount of data to store inside NVM w.r.t RAM
   constant C_CHKPNT_NVM_RAM_AMOUNT : natural := C_RAM_CONTENT_AMOUNT;                                  --(73)
   -- Amount of data to store inside NVM w.r.t DBUFCTL

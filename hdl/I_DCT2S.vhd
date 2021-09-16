@@ -67,7 +67,7 @@ architecture BEHAVIORAL of I_DCT2S is
 
   --########################### TYPES ##########################################
 
-  type input_data2 is array (N - 1 downto 0) of signed(C_RAMDATA_W downto 0);                                                          -- One extra bit
+  type input_data2 is array (N - 1 downto 0) of signed(C_RAMDATA_W downto 0);                                                           -- One extra bit
 
   -- I_DCT Main FSM states type
 
@@ -89,26 +89,27 @@ architecture BEHAVIORAL of I_DCT2S is
   --########################### FUNCTIONS ######################################
 
   --########################### CONSTANTS 2 ####################################
-  constant C_DCT2S_CHKP_IN_RAM_STRT_ADDR                     : natural := (C_BLOCK_SIZE - 1) + 1;                                      -- start address in ram where DCT2S state/checkpoint is saved
-  constant C_DCT2S_CHKP_IN_RAM_OFST                          : natural := C_DCT1S_CHKPNT_RAM_SIZE - 1;                                 -- length of data saved in ram for DCT2S state/checkpoint: DBUF(N) + RAM_ROW (same as in DCT1S)
+  constant C_DCT2S_CHKP_IN_RAM_STRT_ADDR                     : natural := 0;                                                            -- start address in ram where DCT2S state/checkpoint is saved
+  constant C_DCT2S_CHKP_IN_RAM_OFST                          : natural := C_DCTxS_CHKPNT_RAM_SIZE - 1;                                  -- length of data saved in ram for DCT2S state/checkpoint: DBUF(N) + RAM_ROW (same as in DCT1S)
 
   constant C_DBUF_RAM_STRT_ADDR                              : natural := C_DCT2S_CHKP_IN_RAM_STRT_ADDR;
   constant C_DBUF_RAM_OFST                                   : natural := N - 1;
   constant C_RAM_ROW_RAM_STRT_ADDR                           : natural := C_DBUF_RAM_STRT_ADDR + C_DBUF_RAM_OFST + 1;
   constant C_RAM_ROW_RAM_OFST                                : natural := 0;
 
+  constant C_DCT2S_DATA_IN_RAM_STRT_ADDR                     : natural := C_DCT2S_CHKP_IN_RAM_STRT_ADDR + C_DCT2S_CHKP_IN_RAM_OFST + 1; -- start address in ram where DCT1S data is written
   --########################### SIGNALS ########################################
 
-  signal m_pstate                                            : i_dct2s_m_fsm_t;                                                        -- I_DCT2S main fsm present state
-  signal m_fstate                                            : i_dct2s_m_fsm_t;                                                        -- I_DCT2S main fsm future state
+  signal m_pstate                                            : i_dct2s_m_fsm_t;                                                         -- I_DCT2S main fsm present state
+  signal m_fstate                                            : i_dct2s_m_fsm_t;                                                         -- I_DCT2S main fsm future state
 
-  signal push_chkpnt_ram_cmplt                               : std_logic;                                                              -- Push checkpoint data to RAM complete signal
-  signal pull_chkpnt_ram_cmplt                               : std_logic;                                                              -- Pull checkpoint data from RAM complete signal
+  signal push_chkpnt_ram_cmplt                               : std_logic;                                                               -- Push checkpoint data to RAM complete signal
+  signal pull_chkpnt_ram_cmplt                               : std_logic;                                                               -- Pull checkpoint data from RAM complete signal
 
-  signal varc_rdy_s                                          : std_logic;                                                              -- Volatile architecture ready signal
-  signal i_dct_halt                                          : std_logic;                                                              -- Halt all idct
-  signal odv_gate                                            : std_logic;                                                              -- Halt all idct delay
-  signal i_dct_halt_input                                    : std_logic;                                                              -- Halt only input stage of idct leaving rest working
+  signal varc_rdy_s                                          : std_logic;                                                               -- Volatile architecture ready signal
+  signal i_dct_halt                                          : std_logic;                                                               -- Halt all idct
+  signal odv_gate                                            : std_logic;                                                               -- Halt all idct delay
+  signal i_dct_halt_input                                    : std_logic;                                                               -- Halt only input stage of idct leaving rest working
 
   signal dbuf                                                : input_data2;
   signal dcti_shift_reg                                      : input_data2;
@@ -118,6 +119,7 @@ architecture BEHAVIORAL of I_DCT2S is
   signal ram_row                                             : unsigned(ilog2(N) - 1 downto 0);
   signal ram_row2                                            : unsigned(ilog2(N) - 1 downto 0);
   signal col_cnt                                             : unsigned(ilog2(N) - 1 downto 0);
+  signal ram_raddr_s                                         : unsigned(C_RAMADDR_W - 1 downto 0);
 
   signal stage1_en                                           : std_logic;
   signal stage1_direct_start                                 : std_logic;
@@ -148,22 +150,22 @@ architecture BEHAVIORAL of I_DCT2S is
   signal dcto_4                                              : std_logic_vector(C_PL2_DATA_W - 1 downto 0);
   signal dcto_5                                              : std_logic_vector(C_PL2_DATA_W - 1 downto 0);
 
-  signal dbuf_cmplt_d                                        : std_logic_vector((1 + C_PIPELINE_STAGES) - 1 downto 0);                 -- Data Buffer Complete Delay : Once stage2_cnt = N-1 last data of dbuf goes first through ROM then in Pipleline and it's computation completes
-  signal last_dbuf_cmplt                                     : std_logic;                                                              -- Last data buffer was computed and pushed out completely from pipeline
+  signal dbuf_cmplt_d                                        : std_logic_vector((1 + C_PIPELINE_STAGES) - 1 downto 0);                  -- Data Buffer Complete Delay : Once stage2_cnt = N-1 last data of dbuf goes first through ROM then in Pipleline and it's computation completes
+  signal last_dbuf_cmplt                                     : std_logic;                                                               -- Last data buffer was computed and pushed out completely from pipeline
   signal last_dbuf_cmplt_latch                               : std_logic;
 
-  signal push_chkpnt_to_ram_en                               : std_logic;                                                              -- Enalbe procedure that pushes current I_DCT2S status as a checkpoint to ram
-  signal pull_chkpnt_from_ram_en                             : std_logic;                                                              -- Enable procedure that pulls checkpoint from ram and stores to I_DCT2S
-  signal ram_xaddr_incr_en                                   : std_logic;                                                              -- Enable increase of ram_Xaddr
+  signal push_chkpnt_to_ram_en                               : std_logic;                                                               -- Enalbe procedure that pushes current I_DCT2S status as a checkpoint to ram
+  signal pull_chkpnt_from_ram_en                             : std_logic;                                                               -- Enable procedure that pulls checkpoint from ram and stores to I_DCT2S
+  signal ram_xaddr_incr_en                                   : std_logic;                                                               -- Enable increase of ram_Xaddr
 
-  signal ram_xaddr_drct                                      : unsigned (C_RAMADDR_W - 1 downto 0);                                    -- When in direct mode (no I_DCT2S pipeline) either raddr or wadddr are drived not both, this signal is then mapped to the correct one
-  signal ram_din_s                                           : std_logic_vector(C_RAMDATA_W - 1 downto 0);                             -- Direct signal to ram din
-  signal ram_we_s                                            : std_logic;                                                              -- Direct signal to ram wirte enable, goes over I_DCT1S pipeline
+  signal ram_xaddr_drct                                      : unsigned (C_RAMADDR_W - 1 downto 0);                                     -- When in direct mode (no I_DCT2S pipeline) either raddr or wadddr are drived not both, this signal is then mapped to the correct one
+  signal ram_din_s                                           : std_logic_vector(C_RAMDATA_W - 1 downto 0);                              -- Direct signal to ram din
+  signal ram_we_s                                            : std_logic;                                                               -- Direct signal to ram wirte enable, goes over I_DCT1S pipeline
 
-  signal dbuf_from_ram                                       : std_logic;                                                              -- Current data reqeuested from ram is dbuf
-  signal dbuf_from_ram_d1                                    : std_logic;                                                              -- Delay of above (used to compensate ram output delay)
-  signal ram_row_from_ram                                    : std_logic;                                                              -- Current data requested from ram is row_col
-  signal ram_row_from_ram_d1                                 : std_logic;                                                              -- Delay of above (used to compensate ram output delay)
+  signal dbuf_from_ram                                       : std_logic;                                                               -- Current data reqeuested from ram is dbuf
+  signal dbuf_from_ram_d1                                    : std_logic;                                                               -- Delay of above (used to compensate ram output delay)
+  signal ram_row_from_ram                                    : std_logic;                                                               -- Current data requested from ram is row_col
+  signal ram_row_from_ram_d1                                 : std_logic;                                                               -- Delay of above (used to compensate ram output delay)
 
   --########################### ARCHITECTURE BEGIN #############################
 
@@ -188,13 +190,15 @@ begin
   RAM_WE <= ram_we_s;
 
   RAM_RADDR <= std_logic_vector(ram_xaddr_drct) when pull_chkpnt_from_ram_en = '1' else
-               std_logic_vector(resize(ram_row & ram_col, RAM_RADDR'length));
+               std_logic_vector(ram_raddr_s);
 
   VARC_RDY <= varc_rdy_s;
 
   --########################## COBINATORIAL FUNCTIONS ##########################
   last_dbuf_cmplt <= dbuf_cmplt_d(dbuf_cmplt_d'length - 1) OR last_dbuf_cmplt_latch;
 
+  ram_raddr_s     <= to_unsigned(C_DCT2S_DATA_IN_RAM_STRT_ADDR, ram_raddr_s'length)
+                     + resize(ram_row & ram_col, RAM_RADDR'length);
   --########################## PROCESSES #######################################
 
   --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
