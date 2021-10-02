@@ -39,24 +39,24 @@ end entity TOP_LEVEL_TB;
 architecture BEHAVIORAL of TOP_LEVEL_TB is
 
   --########################### CONSTANTS 1 ####################################
-  constant C_CLK_PERIOD_NS                                      : time := 1e09 / C_CLK_FREQ_HZ * 1 ns;
+  constant C_CLK_PERIOD_NS                                          : time := 1e09 / C_CLK_FREQ_HZ * 1 ns;
 
-  constant C_INT_EMU_PRESSCALER                                 : natural := 18;                                                                                                           -- Intermittency emulator prescaler
-  constant C_INT_EMU_RST_EMU_THRESH_INDX                        : natural := 0;                                                                                                            -- Index of RST_EMU voltage level inside int_emu_thresh_values
-  constant C_RST_EMU_THRESH_VALUE                               : natural := 1500;                                                                                                         -- Reset Emulator voltage level threshold
-  constant C_HAZARD_THRESH_VALUE                                    : natural := 1710;                                                                                                         -- Hazard voltage level threshold, this value is not a constant for simulation purposes
+  constant C_INT_EMU_PRESSCALER                                     : natural := 18;                                                                                                           -- Intermittency emulator prescaler
+  constant C_INT_EMU_RST_EMU_THRESH_INDX                            : natural := 0;                                                                                                            -- Index of RST_EMU voltage level inside int_emu_thresh_values
+  constant C_RST_EMU_THRESH_VALUE                                   : natural := 1500;                                                                                                         -- Reset Emulator voltage level threshold
+  constant C_HAZARD_THRESH_VALUE                                    : natural := 2640;                                                                                                         -- Hazard voltage level threshold, this value is not a constant for simulation purposes
 
-  constant C_START_INPUT_SEND_WAIT_CLK                          : natural := 100;                                                                                                          -- Number of clock cycles to wait to start input send process
-  constant C_START_INPUT_SEND_WAIT_CLK_D                        : natural := 0;                                                                                                            -- Delay on top of C_START_INPUT_SEND_WAIT_CLK
+  constant C_START_INPUT_SEND_WAIT_CLK                              : natural := 30;                                                                                                           --100;                                                                                                          -- Number of clock cycles to wait to start input send process
+  signal   c_start_input_send_wait_clk_d                            : natural := 0;                                                                                                            -- Delay on top of C_START_INPUT_SEND_WAIT_CLK
 
-  constant C_DCT1D_0                                            : i_matrix_type := COMPUTE_REF_DCT1D(input_data0, true);
-  constant C_DCT2D_0                                            : i_matrix_type := COMPUTE_REF_DCT1D(C_DCT1D_0, false);
-  constant C_DCT1D_1                                            : i_matrix_type := COMPUTE_REF_DCT1D(input_data1, true);
-  constant C_DCT2D_1                                            : i_matrix_type := COMPUTE_REF_DCT1D(C_DCT1D_1, false);
-  constant C_DCT1D_2                                            : i_matrix_type := COMPUTE_REF_DCT1D(input_data3, true);
-  constant C_DCT2D_2                                            : i_matrix_type := COMPUTE_REF_DCT1D(C_DCT1D_2, false);
-  constant C_DCT1D_3                                            : i_matrix_type := COMPUTE_REF_DCT1D(input_data4, true);
-  constant C_DCT2D_3                                            : i_matrix_type := COMPUTE_REF_DCT1D(C_DCT1D_3, false);
+  constant C_DCT1D_0                                                : i_matrix_type := COMPUTE_REF_DCT1D(input_data0, true);
+  constant C_DCT2D_0                                                : i_matrix_type := COMPUTE_REF_DCT1D(C_DCT1D_0, false);
+  constant C_DCT1D_1                                                : i_matrix_type := COMPUTE_REF_DCT1D(input_data1, true);
+  constant C_DCT2D_1                                                : i_matrix_type := COMPUTE_REF_DCT1D(C_DCT1D_1, false);
+  constant C_DCT1D_2                                                : i_matrix_type := COMPUTE_REF_DCT1D(input_data3, true);
+  constant C_DCT2D_2                                                : i_matrix_type := COMPUTE_REF_DCT1D(C_DCT1D_2, false);
+  constant C_DCT1D_3                                                : i_matrix_type := COMPUTE_REF_DCT1D(input_data4, true);
+  constant C_DCT2D_3                                                : i_matrix_type := COMPUTE_REF_DCT1D(C_DCT1D_3, false);
 
   --########################### TYPES ##########################################
 
@@ -66,60 +66,59 @@ architecture BEHAVIORAL of TOP_LEVEL_TB is
 
   --########################### SIGNALS ########################################
 
-  signal clk                                                    : std_logic;
-  signal clk_s                                                  : std_logic;
-  signal rst                                                    : std_logic;
+  signal clk                                                        : std_logic;
+  signal clk_s                                                      : std_logic;
+  signal rst                                                        : std_logic;
 
-  signal din                                                    : std_logic_vector(C_INDATA_W - 1 downto 0);
-  signal idv                                                    : std_logic;
-  signal dout                                                   : std_logic_vector(C_OUTDATA_W - 1 downto 0);
-  signal odv                                                    : std_logic;
+  signal din                                                        : std_logic_vector(C_INDATA_W - 1 downto 0);
+  signal idv                                                        : std_logic;
+  signal dout                                                       : std_logic_vector(C_OUTDATA_W - 1 downto 0);
+  signal odv                                                        : std_logic;
 
-  signal odv1                                                   : std_logic;
-  signal dcto1                                                  : std_logic_vector(C_1S_OUTDATA_W - 1 downto 0);
+  signal odv1                                                       : std_logic;
+  signal dcto1                                                      : std_logic_vector(C_1S_OUTDATA_W - 1 downto 0);
 
-  signal nvm_busy                                               : std_logic;
-  signal nvm_busy_s                                             : std_logic;
-  signal nvm_en                                                 : std_logic;
-  signal nvm_we                                                 : std_logic;
-  signal nvm_raddr                                              : std_logic_vector(C_NVM_ADDR_W - 1 downto 0);
-  signal nvm_waddr                                              : std_logic_vector(C_NVM_ADDR_W - 1 downto 0);
-  signal nvm_din                                                : std_logic_vector(C_NVM_DATA_W - 1 downto 0);
-  signal nvm_dout                                               : std_logic_vector(C_NVM_DATA_W - 1 downto 0);
+  signal nvm_busy                                                   : std_logic;
+  signal nvm_busy_s                                                 : std_logic;
+  signal nvm_en                                                     : std_logic;
+  signal nvm_we                                                     : std_logic;
+  signal nvm_raddr                                                  : std_logic_vector(C_NVM_ADDR_W - 1 downto 0);
+  signal nvm_waddr                                                  : std_logic_vector(C_NVM_ADDR_W - 1 downto 0);
+  signal nvm_din                                                    : std_logic_vector(C_NVM_DATA_W - 1 downto 0);
+  signal nvm_dout                                                   : std_logic_vector(C_NVM_DATA_W - 1 downto 0);
 
-  signal sys_status                                             : sys_status_t;                                                                                                            -- System status value of sys_status_t
-  signal sys_enrg_status                                        : sys_enrg_status_t;                                                                                                       -- System energy status
-  signal first_run                                              : std_logic;
+  signal sys_status                                                 : sys_status_t;                                                                                                            -- System status value of sys_status_t
+  signal sys_enrg_status                                            : sys_enrg_status_t;                                                                                                       -- System energy status
+  signal first_run                                                  : std_logic;
 
-  signal input_send_en                                          : std_logic;
-  signal inpt_cnt                                               : natural;
-  signal input_row_cnt                                          : natural;
+  signal input_send_en                                              : std_logic;
+  signal inpt_cnt                                                   : natural;
+  signal input_row_cnt                                              : natural;
 
-  signal dct1d_cnt                                              : natural;
-  signal dct2d_cnt                                              : natural;
-  signal dct1d_data                                             : i_array_t (0 to input_data01'length);
-  signal dct2d_data                                             : i_array_t (0 to input_data01'length);
+  signal dct2d_cnt                                                  : natural;
+  signal dct2d_data                                                 : i_array_t (0 to input_data01'length);
 
-  signal int_emu_en                                             : std_logic;
-  signal int_emu_init                                           : std_logic;
-  signal rst_emu                                                : std_logic;
+  signal int_emu_en                                                 : std_logic;
+  signal int_emu_init                                               : std_logic;
+  signal rst_emu                                                    : std_logic;
 
-
-  signal int_emu_thresh_stats                                   : std_logic_vector(C_NUM_THRESHOLDS - 1 downto 0);
-  signal int_emu_thresh_values                                  : thresh_values_t(C_NUM_THRESHOLDS - 1 downto 0);
-  signal int_emu_vtrace_rom_start_indx                          : natural;
-  signal int_emu_vtrace_rom_samples                             : natural;
-  signal vtrace_rom_raddr                                       : natural;
-  signal vtrace_rom_dout                                        : integer;
+  signal int_emu_thresh_stats                                       : std_logic_vector(C_NUM_THRESHOLDS - 1 downto 0);
+  signal int_emu_thresh_values                                      : thresh_values_t(C_NUM_THRESHOLDS - 1 downto 0);
+  signal int_emu_vtrace_rom_start_indx                              : natural;
+  signal int_emu_vtrace_rom_samples                                 : natural;
+  signal vtrace_rom_raddr                                           : natural;
+  signal vtrace_rom_dout                                            : integer;
 
   -- Simulation Signals
-  signal input_finished                                         : std_logic;                                                                                                               -- All input data was sent
-  signal output_finished                                        : std_logic;                                                                                                               -- All input data was sent
-  signal tb_tim                                                 : natural := 0;
-  signal input_started_time                                     : natural;                                                                                                                 -- All input data was sent
-  signal input_finished_time                                    : natural;                                                                                                                 -- All input data was sent
-  signal halt_time                                              : natural;                                                                                                                 -- All input data was sent
-  signal output_finished_time                                   : natural;                                                                                                                 -- All input data was sent
+  signal input_finished                                             : std_logic;                                                                                                               -- All input data was sent
+  signal output_finished                                            : std_logic;                                                                                                               -- All input data was sent
+  signal tb_tim                                                     : natural := 0;
+  signal input_started_time                                         : natural;                                                                                                                 -- All input data was sent
+  signal input_finished_time                                        : natural;                                                                                                                 -- All input data was sent
+  signal halt_time                                                  : natural;                                                                                                                 -- All input data was sent
+  signal output_finished_time                                       : natural;                                                                                                                 -- All input data was sent
+  signal int_emu_en_clk_delay : natural;
+
 
   --########################### ARCHITECTURE BEGIN #############################
 
@@ -241,9 +240,14 @@ begin
   sys_enrg_status <= sys_enrg_hazard when int_emu_thresh_stats(1) = '1' else
                      sys_enrg_ok;
 
-  
-  int_emu_thresh_values(0)<= C_RST_EMU_THRESH_VALUE;
-  int_emu_thresh_values(1)<= C_HAZARD_THRESH_VALUE;
+  int_emu_thresh_values(0) <= C_RST_EMU_THRESH_VALUE;
+  int_emu_thresh_values(1) <= C_HAZARD_THRESH_VALUE;
+  -- C_START_INPUT_SEND_WAIT_CLK_D <= integer((1.0 - real(int_emu_thresh_values(1))/real(2600))*500.0) when int_emu_thresh_values(1) <= 2600
+  --                                 else 0;
+  --c_start_input_send_wait_clk_d <= integer((1.0 - real(int_emu_thresh_values(1)) / real(2700)) * 500.0);
+  c_start_input_send_wait_clk_d <= 0;
+  -- C_START_INPUT_SEND_WAIT_CLK_D <= 0;
+  int_emu_en_clk_delay <= 0;
 
   clk_s <= clk AND not(output_finished);
   --########################## PROCESSES #######################################
@@ -255,7 +259,7 @@ begin
 
     variable v_inp_cnt_upd   : boolean; -- input counter updated after reset emu
     variable v_input_send_en : boolean; -- enable input send
-    variable restarted_once : boolean;
+    variable restarted_once  : boolean;
 
   begin
 
@@ -268,14 +272,14 @@ begin
       input_finished <= '0';
 
       v_input_send_en := false;
-      v_input_send_en := false;
+      v_inp_cnt_upd := false;
     elsif (clk_s'event AND clk_s = '1') then
       -- Defaults
       idv <= '0';
       din <= (others => '0');
 
       -- Enable input
-      if (tb_tim = (C_START_INPUT_SEND_WAIT_CLK + C_START_INPUT_SEND_WAIT_CLK_D)) then
+      if (tb_tim = (C_START_INPUT_SEND_WAIT_CLK + c_start_input_send_wait_clk_d)) then
         v_input_send_en := true;
         input_started_time <= tb_tim;
       end if;
@@ -307,11 +311,13 @@ begin
           end if;
           --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-          -- Mangae first_run signal
+          -- Manage first_run signal
           -- when at least one first stage of DCT was executed, then no longer in first run
           if (inpt_cnt > N * N - 1) then
             first_run <= '0';
           end if;
+
+          -- Set input counter as updated so that the update is not repeated
           v_inp_cnt_upd := true;
         end if;
       end if;
@@ -326,16 +332,9 @@ begin
   begin
 
     if (rst = '1') then
-      dct1d_data <= (others => - 101010);
       dct2d_data <= (others => - 101010);
-      dct1d_cnt  <= 0;
       dct2d_cnt  <= 0;
     elsif (clk_s'event and clk_s = '1') then
-      if (odv1 = '1') then
-        --dct1d_data(dct1d_cnt) <= to_integer(signed(dcto1)); -- to read this value input protocol for energy transients must be applied
-        dct1d_cnt <= dct1d_cnt + 1;
-      end if;
-
       if (odv = '1') then
         dct2d_data(dct2d_cnt) <= to_integer(signed(dout));
         dct2d_cnt             <= dct2d_cnt + 1;
@@ -361,45 +360,92 @@ begin
 
   P_TB : process is
   begin
+  
+   -- output_finished               <= '0';
+   -- rst                           <= '0';
+   -- int_emu_vtrace_rom_start_indx <= 0;
+   -- int_emu_vtrace_rom_samples    <= C_VTRACE_ROM_NUM_ELEMENTS;
+   -- int_emu_en                    <= '0';
+   -- int_emu_init                  <= '1';
+   -- wait for 10  * C_CLK_PERIOD_NS;
+   -- rst                           <= '1';
+   -- wait for 10 * C_CLK_PERIOD_NS;
+   -- int_emu_en                    <= '1';
+   -- rst                           <= '0';
+   -- wait for 1 * C_CLK_PERIOD_NS;
+   -- int_emu_init                  <= '0';
+   -- -- save when system stopped first time
+   -- wait until sys_status = SYS_HALT;
+   -- halt_time           <= tb_tim;
+   -- wait until input_finished = '1';
+   -- input_finished_time <= tb_tim;
+   -- -- all input data was sent
+   -- -- now wait for 2D-DCT end
+   -- wait until (odv'event and odv = '0');
+   -- -- TODO: additional checks if falling edge is caused by a sys_energ_hazard
+   -- if (sys_status /= SYS_RUN) then
+   --   wait until sys_status = SYS_RUN;
+   -- end if;
 
-    output_finished               <= '0';
-    rst                           <= '0';
-    int_emu_vtrace_rom_start_indx <= 0;
-    int_emu_vtrace_rom_samples    <= C_VTRACE_ROM_NUM_ELEMENTS;
-    int_emu_en                    <= '0';
-    int_emu_init                  <= '1';
-    rst                           <= '0';
-    wait for 10  * C_CLK_PERIOD_NS;
-    rst                           <= '1';
-    wait for 10 * C_CLK_PERIOD_NS;
-    int_emu_en                    <= '1';
-    rst                           <= '0';
-    wait for 1 * C_CLK_PERIOD_NS;
-    int_emu_init                  <= '0';
-    -- save when system stopped first time
-    wait until sys_status = SYS_HALT;
-    halt_time <= tb_tim;
-    wait until input_finished = '1';
-    input_finished_time           <= tb_tim;
-    -- all input data was sent
-    -- now wait for 2D-DCT end
-    wait until (odv'event and odv = '0');
-    -- TODO: additional checks if falling edge is caused by a sys_energ_hazard
-    if(sys_status /= SYS_RUN) then
-      wait until sys_status = SYS_RUN;
-    end if;
-    -- this does not qualify for a full end of sent data
-    wait for 10 * C_CLK_PERIOD_NS;
-    -- if the system is still in run and
-    -- no output is on the line then tb is finished
-    if (sys_status = SYS_RUN AND odv = '0') then
-      output_finished      <= '1';
-      output_finished_time <= tb_tim;
-    end if;
+   -- -- this does not qualify for a full end of sent data
+   -- wait for 10 * C_CLK_PERIOD_NS;
+   -- -- if the system is still in run and
+   -- -- no output is on the line then tb is finished
+   -- if (sys_status = SYS_RUN AND odv = '0') then
+   --   output_finished      <= '1';
+   --   output_finished_time <= tb_tim;
+   -- end if;
 
-    wait;
+   -- wait;
+
+   output_finished               <= '0';
+   rst                           <= '0';
+   wait for 10  * C_CLK_PERIOD_NS;
+   rst                           <= '1';
+   wait for 10 * C_CLK_PERIOD_NS;
+   rst                           <= '0';
+   wait for 1 * C_CLK_PERIOD_NS;
+   -- save when system stopped first time
+   wait until sys_status = SYS_HALT;
+   halt_time           <= tb_tim;
+   wait until input_finished = '1';
+   input_finished_time <= tb_tim;
+   -- all input data was sent
+   -- now wait for 2D-DCT end
+   wait until (odv'event and odv = '0');
+   -- TODO: additional checks if falling edge is caused by a sys_energ_hazard
+   if (sys_status /= SYS_RUN) then
+     wait until sys_status = SYS_RUN;
+   end if;
+
+   -- this does not qualify for a full end of sent data
+   wait for 10 * C_CLK_PERIOD_NS;
+   -- if the system is still in run and
+   -- no output is on the line then tb is finished
+   if (sys_status = SYS_RUN AND odv = '0') then
+     output_finished      <= '1';
+     output_finished_time <= tb_tim;
+   end if;
+
+   wait;
+
 
   end process P_TB;
+
+  P_INT_EMU_MNGR: process is 
+  begin
+   int_emu_vtrace_rom_start_indx <= 0;
+   int_emu_vtrace_rom_samples    <= C_VTRACE_ROM_NUM_ELEMENTS;
+   int_emu_en                    <= '0';
+   int_emu_init                  <= '1';
+   wait for 20 * C_CLK_PERIOD_NS;
+   wait for int_emu_en_clk_delay * C_CLK_PERIOD_NS;
+   int_emu_en                    <= '1';
+   wait for 1 * C_CLK_PERIOD_NS;
+   int_emu_init                  <= '0';
+   wait;
+
+  end process;
 
 end architecture BEHAVIORAL;
 

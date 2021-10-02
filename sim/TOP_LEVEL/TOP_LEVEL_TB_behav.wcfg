@@ -14,14 +14,17 @@
    </db_ref_list>
    <zoom_setting>
       <ZoomStartTime time="0fs"></ZoomStartTime>
-      <ZoomEndTime time="61650001fs"></ZoomEndTime>
-      <Cursor1Time time="2425000fs"></Cursor1Time>
+      <ZoomEndTime time="19660001fs"></ZoomEndTime>
+      <Cursor1Time time="2065000fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="394"></NameColumnWidth>
-      <ValueColumnWidth column_width="96"></ValueColumnWidth>
+      <ValueColumnWidth column_width="92"></ValueColumnWidth>
    </column_width_setting>
    <WVObjectSize size="14" />
+   <wave_markers>
+      <marker label="" time="1005000" />
+   </wave_markers>
    <wvobject type="logic" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/CLK">
       <obj_property name="ElementShortName">CLK</obj_property>
       <obj_property name="ObjectShortName">CLK</obj_property>
@@ -61,7 +64,6 @@
    <wvobject type="group" fp_name="group80">
       <obj_property name="label">I_2DDCT_CTRL</obj_property>
       <obj_property name="DisplayName">label</obj_property>
-      <obj_property name="isExpanded"></obj_property>
       <wvobject type="group" fp_name="group41">
          <obj_property name="label">I_2DDCT_CTRL_port</obj_property>
          <obj_property name="DisplayName">label</obj_property>
@@ -564,38 +566,6 @@
             <obj_property name="ElementShortName">dbuf[7:0][8:0]</obj_property>
             <obj_property name="ObjectShortName">dbuf[7:0][8:0]</obj_property>
             <obj_property name="isExpanded"></obj_property>
-            <wvobject type="array" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/U_I_DCT1S/dbuf[7]">
-               <obj_property name="ElementShortName">[7][8:0]</obj_property>
-               <obj_property name="ObjectShortName">[7][8:0]</obj_property>
-            </wvobject>
-            <wvobject type="array" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/U_I_DCT1S/dbuf[6]">
-               <obj_property name="ElementShortName">[6][8:0]</obj_property>
-               <obj_property name="ObjectShortName">[6][8:0]</obj_property>
-            </wvobject>
-            <wvobject type="array" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/U_I_DCT1S/dbuf[5]">
-               <obj_property name="ElementShortName">[5][8:0]</obj_property>
-               <obj_property name="ObjectShortName">[5][8:0]</obj_property>
-            </wvobject>
-            <wvobject type="array" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/U_I_DCT1S/dbuf[4]">
-               <obj_property name="ElementShortName">[4][8:0]</obj_property>
-               <obj_property name="ObjectShortName">[4][8:0]</obj_property>
-            </wvobject>
-            <wvobject type="array" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/U_I_DCT1S/dbuf[3]">
-               <obj_property name="ElementShortName">[3][8:0]</obj_property>
-               <obj_property name="ObjectShortName">[3][8:0]</obj_property>
-            </wvobject>
-            <wvobject type="array" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/U_I_DCT1S/dbuf[2]">
-               <obj_property name="ElementShortName">[2][8:0]</obj_property>
-               <obj_property name="ObjectShortName">[2][8:0]</obj_property>
-            </wvobject>
-            <wvobject type="array" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/U_I_DCT1S/dbuf[1]">
-               <obj_property name="ElementShortName">[1][8:0]</obj_property>
-               <obj_property name="ObjectShortName">[1][8:0]</obj_property>
-            </wvobject>
-            <wvobject type="array" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/U_I_DCT1S/dbuf[0]">
-               <obj_property name="ElementShortName">[0][8:0]</obj_property>
-               <obj_property name="ObjectShortName">[0][8:0]</obj_property>
-            </wvobject>
          </wvobject>
          <wvobject type="logic" fp_name="/TOP_LEVEL_TB/U_I_2DDCT/U_I_DCT1S/stage2_direct_start">
             <obj_property name="ElementShortName">stage2_direct_start</obj_property>

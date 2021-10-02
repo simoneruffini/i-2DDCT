@@ -94,8 +94,6 @@ architecture RTL of I_2DDCT is
   signal i_dct2s_varc_rdy                                     : std_logic;
 
   signal varc_rdy                                             : std_logic;
-  signal sys_status_s                                         : sys_status_t;                                                                                                          -- System status value of sys_status_t
-  signal sys_status_s_d                                       : sys_status_t;                                                                                                          -- System status value delay of sys_status_t
   signal data_sync                                            : std_logic;
 
   signal ram1_waddr, ram2_waddr                               : std_logic_vector(C_RAMADDR_W - 1 downto 0);                                                                            -- RAM write address output
@@ -168,7 +166,7 @@ begin
       ODV  => ODV1,
       DCTO => DCTO1,
       -- Intermittent Enhancment Ports -------------------------
-      SYS_STATUS => sys_status_s,
+      SYS_STATUS => SYS_STATUS,
       VARC_RDY   => i_dct1s_varc_rdy
       ----------------------------------------------------------
     );
@@ -199,7 +197,7 @@ begin
       DATA_READY     => i_dbufctl_data_ready,
       DATA_READY_ACK => i_dct2s_data_ready_ack,
       -- Intermittent Enhancment Ports -------------------------
-      SYS_STATUS     => sys_status_s,
+      SYS_STATUS     => SYS_STATUS,
       DCT1S_VARC_RDY => i_dct1s_varc_rdy,
       VARC_RDY       => i_dct2s_varc_rdy
       ----------------------------------------------------------
@@ -255,7 +253,7 @@ begin
       DATA_READY          => i_dbufctl_data_ready,
       DATA_READY_ACK      => i_dct2s_data_ready_ack,
 
-      SYS_STATUS => sys_status_s,
+      SYS_STATUS => SYS_STATUS,
       DATA_SYNC  => data_sync,
       PB_READY   => i_dbufctl_ready,
       RX         => i_dbufctl_rx,
@@ -330,7 +328,8 @@ begin
   U_RAM_MUX : entity work.ram_mux
     port map (
       -- MUX control ports
-      SYS_STATUS         => sys_status_s_d,
+      CLK                => CLK,
+      SYS_STATUS         => SYS_STATUS,
       I_DCT1S_VARC_READY => i_dct1s_varc_rdy,
       I_DCT2S_VARC_READY => i_dct2s_varc_rdy,
       I_DBUFCTL_WMEMSEL  => i_dbufctl_wmemsel,
@@ -378,7 +377,7 @@ begin
       CLK => CLK,
       RST => RST,
       ----------------------------------------------------------
-      SYS_STATUS => sys_status_s,
+      SYS_STATUS => SYS_STATUS,
       DATA_SYNC  => data_sync,
       ----------------------------------------------------------
       START => ram_pb_start,
@@ -416,7 +415,7 @@ begin
       FIRST_RUN       => FIRST_RUN,
 
       VARC_RDY   => varc_rdy,
-      SYS_STATUS => sys_status_s,
+      SYS_STATUS => SYS_STATUS,
       DATA_SYNC  => data_sync,
 
       DBUFCTL_START => i_dbufctl_start,
@@ -431,21 +430,12 @@ begin
     );
 
   --########################## OUTPUT PORTS WIRING #############################
-  SYS_STATUS <= sys_status_s;
 
   --########################## COBINATORIAL FUNCTIONS ##########################
+
   varc_rdy <= i_dct1s_varc_rdy AND i_dct2s_varc_rdy;
 
   --########################## PROCESSES #######################################
-
-  P_DELAYS : process (CLK) is
-  begin
-
-    if (CLK'event and CLK = '1') then
-      sys_status_s_d <= sys_status_s;
-    end if;
-
-  end process P_DELAYS;
 
 end architecture RTL;
 

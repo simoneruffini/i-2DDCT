@@ -233,7 +233,7 @@ package I_2DDCTTB_PKG is
                           164,016,165,016,165,015,156,015  --07 (504)
                         );                       
 
-    constant C_VTRACE_ROM_NUM_ELEMENTS : natural := 200;
+    constant C_VTRACE_ROM_NUM_ELEMENTS : natural := 400;
     constant C_NUM_THRESHOLDS : integer := 2;
 
     -- from JPEG standard (but not in standard itself!)                      

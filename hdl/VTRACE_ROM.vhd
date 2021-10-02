@@ -40,27 +40,42 @@ architecture BEHAVIORAL of VTRACE_ROM is
 
   --########################### CONSTANTS 1 ####################################
   constant C_MAX_VOLTAGE     : real := 3.3;
-  constant C_START_DISCHARGE : real := 0.05;
+  constant C_START_DISCHARGE : real := 0.2; --0.05;
 
-  constant C_TRACE_DURATION  : natural := 5;
-
+  --constant C_TRACE_DURATION  : natural := 5;
+  constant C_TRACE_DURATION  : natural := 20;
+  --constant RC : real := 1.0;
+  constant RC : real := 1.0;
   constant C_STEP            : real := real(C_TRACE_DURATION) / real(NUM_ELEMENTS_ROM);
-
   --########################### TYPES ##########################################
 
   type rom_t is array (0 to NUM_ELEMENTS_ROM - 1) of integer;
 
   --########################### FUNCTIONS ######################################
 
-  function trace_function (x : real) return real is
+  impure function cap_discharge(x:real) return real is
+  begin
+      return C_MAX_VOLTAGE * EXP(-x/RC);
+  end function;
+
+  impure function cap_charge(x:real) return real is
+  begin
+      return C_MAX_VOLTAGE * (1.0 - EXP(-x/RC));
+  end function;
+
+  impure function trace_function ( x : real ) 
+    return real is
+    variable end_dischrg : real := - RC * LOG(1.49/C_MAX_VOLTAGE)/LOG(MATH_E);
+    variable strt_charge :real := RC * LOG(1.0 - 1.49/C_MAX_VOLTAGE)/LOG(MATH_E);
+    variable chrg_delay : real := C_START_DISCHARGE + end_dischrg + strt_charge; 
   begin
 
     if (x < C_START_DISCHARGE) then
       return C_MAX_VOLTAGE;
-    elsif (x >= C_START_DISCHARGE AND x < (C_START_DISCHARGE + 1.0)) then
-      return C_MAX_VOLTAGE * EXP(-x + C_START_DISCHARGE);
+    elsif (x >= C_START_DISCHARGE AND x < (C_START_DISCHARGE + end_dischrg)) then
+      return cap_discharge(x - C_START_DISCHARGE);
     else
-      return C_MAX_VOLTAGE * (1.0 - EXP(-x + (C_START_DISCHARGE + 0.5)));
+      return cap_charge(x - chrg_delay);
     end if;
 
   end function;
